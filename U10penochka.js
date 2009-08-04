@@ -29,17 +29,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* TODO Think about boxing it into jQuery structure */
-closeLink =
-   function(id) {
-      return "<span class='penInj'><a href=\"javascript:toggle(\'"+id+"\')\">X</a></span>"
-   }
-
-tizer = 
-   function(id) {
-      return "<div id=\'tiz"+id+"\' style='display:none;' class='penInj reply'>Object "+id+" <a href=\"javascript:toggle(\'"+id+"\')\">Show</a></div>"
-   }
-
 var scheme = {
    sageMan: {
       v: false,
@@ -63,7 +52,6 @@ var scheme = {
 function toggle(id) {
    $('#'+id).toggle()
    $('#tiz'+id).toggle() 
-   /* FIXME Save fix (OK) */
    db.saveState()
 }
 
@@ -82,12 +70,7 @@ function refold(id) {
 
 /* */
 function intelli(x,y,id) {
-   var obj = $('#'+id).clone()
-   if (!obj) { 
-      return
-   }
-   obj.anchor().remove()
-   obj.attr('style','position:absolute; top:'+y+'px; left:'+x+'px;display:block;')
+   var obj = $.ui.preview(id,x,y)
    obj.attr('id','is'+id);
    $('body').prepend(obj);
 }
@@ -105,18 +88,18 @@ $(document).ok(
       messages.posts().each(
          function () {
             var pid = $(this).pid()
-            $(this).reflink().after(closeLink(pid))
+            $(this).reflink().after($.ui.closeLink(pid))
             db.config.goodStealth ||
-            $(this).before(tizer(pid))
+            $(this).before($.ui.tizer(pid))
          }
       )
       db.config.hideThreads &&
       messages.threads().each(
          function () {
             var tid = $(this).tid()
-            $(this).reflink().filter(':first').after(closeLink(tid))
+            $(this).reflink().filter(':first').after($.ui.closeLink(tid))
             db.config.goodStealth ||
-            $(this).before(tizer(tid))
+            $(this).before($.ui.tizer(tid))
          }
       )
       db.config.unfoldImages &&

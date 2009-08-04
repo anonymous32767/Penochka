@@ -193,6 +193,28 @@ menu:
 options:
    function(obj) {
       return obj.find('#penOptions')
+   },
+/* UI */
+   preview :
+   function (id,x,y) {
+      var obj = $('#'+id).clone()
+      obj.anchor().remove()
+      obj.addClass('reply')
+      obj.attr('style','position:absolute; top:' + y + 
+	       'px; left:' + x + 'px;display:block;')
+      return obj
+   },
+   closeLink : 
+   function(id) {
+      return "<span class='penInj'><a href=\"javascript:toggle(\'" + 
+	 id + "\')\">X</a></span>"
+   },
+   tizer : 
+   function(id) {
+      return "<div id=\'tiz" + id + 
+	 "\' style='display:none;' class='penInj reply'>Object " + 
+	 id + " <a href=\"javascript:toggle(\'" + id + 
+	 "\')\">Show</a></div>"
    }
 };/* end of 2ch namespace*/
 
@@ -251,3 +273,15 @@ $.fn.extend({
       return ib2ch.options($(this))
    }
 });
+
+jQuery.ui = {
+   closeLink : function(id) {
+      return ib2ch.closeLink(id)
+   },
+   tizer : function(id) {
+      return ib2ch.tizer(id)
+   },
+   preview : function(id,x,y) {
+      return ib2ch.preview(id,x,y)
+   } 
+}
