@@ -251,7 +251,7 @@ function dvach () {
       $('div.adminbar').append('<span class="penInj"><a href="javascript:toggle(\'penOptions\')">Options</a></span>')
       addStyle(css)
       f(obj, cloned)
-      threadsRaw.replaceWith(cloned);
+      threadsRaw.replaceWith(cloned); 
    };
 }/* end of 2ch */
 
@@ -262,7 +262,6 @@ jQuery.fn.extend({
    ok: function(f) {
       this.ready(
          function () {
-	    /* TODO Implement engines detection here */
             var converge = dvach()
 	    converge($(this), f)
          }

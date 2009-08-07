@@ -106,7 +106,7 @@ $(document).ok(
             db.config.goodStealth ||
             $(this).before($.ui.tizer(tid))
          }
-      )
+      ) 
       db.config.unfoldImages &&
       messages.image().each(
          function () {
@@ -114,7 +114,7 @@ $(document).ok(
             a.attr('href','javascript:refold(\''+a.pid()+'\')')
             a.removeAttr('target')
          }
-      )
+      ) 
       db.config.intelliSense.v &&
       messages.anchors().each(
          function () {
@@ -122,7 +122,7 @@ $(document).ok(
             a.attr('onmouseover','intelli(event.pageX+10, event.pageY+10,\''+a.attr('refid')+'\')')
             a.attr('onmouseout','outelli(\''+a.attr('refid')+'\')')
          }
-      )
+      ) 
       if (db.config.sageMan.v) { 
 	 env.email().val('sage')
 	 if (db.config.sageMan.inAllFields) { 
@@ -131,7 +131,7 @@ $(document).ok(
 	    db.config.sageMan.capsBold &&
 	    env.message().val('**SAGE**')
 	 }
-      }
+      } 
       for(var objId in db.hidden) {
          /* It's an low level alternative of toggle method
           * TODO Rewrite toggle for suitable usage in this
@@ -140,6 +140,6 @@ $(document).ok(
          db.config.goodStealth ||
          messages.find('#tiz'+objId).css('display','inline')
       }
-      env.options().append(db.genForm())
-   }
-)
+      env.options().append(db.genForm()) 
+   } 
+) 
