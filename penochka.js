@@ -69,10 +69,23 @@ function refold(id) {
 }
 
 /* */
-function intelli(x,y,id) {
-   var obj = $.ui.preview(id,x,y)
-   obj.attr('id','is'+id);
-   $('body').prepend(obj);
+function apply_isense(a) {
+   a.attr('onmouseover','intelli(event.pageX+10, event.pageY+10,\''+a.attr('refid')+'\',\''+a.attr('refurl')+'\')')
+   a.attr('onmouseout','outelli(\''+a.attr('refid')+'\')')
+}
+
+var z = 0;
+
+function intelli(x,y,id,url) {
+   var obj = $.ui.preview(id,x,y,url)
+   if(obj) {
+      obj.anchors().each(
+         function () { apply_isense($(this)) }
+      ) 
+      obj.attr('id','is'+id);
+      obj.css('z-index', z++);
+      $('body').prepend(obj);
+   }
 }
 
 function outelli(id) {
@@ -117,11 +130,7 @@ $(document).ok(
       ) 
       db.config.intelliSense.v &&
       messages.anchors().each(
-         function () {
-            var a = $(this)
-            a.attr('onmouseover','intelli(event.pageX+10, event.pageY+10,\''+a.attr('refid')+'\')')
-            a.attr('onmouseout','outelli(\''+a.attr('refid')+'\')')
-         }
+         function () { apply_isense($(this)) }
       ) 
       if (db.config.sageMan.v) { 
 	 env.email().val('sage')
@@ -140,6 +149,23 @@ $(document).ok(
          db.config.goodStealth ||
          messages.find('#tiz'+objId).css('display','inline')
       }
-      env.options().append(db.genForm()) 
+      env.options().append(db.genForm())
+
+      var captcha = env.captcha()
+      captcha.keypress(
+	 function (key) {
+	    var recoded = $.xlatb[String.fromCharCode(key.which).toLowerCase()]
+	    if (recoded) {
+	       /* Not a perfect piece of code, but 
+                  i'm thank you eurekafag (: */
+	       var caret = key.target.selectionStart
+	       var str = captcha.val()
+	       captcha.val(str.substring(0,caret) + recoded + str.substring(caret))
+	       key.target.selectionStart = caret+1
+	       key.target.selectionEnd = caret+1
+	       return false
+	    }
+	 }
+      )
    } 
 ) 
