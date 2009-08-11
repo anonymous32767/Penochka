@@ -187,7 +187,7 @@ function dvach () {
       
       anchors:
       function() {
-	 return $(this).find('a[onclick]')
+	 return $(this).find('blockquote a[onclick]')
       },
       
       threads:
@@ -221,7 +221,7 @@ function dvach () {
       function () {
 	 return $(this).find('input[name=kasumi]')
       },
-      message:
+      postmessage:
       function () {
 	 return $(this).find('textarea[name=shampoo]')
       },
@@ -270,23 +270,18 @@ function dvach () {
       },
       closeLink : 
       function(id, title) {
-	 if(!title) {
-	    title = 'X'
-	 }
-	 return "<span class='penInj'><a href=\"javascript:toggle(\'" + 
-	    id + "\')\">"+title+"</a></span>"
+	 return "[<a href=\"javascript:toggle(\'" + 
+	    id + "\')\">"+title+"</a>]"
       },
       tizer : 
-      function(id) {
+      function(id,body) {
 	 return "<div id=\'tiz" + id + 
-	    "\' style='display:none;' class='penInj reply'>Object " + 
-	    id + " <a href=\"javascript:toggle(\'" + id + 
-	    "\')\">Show</a></div>"
+	    "\' style='display:none;'>" + body + "<br clear='both' /><hr></div>"
       } 
    };
 
    return function (obj,f) {
-      const css = '#penOptions {padding: 8px} #penOptions div {margin-left: 8px;} #penOptions div div {margin-left: 16px;} .penOpt2 {padding-left: 8px;float:right} .penOpt2 input{width:64px} .penInj:before{content: "["} .penInj:after{content: "]"}';
+      const css = '#penOptions {padding: 8px} #penOptions div {margin-left: 8px;} #penOptions div div {margin-left: 16px;} .penOpt2 {padding-left: 8px;float:right} .penOpt2 input{width:64px}';
 
       var threadsRaw = obj.find('#delform');
       var cloned = threadsRaw.clone();
@@ -295,7 +290,7 @@ function dvach () {
       process(cloned);
       
       $('body').prepend('<div id="penOptions" class="reply" style="display:none;position:fixed;"><h3 style="margin:0;float:left">Options</h3><span class="penOpt2">[<a href="javascript:db.saveCfg();toggle(\'penOptions\')">Save and exit</a>]</span><br clear="both"/></div>');
-      $('div.adminbar').append('<span class="penInj"><a href="javascript:toggle(\'penOptions\')">Options</a></span>')
+      $('div.adminbar').append('[<a href="javascript:toggle(\'penOptions\')">Options</a>]')
       $('body').append('<div id="cache" style="display:none" />')
       addStyle(css)
       f(obj, cloned)

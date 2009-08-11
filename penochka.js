@@ -66,6 +66,7 @@ function refold(id) {
    var obj = $('#'+id).image()
    swapAttr(obj, 'style', 'altstyle')
    swapAttr(obj, 'src', 'altsrc')
+   return false;
 }
 
 /* */
@@ -97,6 +98,19 @@ function outelli(id) {
    );
 }
 
+function sage(env) {
+   if(!env) {
+      env = $('body')
+   }
+   env.email().val('sage')
+   if (db.config.sageMan.inAllFields) { 
+      env.user().val('sage')
+      env.title().val('sage') 
+      db.config.sageMan.capsBold &&
+	 env.postmessage().val('**SAGE**')
+   }
+}
+
 /* */
 db.load(scheme)
 
@@ -106,25 +120,31 @@ $(document).ok(
       messages.posts().each(
          function () {
             var pid = $(this).pid()
-            $(this).reflink().after($.ui.closeLink(pid))
-            db.config.goodStealth ||
-            $(this).before($.ui.tizer(pid))
+            $(this).reflink().after($.ui.closeLink(pid, 'Скрыть'))
+            if(!db.config.goodStealth) {
+	       var txt = 'Пост ' + pid.replace('p','№') + 
+		  ' скрыт. [<a href="javascript:toggle(\''+pid+'\')">Показать</a>]';
+               $(this).before($.ui.tizer(pid, txt))
+	    }
          }
       )
       db.config.hideThreads &&
       messages.threads().each(
          function () {
             var tid = $(this).tid()
-            $(this).reflink().filter(':first').after($.ui.closeLink(tid))
-            db.config.goodStealth ||
-            $(this).before($.ui.tizer(tid))
+            $(this).reflink().filter(':first').after($.ui.closeLink(tid, 'Скрыть тред'))
+            if(!db.config.goodStealth) {
+	       var txt = 'Тред ' + tid.replace('t','№') +
+		  ' скрыт. [<a href="javascript:toggle(\''+tid+'\')">Показать</a>]';
+               $(this).before($.ui.tizer(tid,txt))
+	    }
          }
       ) 
       db.config.unfoldImages &&
       messages.image().each(
          function () {
             var a = $(this).a()
-            a.attr('href','javascript:refold(\''+a.pid()+'\')')
+            a.attr('onclick','return refold(\''+a.pid()+'\')')
             a.removeAttr('target')
          }
       ) 
@@ -132,14 +152,9 @@ $(document).ok(
       messages.anchors().each(
          function () { apply_isense($(this)) }
       ) 
+      env.email().after(' <b>[<a href="javascript:sage()">Sage</a>]</b>')
       if (db.config.sageMan.v) { 
-	 env.email().val('sage')
-	 if (db.config.sageMan.inAllFields) { 
-	    env.user().val('sage')
-	    env.title().val('sage') 
-	    db.config.sageMan.capsBold &&
-	    env.message().val('**SAGE**')
-	 }
+	 sage(env) 
       } 
       for(var objId in db.hidden) {
          /* It's an low level alternative of toggle method
@@ -147,7 +162,7 @@ $(document).ok(
           * place (may be impossible). */
          messages.find('#'+objId).css('display','none')
          db.config.goodStealth ||
-         messages.find('#tiz'+objId).css('display','inline')
+         messages.find('#tiz'+objId).css('display','block')
       }
       env.options().append(db.genForm())
 
