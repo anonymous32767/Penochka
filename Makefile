@@ -1,4 +1,4 @@
-source = jquery.js jquery.cookie.js jquery.json.js\
+source = jquery.min.js jquery.cookie.js jquery.json.js\
 	 jquery.imgboard.js db.js penochka.js
 
 hex = $(source:.js=.jsb64)
@@ -7,6 +7,10 @@ all: opera firefox
 
 firefox: penochka.user.js
 opera: penochka.cat.js
+
+jq:
+	cd jquery; make
+	cp jquery/jquery.min.js .
 
 penochka.cat.js: $(source)
 	cat $? > $@
