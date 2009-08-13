@@ -76,21 +76,25 @@ function apply_isense(a) {
 }
 
 var z = 0;
+var ist = {};
 
 function intelli(x,y,id,url) {
+   clearTimeout(ist[id])
    var obj = $.ui.preview(id,x,y,url)
    if(obj) {
       obj.anchors().each(
          function () { apply_isense($(this)) }
       ) 
       obj.attr('id','is'+id);
+      obj.attr('refid', id);
+      apply_isense(obj)
       obj.css('z-index', z++);
       $('body').prepend(obj);
    }
 }
 
 function outelli(id) {
-   setTimeout(
+   ist[id] = setTimeout(
       function () {
 	 $('#is'+id).remove()
       }, 
@@ -116,6 +120,9 @@ db.load(scheme)
 
 $(document).ok(
    function (env, messages) {
+      /* TODO : Rewrite */
+      var refs = {}
+
       db.config.hidePosts &&
       messages.posts().each(
          function () {
@@ -126,8 +133,27 @@ $(document).ok(
 		  ' скрыт. [<a href="javascript:toggle(\''+pid+'\')">Показать</a>]';
                $(this).before($.ui.tizer(pid, txt))
 	    }
+	    /* Back refs */
+	    messages.references(pid).each(
+	       function () {
+		  if(refs[pid]) {
+		     refs[pid]+=' '+ $.ui.anchor($(this).pid())
+		  } else {
+		     refs[pid]=$.ui.anchor($(this).pid())
+		  }
+	       }
+	    )
+	    
          }
       )
+      /* TODO: Rewrite */
+
+      for(var i in refs) {
+	 if(refs[i]) {
+	    messages.find('#'+i+' blockquote:first').before('<blockquote><small>Ссылки '+refs[i]+'</small></blockquote>')
+	 }
+      }
+  
       db.config.hideThreads &&
       messages.threads().each(
          function () {
@@ -182,5 +208,6 @@ $(document).ok(
 	    }
 	 }
       )
+      
    } 
 ) 

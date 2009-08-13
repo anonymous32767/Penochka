@@ -147,7 +147,7 @@ function dvach () {
 	 return $(this).find('span.filesize')   
       },
       
-      message:
+      msg:
       function() {
 	 return $(this).find('blockqoute')   
       },
@@ -199,6 +199,11 @@ function dvach () {
       function() {
 	 return $(this).find('.penPost')
       },
+      
+      references:
+      function(pid) {
+	 return $(this).find("a[refid='"+pid+"']")
+      },
 
       menu:
       function() {
@@ -242,6 +247,11 @@ function dvach () {
    jQuery.xlatb = xlatb;
    
    jQuery.ui = {
+      anchor :
+      function(pid) {
+	 var pnum = pid.replace('p','')
+	 return '<a href="#" refid="'+pid+'" onclick="highlight('+pnum+')">&gt;&gt;'+pnum+'</a>'
+      },
       preview :
       function (id,x,y,url) {
 	 if($('#is'+id).attr('id')) {
