@@ -113,8 +113,14 @@ function dvach () {
    function process(cloned) {
       cloned.anchors().each(
 	 function () {
-            $(this).attr('refid', 'p'+$(this).text().replace(/>>(\d+)/, "$1")) 
-	    $(this).attr('refurl', $(this).attr('href').split('#')[0])
+	    [refurl, refid] = $(this).attr('href').split('#')
+	    var pid = 'p' + refid
+            $(this).attr('refid', pid) 
+	    $(this).attr('refurl', refurl)
+	    if(!$.references[pid]) {
+	       $.references[pid] = []
+	    }
+	    $.references[pid].push($(this).pid())
 	 }
       )
       cloned.image().each(
@@ -245,12 +251,17 @@ function dvach () {
    });
 
    jQuery.xlatb = xlatb;
-   
+   jQuery.references = [];
+
    jQuery.ui = {
       anchor :
       function(pid) {
 	 var pnum = pid.replace('p','')
-	 return '<a href="#" refid="'+pid+'" onclick="highlight('+pnum+')">&gt;&gt;'+pnum+'</a>'
+	 return '<a href="#'+pnum+'" refid="'+pid+'" onclick="highlight('+pnum+')">&gt;&gt;'+pnum+'</a>'
+      },
+      refs :
+      function (content) {
+	 return '<blockquote><small>Ссылки '+content+'</small></blockquote>'
       },
       preview :
       function (id,x,y,url) {

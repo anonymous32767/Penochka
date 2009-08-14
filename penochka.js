@@ -1,6 +1,8 @@
 /*
  * vim: ts=3 sts=3 cindent expandtab
- * jquery.imgboard - jquery extensions for imageboards.
+ *
+ * penochka - Various extensions for imageboards,
+ *            which powered by jquery.
  *
  * Copyright (c) 2009, anonymous
  * All rights reserved.
@@ -133,24 +135,16 @@ $(document).ok(
 		  ' скрыт. [<a href="javascript:toggle(\''+pid+'\')">Показать</a>]';
                $(this).before($.ui.tizer(pid, txt))
 	    }
-	    /* Back refs */
-	    messages.references(pid).each(
-	       function () {
-		  if(refs[pid]) {
-		     refs[pid]+=' '+ $.ui.anchor($(this).pid())
-		  } else {
-		     refs[pid]=$.ui.anchor($(this).pid())
-		  }
-	       }
-	    )
-	    
          }
       )
-      /* TODO: Rewrite */
 
-      for(var i in refs) {
-	 if(refs[i]) {
-	    messages.find('#'+i+' blockquote:first').before('<blockquote><small>Ссылки '+refs[i]+'</small></blockquote>')
+      for(var i in $.references) {
+	 if($.references[i]) {
+	    var refs = [];
+	    for (j in $.references[i]) {
+	       refs.push($.ui.anchor($.references[i][j]))
+	    }
+	    messages.find('#'+i+' blockquote:first').before($.ui.refs(refs.join(', ')+'.'))
 	 }
       }
   
@@ -165,7 +159,20 @@ $(document).ok(
                $(this).before($.ui.tizer(tid,txt))
 	    }
          }
-      ) 
+      )
+      /* Menu */
+      /* var am_e = $('<div id="altmenu" />')
+      am_e.load(
+	 'http://2-ch.ru/menu-l.html dl',
+	 {},
+	 function (a,b,c) {
+	    $('#cache').append(am_e)
+	 }
+      )
+      env.menu().remove()
+      $('body').prepend('<blockquote>' + $.ui.anchor('altmenu') + '</blockquote>')
+      apply_isense($('a[refid=altmenu]')) */
+
       db.config.unfoldImages &&
       messages.image().each(
          function () {
@@ -208,6 +215,5 @@ $(document).ok(
 	    }
 	 }
       )
-      
    } 
 ) 
