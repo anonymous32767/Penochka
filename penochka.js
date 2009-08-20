@@ -31,25 +31,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-var scheme = {
-   sageMan: {
-      v: false,
-      capsBold: false,
-      inAllFields: true
-   },
-   hideThreads: true,
-   hidePosts: false,
-   goodStealth: false,
-   unfoldImages: true,
-   intelliSense: {
-      v: false,
-      intelliFallback: 100
-   },
-   State: {
-      ExpirationTime: 3
-   }
-}
-
 /* */
 function toggle(id) {
    $('#'+id).toggle()
@@ -73,8 +54,22 @@ function refold(id) {
 
 /* */
 function apply_isense(a) {
-   a.attr('onmouseover','intelli(event.pageX+10, event.pageY+10,\''+a.attr('refid')+'\',\''+a.attr('refurl')+'\')')
-   a.attr('onmouseout','outelli(\''+a.attr('refid')+'\')')
+   if(!db.config.intelliSense.v[0]) {
+      return
+   }
+   a.hover(
+      function(evt) { // over
+	 intelli(
+	    evt.pageX+10, 
+	    evt.pageY+10, 
+	    a.attr('refid'),
+	    a.attr('refurl')
+	 )
+      },
+      function(evt) { // out
+	 outelli(a.attr('refid'))
+      }
+   )
 }
 
 var z = 0;
@@ -100,7 +95,7 @@ function outelli(id) {
       function () {
 	 $('#is'+id).remove()
       }, 
-      db.config.intelliSense.intelliFallback
+      db.config.intelliSense.fallback[0]
    );
 }
 
@@ -109,54 +104,73 @@ function sage(env) {
       env = $('body')
    }
    env.email().val('sage')
-   if (db.config.sageMan.inAllFields) { 
+   if (db.config.sage.inAllFields[0]) { 
       env.user().val('sage')
       env.title().val('sage') 
-      db.config.sageMan.capsBold &&
+      db.config.sage.capsBold[0] &&
 	 env.postmessage().val('**SAGE**')
    }
 }
 
 /* */
-db.load(scheme)
+db.loadCfg(defaults)
 
 $(document).ok(
    function (env, messages) {
       /* TODO : Rewrite */
       var refs = {}
 
-      db.config.hidePosts &&
+      db.config.hiding.posts[0] &&
       messages.posts().each(
          function () {
             var pid = $(this).pid()
-            $(this).reflink().after($.ui.closeLink(pid, 'Скрыть'))
-            if(!db.config.goodStealth) {
+            $(this).reflink().after($.ui.closeLink(pid, 'X'))
+            if(!db.config.hiding.goodStealth[0]) {
 	       var txt = 'Пост ' + pid.replace('p','№') + 
 		  ' скрыт. [<a href="javascript:toggle(\''+pid+'\')">Показать</a>]';
-               $(this).before($.ui.tizer(pid, txt))
+               $(this).before($.ui.tizer(pid, txt, false))
+	    }
+	    /* Censore */
+	    if(db.config.censore.v[0]) {
+	       var censf = false;
+	       censf = censf || db.config.censore.username[0] &&
+		  $(this).msgusername().search(db.config.censore.username[0])
+	       censf = censf || db.config.censore.title[0] &&
+		  $(this).msgtitle().search(db.config.censore.title[0])
+	       censf = censf || db.config.censore.email[0] &&
+		  $(this).msgemail().search(db.config.censore.email[0])
+	       censf = censf || db.config.censore.msg[0] &&
+		  $(this).msg().search(db.config.censore.msg[0])
+	       censf = censf || db.config.censore.total[0] &&
+		  $(this).text().search(db.config.censore.total[0])
+	       if(censf) {
+		  db.hidden[pid]=1
+	       }
 	    }
          }
       )
-
-      for(var i in $.references) {
-	 if($.references[i]) {
-	    var refs = [];
-	    for (j in $.references[i]) {
-	       refs.push($.ui.anchor($.references[i][j]))
+      
+      if (db.config.forwardReferences[0]) {
+	 for(var i in $.references) {
+	    if($.references[i]) {
+	       var refs = [];
+	       for (j in $.references[i]) {
+		  refs.push($.ui.anchor($.references[i][j]))
+	       }
+	       messages.find('#'+i+' blockquote:first').before($.ui.refs(refs.join(', ')+'.'))
 	    }
-	    messages.find('#'+i+' blockquote:first').before($.ui.refs(refs.join(', ')+'.'))
 	 }
       }
-  
-      db.config.hideThreads &&
+
+      db.config.hiding.threads[0] &&
       messages.threads().each(
          function () {
             var tid = $(this).tid()
             $(this).reflink().filter(':first').after($.ui.closeLink(tid, 'Скрыть тред'))
-            if(!db.config.goodStealth) {
+            if(!db.config.hiding.goodStealth[0]) {
 	       var txt = 'Тред ' + tid.replace('t','№') +
 		  ' скрыт. [<a href="javascript:toggle(\''+tid+'\')">Показать</a>]';
-               $(this).before($.ui.tizer(tid,txt))
+               $(this).before($.ui.tizer(tid,txt,true))
 	    }
          }
       )
@@ -173,7 +187,7 @@ $(document).ok(
       $('body').prepend('<blockquote>' + $.ui.anchor('altmenu') + '</blockquote>')
       apply_isense($('a[refid=altmenu]')) */
 
-      db.config.unfoldImages &&
+      db.config.unfoldImages[0] &&
       messages.image().each(
          function () {
             var a = $(this).a()
@@ -181,14 +195,21 @@ $(document).ok(
             a.removeAttr('target')
          }
       ) 
-      db.config.intelliSense.v &&
+      db.config.intelliSense.v[0] &&
       messages.anchors().each(
          function () { apply_isense($(this)) }
-      ) 
+      )
+ 
+      db.config.sage.button[0] &&
       env.email().after(' <b>[<a href="javascript:sage()">Sage</a>]</b>')
-      if (db.config.sageMan.v) { 
+
+      db.config.sage.sageMan[0] &&
 	 sage(env) 
-      } 
+    
+      /* Const password */
+      db.config.state.constPasswd[0] &&
+	 env.passwd().val(db.config.state.constPasswd[0])
+
       for(var objId in db.hidden) {
          /* It's an low level alternative of toggle method
           * TODO Rewrite toggle for suitable usage in this
@@ -197,7 +218,6 @@ $(document).ok(
          db.config.goodStealth ||
          messages.find('#tiz'+objId).css('display','block')
       }
-      env.options().append(db.genForm())
 
       var captcha = env.captcha()
       captcha.keypress(

@@ -114,6 +114,10 @@ function dvach () {
       cloned.anchors().each(
 	 function () {
 	    [refurl, refid] = $(this).attr('href').split('#')
+	    if (!refid) {
+	       // Op post workaround
+	       refid = $(this).attr('href').split('.')[0].split('/').reverse()[0]
+	    }
 	    var pid = 'p' + refid
             $(this).attr('refid', pid) 
 	    $(this).attr('refurl', refurl)
@@ -155,7 +159,7 @@ function dvach () {
       
       msg:
       function() {
-	 return $(this).find('blockqoute')   
+	 return $(this).find('blockqoute:first')   
       },
       
       reflink:
@@ -163,16 +167,21 @@ function dvach () {
 	 return $(this).find('span.reflink')   
       },
       
-      title:
+      msgtitle:
       function() {
 	 return $(this).find('span.replytitle')   
       },
       
-      username:
+      msgusername:
       function() {
 	 return $(this).find('span.commentpostername')   
       },
       
+      msgemail:
+      function() {
+	 return $(this).find('span.commentpostername a').attr('href')
+      },
+     
       pid:
       function() {
 	 if ($(this).hasClass('penPost')) {
@@ -295,23 +304,25 @@ function dvach () {
 	    id + "\')\">"+title+"</a>]"
       },
       tizer : 
-      function(id,body) {
+      function(id,body,hasHr) {
 	 return "<div id=\'tiz" + id + 
-	    "\' style='display:none;'>" + body + "<br clear='both' /><hr></div>"
+	    "\' style='display:none;'>" + body + 
+	    (hasHr ? "<br clear='both' /><hr />" : "") + 
+	    "</div>"
       } 
    };
 
    return function (obj,f) {
-      const css = '#penOptions {padding: 8px} #penOptions div {margin-left: 8px;} #penOptions div div {margin-left: 16px;} .penOpt2 {padding-left: 8px;float:right} .penOpt2 input{width:64px}';
+      const css = '#penOptions {padding: 8px} #penOprtions table {width: 100%} .penOptDesc {width: 50%} .penOptVal {width: 20%} $penOptControl {}';
 
       var threadsRaw = obj.find('#delform');
       var cloned = threadsRaw.clone();
-      
+
       parse(cloned);
       process(cloned);
-      
-      $('body').prepend('<div id="penOptions" class="reply" style="display:none;position:fixed;"><h3 style="margin:0;float:left">Options</h3><span class="penOpt2">[<a href="javascript:db.saveCfg();toggle(\'penOptions\')">Save and exit</a>]</span><br clear="both"/></div>');
-      $('div.adminbar').append('[<a href="javascript:toggle(\'penOptions\')">Options</a>]')
+   
+      $('body').prepend('<div id="penSettings" style="display:none"><h1 style="float:left;margin:0;padding:0;" class="logo">Два.ч &#8212; Настройки</h1><div style="float:right">[<a href="javascript:db.saveCfg(defaults);settingsHide()">Сохранить и закрыть</a>]</div><br clear="borh" /><br /><hr><br /></div>');
+      $('div.adminbar').append(' - [<a href="javascript:settingsShow()">Настройки</a>]')
       $('body').append('<div id="cache" style="display:none" />')
       addStyle(css)
       f(obj, cloned)
