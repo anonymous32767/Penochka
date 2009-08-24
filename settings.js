@@ -40,10 +40,12 @@ function isEmpty(obj) {
 var defaults = {
    forwardReferences: [true, 'Карта дискуссии'],
    unfoldImages: [true,'Развертывать изображения'],
+   unfoldThreadsBtn: [false, 'Кнопка развертывания треда'],
    intelliSense: {
       v: [true,'<h3>Intellisense</h3>'],
+		ajax: [true, 'Автоматически подгружать пропущенные сообщения'],
       fallback: [100,'Замедление на отпадание'],
-      raiseup: [100,'Замедление на срабатывание']
+      raiseup: [0,'Замедление на срабатывание']
    },
    sage: {
       v: [undefined, '<h3>Сажа</h3>'],
@@ -55,6 +57,7 @@ var defaults = {
    hiding: {
       v: [undefined, '<h3>Скрытие</h3>'],
       threads: [true,'Скрытие потоков'],
+		citeLength: [15,'Показывать цитату из оп-поста, букв'],
       posts: [false,'Скрытие сообщений'],
       goodStealth: [false,'Аккуратно скрывать']
    },
@@ -173,33 +176,39 @@ var db = {
       },
    saveCfg: 
       function (defs) {
-	 var lcfg = {};
-	 var gcfg = {};
-	 db.__iter(
-	    db.config,
-	    function (v,pfx) {
-	       var iv = db.getinp(v[2])
-	       var dv = db.getval(pfx,defs)[0]
-	       if($('#penSetLoc' + v[2]).attr('checked')) {
-		  lcfg[v[2]] = iv
-	       } else {
-		  if(iv != dv) {
-		     gcfg[v[2]] = iv
-		     delete lcfg[v[2]]
-		  } else {
-		     delete gcfg[v[2]]
-		     delete lcfg[v[2]]
-		  }
-	       }
-	    },
-	    []
-	 )
-	 if(!isEmpty(gcfg)) {
+			var lcfg = [];
+			var gcfg = [];
+			db.__iter(
+				db.config,
+				function (v,pfx) {
+					var iv = db.getinp(v[2])
+					var dv = db.getval(pfx,defs)[0]
+					if($('#penSetLoc' + v[2]).attr('checked') == 'checked') {
+						lcfg[v[2]] = iv
+					} else {
+						if(iv != dv) {
+							gcfg[v[2]] = iv
+							lcfg.splice(v[2], 1)
+						} else {
+							gcfg.splice(v[2], 1)
+							lcfg.splice(v[2], 1)
+						}
+					}
+				},
+				[]
+			)
+			if(!isEmpty(gcfg)) {
             $.cookie('penCfgGlobal', $.toJSON(gcfg), {path: '/', expires: 9000})
-	 }
-	 if(!isEmpty(lcfg)) {
+			} else {
+				/* Negative expiration time deletes cookie */
+				$.cookie('penCfgGlobal', '', {path: '/', expires: -1})
+			}
+			if(!isEmpty(lcfg)) {
             $.cookie('penCfg', $.toJSON(lcfg), {expires: 9000})
-	 }
+			} else {
+				/* Here too */
+				$.cookie('penCfg', '', {expires: -1})
+			}
       },
    saveState:
       function () {

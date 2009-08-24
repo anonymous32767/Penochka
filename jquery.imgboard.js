@@ -78,33 +78,33 @@ function dvach () {
       var currThread = $('<span></span>');
       cloned.contents().each(
 	 function () {
-            if ($(this).is('table')) {
+       if ($(this).is('table')) {
 	       if (opPost) {
-		  currThread.append(opPost);
-		  opPost = false;
+				 currThread.append(opPost);
+				 opPost = false;
 	       }
 	       $(this).attr('id', 'p' + $(this).find('a[name]').attr('name'));
 	       $(this).addClass('penPost');
-            }
-            if(opPost) {
+       }
+       if(opPost) {
 	       opPost.append(this);
 	       if($(this).is('a') && $(this).attr('name')) {
-		  currThread.attr('id', 't'+$(this).attr('name'));
-		  currThread.addClass('penThread');
-		  opPost.attr('id', 'p'+$(this).attr('name'));
-		  opPost.addClass('penPost');
+				 currThread.attr('id', 't'+$(this).attr('name'));
+				 currThread.addClass('penThread');
+				 opPost.attr('id', 'p'+$(this).attr('name'));
+				 opPost.addClass('penPost');
 	       }
-            } else if (currThread) {
+       } else if (currThread) {
 	       currThread.append(this);
-            }
-            if ($(this).is('hr')) {
+       }
+       if ($(this).is('hr')) {
 	       if (opPost) {
-		  currThread.append(opPost);
+				 currThread.append(opPost);
 	       }
 	       cloned.append(currThread);
 	       opPost = $('<span></span>');
 	       currThread = $('<span></span>');
-            } 
+       } 
 	 }
       );
       cloned.append(currThread);
@@ -124,9 +124,12 @@ function dvach () {
 	    if(!$.references[pid]) {
 	       $.references[pid] = []
 	    }
-	    $.references[pid].push($(this).pid())
-	 }
-      )
+	    $.references[pid][$(this).pid()]=$(this).pid()
+	 })
+      cloned.moar().each(
+	 function () {
+	    $(this).html($(this).text().split('.')[0]+'. ')
+	 })
       cloned.image().each(
 	 function () {
             var altsrc = $(this).a().attr('href')
@@ -144,118 +147,143 @@ function dvach () {
    jQuery.fn.extend({
       anchor:
       function() {
-	 return $(this).find('a[name]')   
+			return $(this).find('a[name]')   
       },
       
       image:
       function() {
-	 return $(this).find('a img')   
+			return $(this).find('a img')   
       },
       
       imageinfo:
       function() {
-	 return $(this).find('span.filesize')   
+			return $(this).find('span.filesize')   
+      },
+      
+      moar:
+      function() {
+			return $(this).find('span.omittedposts')
       },
       
       msg:
       function() {
-	 return $(this).find('blockqoute:first')   
+			return $(this).find('blockquote:not(.penRefs):first')
       },
       
       reflink:
       function() {
-	 return $(this).find('span.reflink')   
+			return $(this).find('span.reflink')   
       },
       
       msgtitle:
       function() {
-	 return $(this).find('span.replytitle')   
+			return $(this).find('span.replytitle')   
       },
       
       msgusername:
       function() {
-	 return $(this).find('span.commentpostername')   
+			return $(this).find('span.commentpostername')   
       },
       
       msgemail:
       function() {
-	 return $(this).find('span.commentpostername a').attr('href')
+			return $(this).find('span.commentpostername a').attr('href')
       },
      
       pid:
       function() {
-	 if ($(this).hasClass('penPost')) {
+			if ($(this).hasClass('penPost')) {
             return $(this).attr('id')
-	 } else {
+			} else {
             return $(this).parents('.penPost').attr('id')   
-	 }
+			}
       },
       
       tid:
       function() {
-	 if ($(this).hasClass('penThread')) {
+			if ($(this).hasClass('penThread')) {
             return $(this).attr('id')
-	 } else {
+			} else {
             return $(this).parents('.penThread').attr('id')
-	 }
+			}
       },
       
       anchors:
       function() {
-	 return $(this).find('blockquote a[onclick]')
+			return $(this).find('blockquote a[onclick]')
       },
       
       threads:
       function() {
-	 return $(this).find('.penThread')
+			if ($(this).hasClass('penThread')) {
+				return $(this)
+			} else {
+				return $(this).find('.penThread')
+			}
       },
       
       posts:
       function() {
-	 return $(this).find('.penPost')
+			return $(this).find('.penPost')
       },
       
       references:
       function(pid) {
-	 return $(this).find("a[refid='"+pid+"']")
+			return $(this).find("a[refid='"+pid+"']")
       },
 
       menu:
       function() {
-	 return $(this).find('div.adminbar')
+			return $(this).find('div.adminbar')
       },
 
       options:
       function() {
-	 return $(this).find('#penOptions')
+			return $(this).find('#penOptions')
+      },
+      postform:
+      function () {
+			return $(this).find('#postform')
       },
       user:
       function () {
-	 return $(this).find('input[name=akane]')
+			return $(this).find('input[name=akane]')
       },
       email: 
       function () {
-	 return $(this).find('input[name=nabiki]')
+			return $(this).find('input[name=nabiki]')
       },
       title: 
       function () {
-	 return $(this).find('input[name=kasumi]')
+			return $(this).find('input[name=kasumi]')
       },
       postmessage:
       function () {
-	 return $(this).find('textarea[name=shampoo]')
+			return $(this).find('textarea[name=shampoo]')
       },
       file:
       function () {
-	 return $(this).find('input[name=file]')
+			return $(this).find('input[name=file]')
       },
       captcha:
       function () {
-	 return $(this).find('input[name=captcha]')
+			return $(this).find('input[name=captcha]')
       },
       passwd:
       function () {
-	 return $(this).find('input[name=password]')
+			return $(this).find('input[name=password]')
+      },
+      ajaxThread:
+      function (url, f) {
+			var e = $('<span/>')
+			e.load('http://'+location.host + url + ' #delform',
+		{},
+		function (a,b,c) {
+		   var cloned = $(e).find('#delform')
+		   parse(cloned)
+		   process(cloned)
+		   f(cloned)  
+		})
       }
    });
 
@@ -270,33 +298,34 @@ function dvach () {
       },
       refs :
       function (content) {
-	 return '<blockquote><small>Ссылки '+content+'</small></blockquote>'
+			return '<blockquote class="penRefs"><small>Ссылки '+content+'</small></blockquote>'
       },
       preview :
-      function (id,x,y,url) {
-	 if($('#is'+id).attr('id')) {
-	    return false;
-	 }
-	 var obj = $('#'+id).clone()
-	 if(!obj.attr('id')) {
-	    var e = $('<span/>')
-	    e.load('http://'+location.host + url + ' #delform',
-		   {},
-		   function (a,b,c) {
-		      var cloned = $(e).find('#delform')
-		      parse(cloned)
-		      $('#cache').append(e)
-		      $('#is'+id).remove()
-		      intelli(x,y,id,url)
-		   })
-	    obj = $('<div>Loading...</div>')
-	 }
-	 process(obj) 
-	 obj.anchor().remove()
-	 obj.addClass('reply')
-	 obj.attr('style','position:absolute; top:' + y + 
-		  'px; left:' + x + 'px;display:block;')
-	 return obj
+      function (id,x,y,url, use_ajax) {
+			if($('#is'+id).attr('id')) {
+				return false;
+			}
+			var obj = $('#'+id).clone()
+			if (!obj.attr('id')) {
+				if(use_ajax) {
+					obj.ajaxThread(
+						url,
+						function (e) {
+							$('#cache').append(e)
+							$('#is'+id).remove()
+							intelli(x,y,id,url)
+						})
+					obj = $('<div>Загрузка...</div>')
+				} else {
+					obj = $('<div>Недосягаемо.</div>')
+				}
+			}
+			process(obj) 
+			obj.anchor().remove()
+			obj.addClass('reply')
+			obj.attr('style','position:absolute; top:' + y + 
+						'px; left:' + x + 'px;display:block;')
+			return obj
       },
       closeLink : 
       function(id, title) {
