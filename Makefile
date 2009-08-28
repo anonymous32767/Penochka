@@ -20,3 +20,6 @@ build:
 	git push github master
 tst:
 	echo $(v)
+
+privoxy.js: penochka.opera.js
+	perl -MMIME::Base64 -0777 -ne "print\"\t'data:text/javascript;base64,\".encode_base64(\$$_,'').\"\',\n\"" < $< > $@
