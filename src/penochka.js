@@ -133,6 +133,8 @@ function intelli(x,y,id,url) {
 										  db.config.intelliSense.ajax[0])
 			if(obj) {
 				apply_me(undefined,obj) 
+			} else {
+				return
 			}
 			obj.attr('id','is'+id);
 			obj.attr('refid', id);
@@ -166,47 +168,60 @@ function sage(env) {
 }
 
 apply_me = function (env, messages) {
-   db.config.hiding.posts[0] &&
-      messages.posts().each(
-         function () {
-            var pid = $(this).pid()
-            $(this).reflink().append(' ' + $.ui.closeLink(pid, 'X'))
-            if(!db.config.hiding.goodStealth[0]) {
+   messages.posts().each(
+      function () {
+			var obj = $(this)
+         var pid = $(this).pid()
+			if(db.config.hiding.posts[0]) {
+				obj.reflink().append(' ' + $.ui.closeLink(pid, 'X'))
+				if(!db.config.hiding.goodStealth[0]) {
 					var txt = 'Пост ' + pid.replace('p','№') + 
 						' скрыт. [<a href="javascript:toggle(\''+pid+'\')">Показать</a>]';
-               $(this).before($.ui.tizer(pid, txt, false))
+					obj.before($.ui.tizer(pid, txt, false))
 				}
-				/* Censore */
-				if(db.config.censore.v[0]) {
-					var censf = false;
-					censf = censf || db.config.censore.username[0] &&
-						$(this).msgusername().search(db.config.censore.username[0])
-					censf = censf || db.config.censore.title[0] &&
-						$(this).msgtitle().search(db.config.censore.title[0])
-					censf = censf || db.config.censore.email[0] &&
-						$(this).msgemail().search(db.config.censore.email[0])
-					censf = censf || db.config.censore.msg[0] &&
-						$(this).msg().search(db.config.censore.msg[0])
-					censf = censf || db.config.censore.total[0] &&
-						$(this).text().search(db.config.censore.total[0])
-					if(censf) {
+			}
+			/* Censore */
+			if(db.config.censore.v[0]) {
+				var censf = false;
+				/*censf = censf || db.config.censore.username[0] &&
+					obj.msgusername().search(db.config.censore.username[0])
+				censf = censf || db.config.censore.title[0] &&
+					obj.msgtitle().search(db.config.censore.title[0])
+				censf = censf || db.config.censore.email[0] &&
+					obj.msgemail().search(db.config.censore.email[0])
+				censf = censf || db.config.censore.msg[0] &&
+					obj.msg().search(db.config.censore.msg[0])
+				censf = censf || db.config.censore.total[0] &&
+					obj.text().search(db.config.censore.total[0]) */
+				if(censf) {
 						db.hidden[pid]=1
-					}
 				}
-         }
-      )
+			}
+			if (db.config.forwardReferences.v[0] && $.references[pid]) {
+				if(db.config.forwardReferences.asDog[0]) {
+					obj.reflink().append('@'+$.references[pid].length)
+				} else {
+					var refs = [];
+					for (j in $.references[pid]) {
+						refs.push($.ui.anchor($.references[pid][j]))
+					}
+					obj.msg().before($.ui.refs(refs.join(', ')+'.'))
+				}
+			}
+      }
+   )
    
-   if (db.config.forwardReferences[0]) {
-      for(var i in $.references) {
+   /* if (db.config.forwardReferences[0]) {
+		for(var i in $.references) {
 			if($.references[i]) {
 				var refs = [];
 				for (j in $.references[i]) {
 					refs.push($.ui.anchor($.references[i][j]))
 				}
-				messages.find('#'+i).msg().before($.ui.refs(refs.join(', ')+'.'))
+				messages.find('#'+i+' blockquote:first').before($.ui.refs(refs.join(', ')+'.'))
 			}
-      }
-   }
+		}
+   } */
    
    db.config.hiding.threads[0] &&
       messages.threads().each(

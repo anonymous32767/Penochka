@@ -167,7 +167,7 @@ function dvach () {
       
       msg:
       function() {
-			return $(this).find('blockquote:not(.penRefs):first')
+			return $(this).find('blockquote:first')
       },
       
       reflink:
@@ -279,6 +279,9 @@ function dvach () {
 			e.load('http://'+location.host + url + ' #delform',
 		{},
 		function (a,b,c) {
+			if (b != 'success') {
+				return
+			}
 		   var cloned = $(e).find('#delform')
 		   parse(cloned)
 		   process(cloned)
@@ -293,12 +296,12 @@ function dvach () {
    jQuery.ui = {
       anchor :
       function(pid) {
-	 var pnum = pid.replace('p','')
-	 return '<a href="#'+pnum+'" refid="'+pid+'" onclick="highlight('+pnum+')">&gt;&gt;'+pnum+'</a>'
+			var pnum = pid.replace('p','')
+			return '<a href="#'+pnum+'" refid="'+pid+'" onclick="highlight('+pnum+')">&gt;&gt;'+pnum+'</a>'
       },
       refs :
       function (content) {
-			return '<blockquote class="penRefs"><small>Ссылки '+content+'</small></blockquote>'
+			return '<blockquote><small>Ссылки '+content+'</small></blockquote>'
       },
       preview :
       function (id,x,y,url, use_ajax) {
@@ -334,18 +337,18 @@ function dvach () {
       },
       tizer : 
       function(id,body,hasHr) {
-	 return "<div id=\'tiz" + id + 
-	    "\' style='display:none;'>" + body + 
-	    (hasHr ? "<br clear='both' /><hr />" : "") + 
-	    "</div>"
+			return "<div id=\'tiz" + id + 
+				"\' style='display:none;'>" + body + 
+				(hasHr ? "<br clear='both' /><hr />" : "") + 
+				"</div>"
       } 
    };
 
    return function (obj,f) {
       const css = '#penOptions {padding: 8px} #penOprtions table {width: 100%} .penOptDesc {width: 50%} .penOptVal {width: 20%} $penOptControl {}';
-
+		
       var threadsRaw = obj.find('#delform');
-      var cloned = threadsRaw.clone();
+      var cloned = threadsRaw.clone()
 
       parse(cloned);
       process(cloned);
@@ -354,7 +357,7 @@ function dvach () {
       $('div.adminbar').append(' - [<a href="javascript:settingsShow()">Настройки</a>]')
       $('body').append('<div id="cache" style="display:none" />')
       addStyle(css)
-      f(obj, cloned)
+		f(obj, cloned)
       threadsRaw.replaceWith(cloned); 
    };
 }/* end of 2ch */
@@ -372,5 +375,6 @@ jQuery.fn.extend({
 	    converge($(this), f)
          }
       )
+
    }
 })

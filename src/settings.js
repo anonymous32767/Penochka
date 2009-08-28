@@ -38,7 +38,10 @@ function isEmpty(obj) {
 }
 
 var defaults = {
-   forwardReferences: [true, 'Карта дискуссии'],
+   forwardReferences: {
+		v: [true, 'Карта дискуссии'],
+		asDog: [true, 'В виде собаки']
+	},
    unfoldImages: [true,'Развертывать изображения'],
    unfoldThreadsBtn: [false, 'Кнопка развертывания треда'],
    intelliSense: {
