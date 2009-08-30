@@ -15,7 +15,7 @@ build:
 	make compiled
 	git add penochka.opera.js
 	git add penochka.user.js
-	git commit -a -m "Build $(v)"
+	#git commit -a -m "Build $(v)"
 	git tag -a -m "$(m)" $(v)
 	git push --tags github master
 	make clean
