@@ -86,17 +86,16 @@ function swapAttr(obj, a1, a2) {
 }
 
 function refold(id) { 
-	$("#itiz"+id).show();
    var obj = $('#'+id).image()
    var ofs = obj.offset();
-	if(!obj.attr('onload')) {
-		obj.attr('onload', '$("#itiz'+id+'").hide()')
+	if(!$("#itiz"+id).attr('id')) {
+		obj.one("load",
+			function () {
+				$('#itiz'+id).hide()
+			})
 		/* TODO: Move this HTML to jQuery.imgboard.ui */
-		obj.parents('a').prepend('<div style="position:absolute;top:'+ofs.top+'px;left:'+ofs.left+'px;z-index:99;background-color:maroon;color:white;padding:2px;font-weight:bold;" id="itiz'+id+'">Загрузка...</div>')
-	} else {
-		obj.attr('onload', '1')
-		$("#itiz"+id).remove()
-	}
+		obj.parents('a').before('<div style="position:absolute;top:'+ofs.top+'px;left:'+ofs.left+'px;z-index:99;background-color:maroon;color:white;padding:2px;font-weight:bold;" id="itiz'+id+'">Загрузка...</div>')
+	} 
    swapAttr(obj, 'style', 'altstyle')
    swapAttr(obj, 'src', 'altsrc')
    return false;
@@ -149,7 +148,7 @@ function outelli(id) {
 	clearTimeout(ist[id])
    ist[id] = setTimeout(
       function () {
-	 $('#is'+id).remove()
+			$('#is'+id).remove()
       }, 
       db.config.intelliSense.fallback[0])
 }
@@ -173,11 +172,19 @@ apply_me = function (env, messages) {
 			var obj = $(this)
          var pid = $(this).pid()
 			if(db.config.hiding.posts[0]) {
-				obj.reflink().append(' ' + $.ui.closeLink(pid, 'X'))
+				obj.reflink().after($.ui.controlLink(
+					'[|X|]',
+					function () { toggle(pid) }
+				))
 				if(!db.config.hiding.goodStealth[0]) {
-					var txt = 'Пост ' + pid.replace('p','№') + 
-						' скрыт. [<a href="javascript:toggle(\''+pid+'\')">Показать</a>]';
-					obj.before($.ui.tizer(pid, txt, false))
+					$(this).before($.ui.tizer(
+						pid,
+						$.ui.controlLink(
+							'Пост ' + pid.replace('p','№') + ' ' +
+								' скрыт. [|Показать|]',
+							function () { toggle(pid) }
+						)
+						,false))
 				}
 			}
 			/* Censore */
@@ -211,38 +218,38 @@ apply_me = function (env, messages) {
       }
    )
    
-   /* if (db.config.forwardReferences[0]) {
-		for(var i in $.references) {
-			if($.references[i]) {
-				var refs = [];
-				for (j in $.references[i]) {
-					refs.push($.ui.anchor($.references[i][j]))
-				}
-				messages.find('#'+i+' blockquote:first').before($.ui.refs(refs.join(', ')+'.'))
-			}
-		}
-   } */
-   
    db.config.hiding.threads[0] &&
       messages.threads().each(
          function () {
             var tid = $(this).tid()
-            $(this).reflink().filter(':first').after($.ui.closeLink(tid, 'Скрыть тред'))
+            $(this).reflink().filter(':first').after($.ui.controlLink(
+					'[|Скрыть тред|]',
+					function () { toggle(tid) }
+				))
             if(!db.config.hiding.goodStealth[0]) {
 					if(db.config.hiding.citeLength[0]) {
 						var cite = '(' + 
 							$(this).msg().text().slice(0, db.config.hiding.citeLength[0] - 1) + 
 							'...)'
 					} else { var cite = '' }
-					var txt = 'Тред ' + tid.replace('t','№') + ' ' + cite + 
-						' скрыт. [<a href="javascript:toggle(\''+tid+'\')">Показать</a>]';
-               $(this).before($.ui.tizer(tid,txt,true))
+               $(this).before($.ui.tizer(
+						tid,
+						$.ui.controlLink(
+							'Тред ' + tid.replace('t','№') + ' ' + cite + 
+								' скрыт. [|Показать|]',
+							function () { toggle(tid) }
+						)
+						,true))
 				}
 				var e = $(this).moar()
 				if(e) {
 					/* Thread unfolding */
-					e.append('[<a href="javascript:unfold(\''+tid+'\')">Раскрыть</a>]')
-					e.clone().appendTo($(this).posts().filter(':last'))
+					e.append(
+						$.ui.controlLink(
+							'[|Раскрыть|]',
+							function () { unfold(tid) }
+						))
+					e.clone(true).appendTo($(this).posts().filter(':last'))
 					/* Postform */
 					/* e.append('[<a href="javascript:toggleReplyForm(\''+tid+'\')">Ответить</a>]') */
 				}
@@ -252,9 +259,11 @@ apply_me = function (env, messages) {
    db.config.unfoldImages[0] &&
       messages.image().each(
          function () {
-            var a = $(this).a()
-            a.attr('onclick','return refold(\''+a.pid()+'\')')
-            a.removeAttr('target')
+            $(this).a().click(
+					function () {
+						return refold($(this).pid())
+					}
+				).removeAttr('target')
          }
       ) 
    db.config.intelliSense.v[0] &&
@@ -277,8 +286,13 @@ apply_me = function (env, messages) {
    }
 
    db.config.sage.button[0] &&
-      env.email().after(' <b>[<a href="javascript:sage()">Sage</a>]</b>')
-   
+      env.email().after(
+			$.ui.controlLink(
+				' <b>[</b>|<b>Sage</b>|<b>]</b>',
+				function () { sage()	}
+			)
+		)
+
    db.config.sage.sageMan[0] &&
       sage(env) 
    

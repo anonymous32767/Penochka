@@ -113,7 +113,9 @@ function dvach () {
    function process(cloned) {
       cloned.anchors().each(
 	 function () {
-	    [refurl, refid] = $(this).attr('href').split('#')
+       var a = $(this).attr('href').split('#')
+	    var refurl = a[0]
+       var refid = a[1]
 	    if (!refid) {
 	       // Op post workaround
 	       refid = $(this).attr('href').split('.')[0].split('/').reverse()[0]
@@ -131,7 +133,7 @@ function dvach () {
 	    $(this).html($(this).text().split('.')[0]+'. ')
 	 })
       cloned.image().each(
-	 function () {
+			function () {
             var altsrc = $(this).a().attr('href')
             var w = $(this).attr('width')
             var h = $(this).attr('height')
@@ -140,7 +142,7 @@ function dvach () {
             $(this).attr('altstyle','display:block;clear: both;min-height: '+h+'px; min-width: '+w+'px')
             $(this).removeAttr('height')
             $(this).removeAttr('width')
-	 }
+			}
       )
    }
 
@@ -330,22 +332,30 @@ function dvach () {
 						'px; left:' + x + 'px;display:block;')
 			return obj
       },
-      closeLink : 
-      function(id, title) {
-	 return "[<a href=\"javascript:toggle(\'" + 
-	    id + "\')\">"+title+"</a>]"
+      controlLink : 
+      function(title, handler) {
+			var textArray = title.split('|')
+			return $('<span />').
+				append(textArray[0]).
+				append(
+					$('<a href="#">' + textArray[1] + '</a>').
+						click(
+							function () { 
+								handler ()
+								return false
+							})).
+				append(textArray[2])
       },
       tizer : 
       function(id,body,hasHr) {
-			return "<div id=\'tiz" + id + 
-				"\' style='display:none;'>" + body + 
-				(hasHr ? "<br clear='both' /><hr />" : "") + 
-				"</div>"
+			return $("<div id=\'tiz" + id + "\' style='display:none;' />").
+				append(body).
+				append(hasHr ? "<br clear='both' /><hr />" : "")
       } 
    };
 
    return function (obj,f) {
-      const css = '#penOptions {padding: 8px} #penOprtions table {width: 100%} .penOptDesc {width: 50%} .penOptVal {width: 20%} $penOptControl {}';
+      const css = '#penOptions {padding: 8px} .penOptDesc {width: 45%;float: left} .penOptVal {width: 140px} $penOptControl {} .penOptLoc .penOptVal .penOptDef {float:right;margin-left: 8px} ';
 		
       var threadsRaw = obj.find('#delform');
       var cloned = threadsRaw.clone()
@@ -353,8 +363,26 @@ function dvach () {
       parse(cloned);
       process(cloned);
    
-      $('body').prepend('<div id="penSettings" style="display:none"><h1 style="float:left;margin:0;padding:0;" class="logo">Два.ч &#8212; Настройки</h1><div style="float:right">[<a href="javascript:db.saveCfg(defaults);settingsHide()">Сохранить и закрыть</a>]</div><br clear="borh" /><br /><hr><br /></div>');
-      $('div.adminbar').append(' - [<a href="javascript:settingsShow()">Настройки</a>]')
+      var settings = $('<div id="penSettings" style="display:none"></div>');
+		var closeDiv = $('<div style="float:right" />').
+			append(
+				$.ui.controlLink(
+					'[|Сохранить и закрыть|]',
+					function () { db.saveCfg(defaults);settingsHide() }
+				))
+		settings.
+			append($('<h1 style="float:left;margin:0;padding:0;" class="logo">Два.ч &#8212; Настройки</h1>')).
+			append(closeDiv).
+			append('<br clear="borh" /><br />')
+
+		$('body').prepend(settings)
+		
+      $('div.adminbar:first').append(
+			$.ui.controlLink(
+				' - [|Настройки|]',
+				function () { settingsShow() }
+			)
+		)
       $('body').append('<div id="cache" style="display:none" />')
       addStyle(css)
 		f(obj, cloned)

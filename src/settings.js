@@ -45,32 +45,32 @@ var defaults = {
    unfoldImages: [true,'Развертывать изображения'],
    unfoldThreadsBtn: [false, 'Кнопка развертывания треда'],
    intelliSense: {
-      v: [true,'<h3>Intellisense</h3>'],
+      v: [true,'<h3 style="margin:0;padding:0">Intellisense</h3>'],
 		ajax: [true, 'Автоматически подгружать пропущенные сообщения'],
       fallback: [100,'Замедление на отпадание'],
       raiseup: [0,'Замедление на срабатывание']
    },
    sage: {
-      v: [undefined, '<h3>Сажа</h3>'],
+      v: [undefined, '<h3 style="margin:0;padding:0">Сажа</h3>'],
       sageMan: [false, 'Я &#8212; человек-<b>САЖА</b>'],
       capsBold: [false, '<b>КАПСБОЛД</b>'],
       inAllFields: [false, 'Сажа идет во все поля'],
       button: [true, 'Кнопка сажи']
    },
    hiding: {
-      v: [undefined, '<h3>Скрытие</h3>'],
+      v: [undefined, '<h3 style="margin:0;padding:0">Скрытие</h3>'],
       threads: [true,'Скрытие потоков'],
 		citeLength: [15,'Показывать цитату из оп-поста, букв'],
       posts: [false,'Скрытие сообщений'],
       goodStealth: [false,'Аккуратно скрывать']
    },
    state: {
-      v: [undefined,'<h3>Хранение данных</h3>'],   
+      v: [undefined,'<h3 style="margin:0;padding:0">Хранение данных</h3>'],   
       constPasswd: ['', 'Постоянный пароль'],
       expirationTime: [3,'Хранить информацию о скрытых тредах, дн.']
    },
    censore: {
-      v: [false, '<h3>Фильтрация</h3>'],
+      v: [false, '<h3 style="margin:0;padding:0">Фильтрация</h3>'],
       username: ['', 'Имя пользователя'],
       title: ['', 'Заголовок'],
       email: ['', 'Электропочта (сажа)'],
@@ -125,11 +125,11 @@ var db = {
       var e = $('#penSet' + key)
       switch (typeof val) {
       case 'boolean':
-	 if (val) {
-	    e.attr('checked','checked')
-	 } else {
-	    e.removeAttr('checked')
-	 }
+			if (val) {
+				e.attr('checked','checked')
+			} else {
+				e.removeAttr('checked')
+			}
          break;
       case 'number':
       case 'string':
@@ -166,10 +166,10 @@ var db = {
 	       sv(pfx, cfg, nv)
 	       nv.push(i);
 	       if (typeof lcfg[i] != 'undefined') {
-		  nv[0] = lcfg[i]
-		  nv.push('local')
+				 nv[0] = lcfg[i]
+				 nv.push('local')
 	       } else if (typeof gcfg[i] != 'undefined') {
-		  nv[0] = gcfg[i]
+				 nv[0] = gcfg[i]
 	       }
 	       i++
 	    },
@@ -237,44 +237,57 @@ var db = {
          var obj = this;
          var genf =
             function (desc, key, val, loc, add) {
-	       var locchk = '<input type="checkbox" ' +
-		  (loc ? 'checked="checked"' : '') +
-		  'id="penSetLoc'+key+'" /> Локально'
-	       var defbtn = '<input type="button" value="По умолчанию" onclick="settingsDefault(defaults,\''+key+'\')" />'
-	       var result = "";
+					if(!add) {
+						add = $('<span>')
+					}
+					var locchk = $('<span><input type="checkbox" ' +
+										(loc ? 'checked="checked"' : '') +
+										'id="penSetLoc'+key+'" /> Локально</span>')
+					var defbtn = $('<input type="button" value="По умолчанию" />').
+						click(
+							function () {
+								settingsDefault(defaults,key)
+							})
+					var result = $('<span>');
                switch (typeof val) {
                case 'boolean':
-                  result = '<input type="checkbox" id="penSet' + key + '" ' + 
-                         (val ? 'checked="checked"' : ' ') + '>'
+                  result = $('<input type="checkbox" id="penSet' + key + '" ' + 
+									  (val ? 'checked="checked"' : ' ') + '>')
                break;
                case 'number':
                case 'string':
-                  result = '<input type="text" id="penSet' + key + '" ' + 
-                        'value="' + val + '">'
+                  result = $('<input type="text" id="penSet' + key + '" ' + 
+									  'value="' + val + '">')
                break;
 	       default:
-		  locchk = ' ';
-		  defbtn= ' ';
+						locchk = $('<span>');
+						defbtn= $('<span>');
 		  break;
             }
-	       return '<table width="100%"><tr><td class="penOptDesc">' +
-		  desc + '</td><td class="penOptVal">' + 
-		  result + '</td><td class="penOptLoc">' + 
-		  locchk + '</td><td class="penOptDef">' +
-	          defbtn + '</td><tr><td colspan="4">' +
-		  add + '</td></tr></table>'
+					var tab = $('<div>')
+					var tab1 = $('<div>')
+					var tab2 = $('<div>')
+					$('<div>' + desc + '</div>').addClass('penOptDesc').appendTo(tab1)
+					result.wrap('<div>').addClass('penOptVal').appendTo(tab1)
+					locchk.wrap('<div>').addClass('penOptLoc').appendTo(tab1)
+					defbtn.wrap('<div>').addClass('penOptDef').appendTo(tab1)
+					add.appendTo(tab2)
+					tab1.appendTo(tab)
+					$('<br clear="both" />').appendTo(tab)
+					tab2.appendTo(tab)
+					return tab
             }
          var walk_n_gen =
             function (list) {
-               var out = "";
+               var out = $('<span/>');
                for (var key in list) {
                   if (key == 'v') {
                      continue
                   }
                   if (list[key] instanceof Array) {
-                     out += genf(list[key][1], list[key][2], list[key][0], list[key][3], '')
+                     out.append(genf(list[key][1], list[key][2], list[key][0], list[key][3], ''))
                   } else {
-                     out += genf(list[key].v[1], list[key].v[2], list[key].v[0], list[key].v[3], walk_n_gen(list[key]))
+                     out.append(genf(list[key].v[1], list[key].v[2], list[key].v[0], list[key].v[3], walk_n_gen(list[key])))
                   }
                }
                return out
@@ -282,13 +295,13 @@ var db = {
 
          if (!this.__form) {
             this.__form = walk_n_gen(db.config);
-	    this.__form += '<hr/><hr/>'
+				this.__form.append('<hr/><hr/>')
          } 
          return this.__form
       }
 }
 
-function settingsShow() {
+function settingsShow () {
    var e = $('#penSettings');
    if (!e.find('table').is('table')) {
       e.append(db.genForm())
@@ -308,9 +321,9 @@ function settingsDefault(defs,sid) {
    db.__iter(
       db.config,
       function (v,pfx) {
-	 if (v[2] == sid) {
-	    db.setinp(sid, db.getval(pfx, defs)[0])
-	 }
+			if (v[2] == sid) {
+				db.setinp(sid, db.getval(pfx, defs)[0])
+			}
       },
       [])
 }

@@ -1,3 +1,4 @@
+
 all: compiled
 
 compiled:
@@ -15,9 +16,11 @@ build:
 	git add penochka.opera.js
 	git add penochka.user.js
 	git commit -a -m "Build $(v)"
-	git tag -a -m "Build $(v). $(m)" $(v)
+	git tag -a -m "$(m)" $(v)
 	git push --tags github master
 	make clean
+	git rm -f penochka.opera.js
+	git rm -f penochka.user.js
 	git commit -a -m "Build $(v) cleanup."
 	git push github master
 tst:

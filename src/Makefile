@@ -30,7 +30,7 @@ penochka.user.js: $(hex)
 	rm -f *.jsb64
 
 %.jsb64: %.js
-	perl -MMIME::Base64 -0777 -ne "print\"\t'data:text/javascript;base64,\".encode_base64(\$$_,'').\"\',\n\"" < $< > $@
+	perl -MEncode -MMIME::Base64 -0777 -ne "print\"\t'data:text/javascript;base64,\".encode_base64(encode(\"UTF-8\", \"\$$_\"),'').\"\',\n\"" < $< > $@
 
 clean:
 	rm -f *.jsb64
