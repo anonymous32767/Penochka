@@ -31,6 +31,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+jQuery.fn.swap = function(b){ 
+    b = jQuery(b)[0]; 
+    var a = this[0]; 
+    var t = a.parentNode.insertBefore(document.createTextNode(''), a); 
+    b.parentNode.insertBefore(a, b); 
+    t.parentNode.insertBefore(b, t); 
+    t.parentNode.removeChild(t); 
+    return this; 
+};
+
 /* Penochka application function variable */
 var apply_me = {} 
 
@@ -47,26 +57,49 @@ function toggleReplyForm(id) {
 }
 
 /* */
+
+function toggleThread(id) {
+	$('#'+id).swap('#fold'+id)
+}
+
 function unfold(id) {
+	var replace =
+		function (o,n) {
+			apply_me(undefined,n)
+			n.reflink().filter(':first').after(
+				$.ui.controlLink(
+					'[|Скукожить обратно|]',
+					function () {
+						toggleThread(id)
+					})
+			)
+			o.attr('id', 'fold'+id)
+			toggleThread(id)
+			wait.swap(moar)
+		}
+
+	if($('#fold'+id).length >0) {
+		toggleThread(id)
+	}
+
    var o = $('#'+id)
 	var url = o.reflink().find('a').attr('href').split('#')[0]
-	o.moar().text('Загрузка треда...')
+	var moar = o.moar()
+	var wait = $('<span>Загрузка треда...</span>')
+	moar.swap(wait)
 	var cached = $('#cache #'+id)
 	if(cached.attr('id')) {
 		setTimeout(
 			function () {
-				apply_me(undefined,cached)
-				cached.reflink().after('[<a href="' + url + '">Ответ</a>]')
-				o.replaceWith(cached)
+				replace(o, cached)
 			}, 0)
 	} else {
 		o.ajaxThread(
 			url,
 			function(e) {
 				var ue = e.find('#'+id)
-				apply_me(undefined,ue)
-				ue.reflink().after('[<a href="' + url + '">Ответ</a>]')
-				o.replaceWith(ue)
+				ue.appendTo('#cache')
+				replace(o,ue)
       })
 	}
 }
@@ -221,7 +254,9 @@ apply_me = function (env, messages) {
    db.config.hiding.threads[0] &&
       messages.threads().each(
          function () {
-            var tid = $(this).tid()
+				var subj = $(this)
+				var tid = subj.tid()
+
             $(this).reflink().filter(':first').after($.ui.controlLink(
 					'[|Скрыть тред|]',
 					function () { toggle(tid) }
@@ -246,7 +281,7 @@ apply_me = function (env, messages) {
 					/* Thread unfolding */
 					e.append(
 						$.ui.controlLink(
-							'[|Раскрыть|]',
+							'[|Раскукожить|]',
 							function () { unfold(tid) }
 						))
 					e.clone(true).appendTo($(this).posts().filter(':last'))

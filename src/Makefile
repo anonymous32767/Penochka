@@ -13,7 +13,16 @@ jq:
 	cp jquery/jquery.min.js .
 
 penochka.opera.js: $(source)
-	cat $^ > $@
+	echo "// ==UserScript==" > $@
+	echo "// @name           Govno 3 aka penochka" >> $@
+	echo "// @version	 " >> $@
+	echo "// @description    Penochka imgboard script." >> $@
+	echo "// @include        http://2-ch.ru/*" >> $@
+	echo "// @include        http://*.2-ch.ru/*" >> $@
+	echo "// @exclude        */src/*" >> $@
+	echo "// @run-at 			 document-start" >> $@
+	echo "// ==/UserScript==" >> $@
+	cat $^ >> $@
 
 penochka.user.js: $(hex)
 	echo "// ==UserScript==" > $@

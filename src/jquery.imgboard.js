@@ -278,17 +278,18 @@ function dvach () {
       ajaxThread:
       function (url, f) {
 			var e = $('<span/>')
-			e.load('http://'+location.host + url + ' #delform',
-		{},
-		function (a,b,c) {
-			if (b != 'success') {
-				return
-			}
-		   var cloned = $(e).find('#delform')
-		   parse(cloned)
-		   process(cloned)
-		   f(cloned)  
-		})
+			e.load(
+				'http://'+location.host + url + ' #delform',
+				{},
+				function (a,b,c) {
+					if (b != 'success') {
+						return
+					}
+					var cloned = $(e).find('#delform')
+					parse(cloned)
+					process(cloned)
+					f(cloned)  
+				})
       }
    });
 
@@ -338,7 +339,7 @@ function dvach () {
 			return $('<span />').
 				append(textArray[0]).
 				append(
-					$('<a href="#">' + textArray[1] + '</a>').
+					$('<a href="javascript:()">' + textArray[1] + '</a>').
 						click(
 							function () { 
 								handler ()
@@ -351,11 +352,11 @@ function dvach () {
 			return $("<div id=\'tiz" + id + "\' style='display:none;' />").
 				append(body).
 				append(hasHr ? "<br clear='both' /><hr />" : "")
-      } 
+      }
    };
 
    return function (obj,f) {
-      const css = '#penOptions {padding: 8px} .penOptDesc {width: 45%;float: left} .penOptVal {width: 140px} $penOptControl {} .penOptLoc .penOptVal .penOptDef {float:right;margin-left: 8px} ';
+      const css = '#penOptions {padding: 8px} .penVal, .penLoc, .penDef { display:block; text-align:right; float: right;position: relative; margin:3px; margin-left: 8px; height:26px; line-height:1;} .penRow {display: block; position: relative; clear: both; } .penTab {margin-left: 22px} #penOptions input { height: 24px;} .penBig {font-size: 16pt}';
 		
       var threadsRaw = obj.find('#delform');
       var cloned = threadsRaw.clone()

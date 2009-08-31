@@ -45,32 +45,32 @@ var defaults = {
    unfoldImages: [true,'Развертывать изображения'],
    unfoldThreadsBtn: [false, 'Кнопка развертывания треда'],
    intelliSense: {
-      v: [true,'<h3 style="margin:0;padding:0">Intellisense</h3>'],
+      v: [true,'<b class="penBig">Intellisense</b>'],
 		ajax: [true, 'Автоматически подгружать пропущенные сообщения'],
       fallback: [100,'Замедление на отпадание'],
       raiseup: [0,'Замедление на срабатывание']
    },
    sage: {
-      v: [undefined, '<h3 style="margin:0;padding:0">Сажа</h3>'],
+      v: [undefined, '<b class="penBig">Сажа</b>'],
       sageMan: [false, 'Я &#8212; человек-<b>САЖА</b>'],
       capsBold: [false, '<b>КАПСБОЛД</b>'],
       inAllFields: [false, 'Сажа идет во все поля'],
       button: [true, 'Кнопка сажи']
    },
    hiding: {
-      v: [undefined, '<h3 style="margin:0;padding:0">Скрытие</h3>'],
+      v: [undefined, '<b class="penBig">Скрытие</b>'],
       threads: [true,'Скрытие потоков'],
 		citeLength: [15,'Показывать цитату из оп-поста, букв'],
       posts: [false,'Скрытие сообщений'],
       goodStealth: [false,'Аккуратно скрывать']
    },
    state: {
-      v: [undefined,'<h3 style="margin:0;padding:0">Хранение данных</h3>'],   
+      v: [undefined,'<b class="penBig">Хранение данных</b>'],   
       constPasswd: ['', 'Постоянный пароль'],
       expirationTime: [3,'Хранить информацию о скрытых тредах, дн.']
    },
    censore: {
-      v: [false, '<h3 style="margin:0;padding:0">Фильтрация</h3>'],
+      v: [false, '<b class="penBig">Фильтрация</b>'],
       username: ['', 'Имя пользователя'],
       title: ['', 'Заголовок'],
       email: ['', 'Электропочта (сажа)'],
@@ -235,60 +235,65 @@ var db = {
    genForm:
       function () {
          var obj = this;
-         var genf =
+         var genf = 
             function (desc, key, val, loc, add) {
-					if(!add) {
-						add = $('<span>')
+					var locchk = $('<span class="penLoc">')
+					var defbtn = $('<span class="penDef">')
+					var result = $('<span class="penVal">')
+					if(typeof val != 'undefined') {
+						locchk.append(
+							'<input type="checkbox" ' +
+								(loc ? 'checked="checked"' : '') +
+								'id="penSetLoc'+key+'" /> Локально')
+						defbtn.append(
+							$('<input type="button" value="По умолчанию" />').
+								click(
+									function () {
+										settingsDefault(defaults,key)
+									}))
 					}
-					var locchk = $('<span><input type="checkbox" ' +
-										(loc ? 'checked="checked"' : '') +
-										'id="penSetLoc'+key+'" /> Локально</span>')
-					var defbtn = $('<input type="button" value="По умолчанию" />').
-						click(
-							function () {
-								settingsDefault(defaults,key)
-							})
-					var result = $('<span>');
                switch (typeof val) {
                case 'boolean':
-                  result = $('<input type="checkbox" id="penSet' + key + '" ' + 
-									  (val ? 'checked="checked"' : ' ') + '>')
-               break;
+                  result.append(
+							'<input type="checkbox" id="penSet' + key + '" ' + 
+								(val ? 'checked="checked"' : ' ') + '>')
+						break;
                case 'number':
                case 'string':
-                  result = $('<input type="text" id="penSet' + key + '" ' + 
-									  'value="' + val + '">')
-               break;
-	       default:
-						locchk = $('<span>');
-						defbtn= $('<span>');
-		  break;
-            }
-					var tab = $('<div>')
-					var tab1 = $('<div>')
-					var tab2 = $('<div>')
-					$('<div>' + desc + '</div>').addClass('penOptDesc').appendTo(tab1)
-					result.wrap('<div>').addClass('penOptVal').appendTo(tab1)
-					locchk.wrap('<div>').addClass('penOptLoc').appendTo(tab1)
-					defbtn.wrap('<div>').addClass('penOptDef').appendTo(tab1)
-					add.appendTo(tab2)
-					tab1.appendTo(tab)
-					$('<br clear="both" />').appendTo(tab)
-					tab2.appendTo(tab)
-					return tab
+                  result.append(
+							'<input type="text" id="penSet' + key + '" ' + 
+								'value="' + val + '">')
+						break;
+					default:
+						break;
+					}
+					var tab = $('<div class="penRow">')
+					tab.append('<span class="penDesc">' + desc + '</span>').
+						append(defbtn).
+						append(locchk).
+						append(result)
+					//add.appendTo(tab2)
+					//tab1.appendTo(tab)
+					//$('<br clear="both" />').appendTo(tab)
+					//tab2.appendTo(tab)
+					return [tab, add ? $('<div class=penTab>').append(add) : '']
             }
          var walk_n_gen =
             function (list) {
                var out = $('<span/>');
+					var t = [];
                for (var key in list) {
                   if (key == 'v') {
                      continue
                   }
-                  if (list[key] instanceof Array) {
-                     out.append(genf(list[key][1], list[key][2], list[key][0], list[key][3], ''))
+                  if (list[key] instanceof Array) { 
+                     t = genf(list[key][1], list[key][2], list[key][0], list[key][3], '')
                   } else {
-                     out.append(genf(list[key].v[1], list[key].v[2], list[key].v[0], list[key].v[3], walk_n_gen(list[key])))
+                     t = genf(list[key].v[1], list[key].v[2], list[key].v[0], list[key].v[3], walk_n_gen(list[key]))
                   }
+						for(var k in t) {
+							out.append(t[k])
+						}
                }
                return out
             }
