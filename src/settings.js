@@ -40,13 +40,14 @@ function isEmpty(obj) {
 var defaults = {
    forwardReferences: {
 		v: [true, 'Карта дискуссии'],
-		asDog: [true, 'В виде собаки']
+		asDog: [false, 'В виде собаки']
 	},
    unfoldImages: [true,'Развертывать изображения'],
-   unfoldThreadsBtn: [false, 'Кнопка развертывания треда'],
+   unfoldThreads: [false, 'Кнопка развертывания треда'],
+   replyForm: [true, 'Форма ответа в конце треда'],
    intelliSense: {
       v: [true,'<b class="penBig">Intellisense</b>'],
-		ajax: [true, 'Автоматически подгружать пропущенные сообщения'],
+      ajax: [true, 'Автоматически подгружать пропущенные сообщения'],
       fallback: [100,'Замедление на отпадание'],
       raiseup: [0,'Замедление на срабатывание']
    },

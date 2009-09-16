@@ -275,21 +275,57 @@ function dvach () {
       function () {
 			return $(this).find('input[name=password]')
       },
+      isInThread:
+      function () {
+	 return $('#postform:first input[name=parent]').val()
+      },
+      tuneForThread:
+      function (tid) {
+	 var tnum = tid.replace('t','')
+	 var form = $(this)
+	 var lnum = $('#'+tid).find('.penPost:last').pid().replace('p','')
+	 form.find('input[name=gb2][value=board]').removeAttr('checked')
+	 form.find('input[name=gb2][value=thread]').attr('checked','checked')
+	 form.prepend('<input type="hidden" name="parent" value="' + tnum + '" />')
+	 var captcha = form.find('#imgcaptcha')
+	    captcha.attr(
+	       'src',
+	       captcha.attr('src').
+		  replace(/key=\S*&/, "key=res" + tnum + "&").
+		  replace(/dummy=\S*/, "dummy=" + lnum)
+	    )
+	 return form
+      },
       ajaxThread:
       function (url, f) {
-			var e = $('<span/>')
-			e.load(
-				'http://'+location.host + url + ' #delform',
-				{},
-				function (a,b,c) {
-					if (b != 'success') {
-						return
-					}
-					var cloned = $(e).find('#delform')
-					parse(cloned)
-					process(cloned)
-					f(cloned)  
-				})
+	 var e = $('<span/>')
+	 e.load(
+	    'http://'+location.host + url + ' #delform',
+	    {},
+	    function (a,b,c) {
+	       if (b != 'success') {
+		  return
+	       }
+	       var cloned = $(e).find('#delform')
+	       parse(cloned)
+	       process(cloned)
+	       f(cloned)  
+	       cloned.posts().each(
+		  function () {
+		     var obj = $(this)
+		     var rp = $('#' + obj.pid())
+		     if(rp.attr('id')) {
+			/* Tired a bit. Here may be bad code */
+			var moar = rp.moar().clone(true)
+			var rp2 = obj.clone(true)
+			rp.replaceWith(rp2)
+			if (moar) {			
+			   rp2.append(moar)
+			}
+		     }
+		  }
+	       )
+	    })
       }
    });
 
@@ -307,7 +343,7 @@ function dvach () {
 			return '<blockquote><small>Ссылки '+content+'</small></blockquote>'
       },
       preview :
-      function (id,x,y,url, use_ajax) {
+      function (id,x,y,url, use_ajax, f) {
 			if($('#is'+id).attr('id')) {
 				return false;
 			}
@@ -317,9 +353,10 @@ function dvach () {
 					obj.ajaxThread(
 						url,
 						function (e) {
-							$('#cache').append(e)
-							$('#is'+id).remove()
-							intelli(x,y,id,url)
+						   $('#cache').append(e)
+						   $('#is'+id).remove()
+						   f(e)
+						   intelli(x,y,id,url)
 						})
 					obj = $('<div>Загрузка...</div>')
 				} else {

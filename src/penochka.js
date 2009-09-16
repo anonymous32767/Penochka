@@ -47,61 +47,68 @@ var apply_me = {}
 /* */
 /* FIXME 1. Append only where needed
          2. Toggling doesn't work  */
-function toggleReplyForm(id) {
+function showReplyForm(id, citeid) {
+   
    if($('#postForm'+id).attr('id')) {
-      $('#postForm'+id).remove()
+      if (typeof citeid != undefined) {
+	 var pm = $('#postForm'+id).postmessage()
+	 pm.val(pm.val() + '>>'+citeid.replace('p',''))
+      }
+      return
    }
-   var frm = $('body').postform().clone();
+   var frm = $('body').postform().clone().tuneForThread(id);
    frm.attr('id', 'postForm' + id);
-   $('#'+id).moar().append(frm)
+   
+   $('#'+id).posts().filter(':last').after(frm)
+   frm.postmessage()[0].focus()
 }
 
 /* */
 
 function toggleThread(id) {
-	$('#'+id).swap('#fold'+id)
+   $('#'+id).swap('#fold'+id)
 }
 
 function unfold(id) {
-	var replace =
-		function (o,n) {
-			apply_me(undefined,n)
-			n.reflink().filter(':first').after(
-				$.ui.controlLink(
-					'[|Скукожить обратно|]',
-					function () {
-						toggleThread(id)
-					})
-			)
-			o.attr('id', 'fold'+id)
-			toggleThread(id)
-			wait.swap(moar)
-		}
-
-	if($('#fold'+id).length >0) {
-		toggleThread(id)
-	}
-
+   var replace =
+      function (o,n) {
+	 n.reflink().filter(':first').after(
+	    $.ui.controlLink(
+	       '[|Свернуть обратно|]',
+	       function () {
+		  toggleThread(id)
+	       })
+	 )
+	 o.attr('id', 'fold'+id)
+	 toggleThread(id)
+	 wait.swap(moar)
+      }
+   
+   if($('#fold'+id).length >0) {
+      toggleThread(id)
+   }
+   
    var o = $('#'+id)
-	var url = o.reflink().find('a').attr('href').split('#')[0]
-	var moar = o.moar()
-	var wait = $('<span>Загрузка треда...</span>')
-	moar.swap(wait)
-	var cached = $('#cache #'+id)
-	if(cached.attr('id')) {
-		setTimeout(
-			function () {
-				replace(o, cached)
-			}, 0)
-	} else {
-		o.ajaxThread(
-			url,
-			function(e) {
-				var ue = e.find('#'+id)
-				ue.appendTo('#cache')
-				replace(o,ue)
-      })
-	}
+   var url = o.reflink().find('a').attr('href').split('#')[0]
+   var moar = o.moar()
+   var wait = $('<span>Загрузка треда...</span>')
+   moar.swap(wait)
+   var cached = $('#cache #'+id)
+   if(cached.attr('id')) {
+      setTimeout(
+	 function () {
+	    replace(o, cached)
+	 }, 0)
+   } else {
+      o.ajaxThread(
+	 url,
+	 function(e) {
+	    apply_me(undefined, e)
+	    var ue = e.find('#'+id)
+	    ue.appendTo('#cache')
+	    replace(o,ue)
+	 })
+   }
 }
 
 /* */
@@ -121,14 +128,14 @@ function swapAttr(obj, a1, a2) {
 function refold(id) { 
    var obj = $('#'+id).image()
    var ofs = obj.offset();
-	if(!$("#itiz"+id).attr('id')) {
-		obj.one("load",
-			function () {
-				$('#itiz'+id).hide()
-			})
-		/* TODO: Move this HTML to jQuery.imgboard.ui */
-		obj.parents('a').before('<div style="position:absolute;top:'+ofs.top+'px;left:'+ofs.left+'px;z-index:99;background-color:maroon;color:white;padding:2px;font-weight:bold;" id="itiz'+id+'">Загрузка...</div>')
-	} 
+   if(!$("#itiz"+id).attr('id')) {
+      obj.one("load",
+	      function () {
+		 $('#itiz'+id).hide()
+	      })
+      /* TODO: Move this HTML to jQuery.imgboard.ui */
+      obj.parents('a').before('<div style="position:absolute;top:'+ofs.top+'px;left:'+ofs.left+'px;z-index:99;background-color:maroon;color:white;padding:2px;font-weight:bold;" id="itiz'+id+'">Загрузка...</div>')
+   } 
    swapAttr(obj, 'style', 'altstyle')
    swapAttr(obj, 'src', 'altsrc')
    return false;
@@ -159,29 +166,28 @@ var ist = {};
 
 function intelli(x,y,id,url) {
    clearTimeout(ist[id])
-	ist[id] = setTimeout(
-		function () {
-			var obj = $.ui.preview(id,x,y,url,
-										  db.config.intelliSense.ajax[0])
-			if(obj) {
-				apply_me(undefined,obj) 
-			} else {
-				return
-			}
-			obj.attr('id','is'+id);
-			obj.attr('refid', id);
-			apply_isense(obj)
-			obj.css('z-index', z++);
-			$('body').prepend(obj);
-		},
-		db.config.intelliSense.raiseup[0])
+   ist[id] = setTimeout(
+      function () {
+	 var obj = $.ui.preview(id,x,y,url,
+				db.config.intelliSense.ajax[0],
+				function (e) { apply_me(undefined, e) })
+	 if(!obj) {
+	    return 
+	 } 
+	 obj.attr('id','is'+id);
+	 obj.attr('refid', id);
+	 apply_isense(obj)
+	 obj.css('z-index', z++);
+	 $('body').prepend(obj);
+      },
+      db.config.intelliSense.raiseup[0])
 }
 
 function outelli(id) {
-	clearTimeout(ist[id])
+   clearTimeout(ist[id])
    ist[id] = setTimeout(
       function () {
-			$('#is'+id).remove()
+	 $('#is'+id).remove()
       }, 
       db.config.intelliSense.fallback[0])
 }
@@ -202,28 +208,28 @@ function sage(env) {
 apply_me = function (env, messages) {
    messages.posts().each(
       function () {
-			var obj = $(this)
+	 var obj = $(this)
          var pid = $(this).pid()
-			if(db.config.hiding.posts[0]) {
-				obj.reflink().after($.ui.controlLink(
-					'[|X|]',
-					function () { toggle(pid) }
-				))
-				if(!db.config.hiding.goodStealth[0]) {
-					$(this).before($.ui.tizer(
-						pid,
-						$.ui.controlLink(
-							'Пост ' + pid.replace('p','№') + ' ' +
-								' скрыт. [|Показать|]',
-							function () { toggle(pid) }
-						)
-						,false))
-				}
+	 if(db.config.hiding.posts[0]) {
+	    obj.reflink().after($.ui.controlLink(
+	       '[|X|]',
+	       function () { toggle(pid) }
+	    ))
+	    if(!db.config.hiding.goodStealth[0]) {
+	       $(this).before($.ui.tizer(
+		  pid,
+		  $.ui.controlLink(
+		     'Пост ' + pid.replace('p','№') + ' ' +
+			' скрыт. [|Показать|]',
+		     function () { toggle(pid) }
+		  )
+		  ,false))
+	    }
 			}
-			/* Censore */
-			if(db.config.censore.v[0]) {
-				var censf = false;
-				/*censf = censf || db.config.censore.username[0] &&
+	 /* Censore */
+	 if(db.config.censore.v[0]) {
+	    var censf = false;
+	    /*censf = censf || db.config.censore.username[0] &&
 					obj.msgusername().search(db.config.censore.username[0])
 				censf = censf || db.config.censore.title[0] &&
 					obj.msgtitle().search(db.config.censore.title[0])
@@ -233,61 +239,74 @@ apply_me = function (env, messages) {
 					obj.msg().search(db.config.censore.msg[0])
 				censf = censf || db.config.censore.total[0] &&
 					obj.text().search(db.config.censore.total[0]) */
-				if(censf) {
-						db.hidden[pid]=1
-				}
-			}
-			if (db.config.forwardReferences.v[0] && $.references[pid]) {
-				if(db.config.forwardReferences.asDog[0]) {
-					obj.reflink().append('@'+$.references[pid].length)
-				} else {
-					var refs = [];
-					for (j in $.references[pid]) {
-						refs.push($.ui.anchor($.references[pid][j]))
-					}
-					obj.msg().before($.ui.refs(refs.join(', ')+'.'))
-				}
-			}
+	    if(censf) {
+	       db.hidden[pid]=1
+	    }
+	 }
+	 if (db.config.forwardReferences.v[0] && $.references[pid]) {
+	    if(db.config.forwardReferences.asDog[0]) {
+	       obj.reflink().append('@'+$.references[pid].length)
+	    } else {
+	       var refs = [];
+	       for (j in $.references[pid]) {
+		  refs.push($.ui.anchor($.references[pid][j]))
+	       }
+	       obj.msg().before($.ui.refs(refs.join(', ')+'.'))
+	    }
+	 }
       }
    )
    
    db.config.hiding.threads[0] &&
       messages.threads().each(
          function () {
-				var subj = $(this)
-				var tid = subj.tid()
-
+	    var subj = $(this)
+	    var tid = subj.tid()
+	    
             $(this).reflink().filter(':first').after($.ui.controlLink(
-					'[|Скрыть тред|]',
-					function () { toggle(tid) }
-				))
+	       '[|Скрыть тред|]',
+	       function () { toggle(tid) }
+	    ))
             if(!db.config.hiding.goodStealth[0]) {
-					if(db.config.hiding.citeLength[0]) {
-						var cite = '(' + 
-							$(this).msg().text().slice(0, db.config.hiding.citeLength[0] - 1) + 
-							'...)'
-					} else { var cite = '' }
+	       if(db.config.hiding.citeLength[0]) {
+		  var cite = '(' + 
+		     $(this).msg().text().slice(0, db.config.hiding.citeLength[0] - 1) + 
+		     '...)'
+	       } else { var cite = '' }
                $(this).before($.ui.tizer(
 						tid,
-						$.ui.controlLink(
-							'Тред ' + tid.replace('t','№') + ' ' + cite + 
-								' скрыт. [|Показать|]',
-							function () { toggle(tid) }
-						)
-						,true))
-				}
-				var e = $(this).moar()
-				if(e) {
-					/* Thread unfolding */
-					e.append(
-						$.ui.controlLink(
-							'[|Раскукожить|]',
-							function () { unfold(tid) }
-						))
-					e.clone(true).appendTo($(this).posts().filter(':last'))
-					/* Postform */
-					/* e.append('[<a href="javascript:toggleReplyForm(\''+tid+'\')">Ответить</a>]') */
-				}
+		  $.ui.controlLink(
+		     'Тред ' + tid.replace('t','№') + ' ' + cite + 
+			' скрыт. [|Показать|]',
+		     function () { toggle(tid) }
+		  )
+		  ,true))
+	    }
+	    var moar = $(this).moar()
+	    if (moar && db.config.unfoldThreads[0]) {
+	       /* Thread unfolding */
+	       moar.append(
+		  $.ui.controlLink(
+		     '[|Развернуть|]',
+		     function () { unfold(tid) }
+		  ))
+	       var moar2 = moar.clone(true)
+	       if (db.config.replyForm[0]) {
+		  moar2.append(
+		     $.ui.controlLink(
+			' [|Ответить|]',
+			function () { showReplyForm(tid) }
+		     ))}
+	       moar2.appendTo($(this).posts().filter(':last'))
+	    }
+	    if (db.config.replyForm[0]) {
+	       subj.reflink().each(
+		  function () {
+		     var pid = $(this).pid()
+		     $(this).find('a').click(
+			function () { showReplyForm(tid, pid); return false; }
+		     )}
+	       )}
          }
       )
    
@@ -295,17 +314,19 @@ apply_me = function (env, messages) {
       messages.image().each(
          function () {
             $(this).a().click(
-					function () {
-						return refold($(this).pid())
-					}
-				).removeAttr('target')
+	       function () {
+		  return refold($(this).pid())
+	       }
+	    ).removeAttr('target')
          }
-      ) 
+      )
+
    db.config.intelliSense.v[0] &&
       messages.anchors().each(
          function () { apply_isense($(this)) }
       )
-   
+    
+
    for(var objId in db.hidden) {
       /* It's an low level alternative of toggle method
           * TODO Rewrite toggle for suitable usage in this
@@ -314,20 +335,26 @@ apply_me = function (env, messages) {
       db.config.goodStealth ||
          messages.find('#tiz'+objId).css('display','block')
    }
-	
+   
    if(!env) { /* Board environment setup 
                  no messages processing below this*/
       return
    }
 
+   if($.fn.isInThread()) {
+      var txt = messages.posts().filter(':first').
+	 msg().text().slice(0, db.config.hiding.citeLength[0] - 1)
+      $('title').append(' &#8212; ' + txt)
+   }
+   
    db.config.sage.button[0] &&
       env.email().after(
-			$.ui.controlLink(
-				' <b>[</b>|<b>Sage</b>|<b>]</b>',
-				function () { sage()	}
-			)
-		)
-
+	 $.ui.controlLink(
+	    ' <b>[</b>|<b>Сажа</b>|<b>]</b>',
+	    function () { sage()	}
+	 )
+      )
+   
    db.config.sage.sageMan[0] &&
       sage(env) 
    
@@ -339,16 +366,16 @@ apply_me = function (env, messages) {
    captcha.keypress(
       function (key) {
 			var recoded = $.xlatb[String.fromCharCode(key.which).toLowerCase()]
-			if (recoded) {
-				/* Not a perfect piece of code, but 
+	 if (recoded) {
+	    /* Not a perfect piece of code, but 
                   i'm thank you eurekafag (: */
-				var caret = key.target.selectionStart
-				var str = captcha.val()
-				captcha.val(str.substring(0,caret) + recoded + str.substring(caret))
-				key.target.selectionStart = caret+1
+	    var caret = key.target.selectionStart
+	    var str = captcha.val()
+	    captcha.val(str.substring(0,caret) + recoded + str.substring(caret))
+	    key.target.selectionStart = caret+1
 				key.target.selectionEnd = caret+1
-				return false
-			}
+	    return false
+	 }
       }
    )
 }
