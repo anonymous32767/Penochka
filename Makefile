@@ -3,29 +3,19 @@ all: compiled
 
 compiled:
 	cd src; make;
-	mv src/penochka.opera.js penochka.opera.js
-	mv src/penochka.user.js penochka.user.js
+	mv src/penochka.js penochka.js
 
 clean:
 	cd src; make clean
-	rm -f penochka.opera.js
-	rm -f penochka.user.js
+	rm -f penochka.js
 
 build: 	
 	make compiled
-	git add penochka.opera.js
-	git add penochka.user.js
+	git add penochka.js
 	git commit -a -m "$(m)"
-	git tag -a $(v)
+	git tag -a $(v) -m "Build $(v)"
 	git push --tags github master
 	make clean
-	git rm -f penochka.opera.js
-	git rm -f penochka.user.js
+	git rm -f penochka.js
 	git commit -a -m "Build $(v) cleanup."
 	git push github master
-
-test: compiled
-	cp -f penochka.opera.js $$PEN_OPR_TST
-
-privoxy.js: penochka.opera.js
-	perl -MMIME::Base64 -0777 -ne "print\"\t'data:text/javascript;base64,\".encode_base64(\$$_,'').\"\',\n\"" < $< > $@

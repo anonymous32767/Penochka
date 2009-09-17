@@ -43,7 +43,7 @@ var defaults = {
 		asDog: [false, 'В виде собаки']
 	},
    unfoldImages: [true,'Развертывать изображения'],
-   unfoldThreads: [false, 'Кнопка развертывания треда'],
+   unfoldThreads: [true, 'Кнопка развертывания треда'],
    replyForm: [true, 'Форма ответа в конце треда'],
    intelliSense: {
       v: [true,'<b class="penBig">Intellisense</b>'],
@@ -61,7 +61,7 @@ var defaults = {
    hiding: {
       v: [undefined, '<b class="penBig">Скрытие</b>'],
       threads: [true,'Скрытие потоков'],
-		citeLength: [15,'Показывать цитату из оп-поста, букв'],
+		citeLength: [35, 'Показывать цитату из оп-поста, букв'],
       posts: [false,'Скрытие сообщений'],
       goodStealth: [false,'Аккуратно скрывать']
    },

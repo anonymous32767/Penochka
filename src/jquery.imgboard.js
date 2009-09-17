@@ -149,32 +149,32 @@ function dvach () {
    jQuery.fn.extend({
       anchor:
       function() {
-			return $(this).find('a[name]')   
+	 return $(this).find('a[name]')   
       },
       
       image:
       function() {
-			return $(this).find('a img')   
+	 return $(this).find('a img')   
       },
       
       imageinfo:
       function() {
-			return $(this).find('span.filesize')   
+	 return $(this).find('span.filesize')   
       },
       
       moar:
       function() {
-			return $(this).find('span.omittedposts')
+	 return $(this).find('span.omittedposts')
       },
       
       msg:
       function() {
-			return $(this).find('blockquote:first')
+	 return $(this).find('blockquote:not(.penRefs):first')
       },
       
       reflink:
       function() {
-			return $(this).find('span.reflink')   
+	 return $(this).find('span.reflink')   
       },
       
       msgtitle:
@@ -284,8 +284,11 @@ function dvach () {
 	 var tnum = tid.replace('t','')
 	 var form = $(this)
 	 var lnum = $('#'+tid).find('.penPost:last').pid().replace('p','')
-	 form.find('input[name=gb2][value=board]').removeAttr('checked')
-	 form.find('input[name=gb2][value=thread]').attr('checked','checked')
+	 /* Reserved: manually switch to thread gb2
+ 
+         form.find('input[name=gb2][value=board]').removeAttr('checked')
+	 form.find('input[name=gb2][value=thread]').attr('checked','checked') */
+	 form.find('div.rules').remove()
 	 form.prepend('<input type="hidden" name="parent" value="' + tnum + '" />')
 	 var captcha = form.find('#imgcaptcha')
 	    captcha.attr(
@@ -340,35 +343,36 @@ function dvach () {
       },
       refs :
       function (content) {
-			return '<blockquote><small>Ссылки '+content+'</small></blockquote>'
+			return '<blockquote class="penRefs"><small>Ссылки '+content+'</small></blockquote>'
       },
       preview :
       function (id,x,y,url, use_ajax, f) {
-			if($('#is'+id).attr('id')) {
-				return false;
-			}
-			var obj = $('#'+id).clone()
-			if (!obj.attr('id')) {
-				if(use_ajax) {
-					obj.ajaxThread(
-						url,
-						function (e) {
-						   $('#cache').append(e)
-						   $('#is'+id).remove()
-						   f(e)
-						   intelli(x,y,id,url)
-						})
-					obj = $('<div>Загрузка...</div>')
-				} else {
-					obj = $('<div>Недосягаемо.</div>')
-				}
-			}
-			process(obj) 
-			obj.anchor().remove()
-			obj.addClass('reply')
-			obj.attr('style','position:absolute; top:' + y + 
-						'px; left:' + x + 'px;display:block;')
-			return obj
+	 if($('#is'+id).attr('id') || !id) {
+	    return false;
+	 }
+	 var obj = $('#'+id).clone()
+	 if (!obj.attr('id')) {
+	    if(use_ajax) {
+	       obj.ajaxThread(
+		  url,
+		  function (e) {
+		     f(e)
+		     $('#cache').append(e)
+		     $('#is'+id).remove()
+		     intelli(x,y,id,url)
+		  })
+	       obj = $('<div>Загрузка...</div>')
+	    } else {
+	       obj = $('<div>Недосягаемо.</div>')
+	    }
+	 }
+	 process(obj)
+	 f(obj)
+	 obj.anchor().remove()
+	 obj.addClass('reply')
+	 obj.attr('style','position:absolute; top:' + y + 
+		  'px; left:' + x + 'px;display:block;')
+	 return obj
       },
       controlLink : 
       function(title, handler) {
@@ -423,7 +427,7 @@ function dvach () {
 		)
       $('body').append('<div id="cache" style="display:none" />')
       addStyle(css)
-		f(obj, cloned)
+      f(obj, cloned)
       threadsRaw.replaceWith(cloned); 
    };
 }/* end of 2ch */
