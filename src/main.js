@@ -207,12 +207,16 @@ function sage(env) {
    if(!env) {
       env = $('body')
    }
-   env.find(iom.form.email).val('sage')
+   var email = env.find(iom.form.email)
+   email.val(email.val() == 'sage' ? '' : 'sage')
    if (db.config.sage.inAllFields[0]) {
-      env.find(iom.form.poster).val('sage')
-      env.find(iom.form.title).val('sage')
+      var pstr = env.find(iom.form.poster)
+      pstr.val(pstr.val() == 'sage' ? '' : 'sage')
+      var ttl = env.find(iom.form.title)
+      ttl.val(ttl.val() == 'sage' ? '' : 'sage')
+      var msg = env.find(iom.form.message)
       db.config.sage.capsBold[0] &&
-         env.find(iom.form.message).val('**SAGE**')
+	 ttl.val(ttl.val() == '**SAGE**' ? '' : '**SAGE**')
    }
 }
 
@@ -360,11 +364,11 @@ apply_me = function (env, messages) {
       return
    }
 
-   if($(iom.form.parent).count > 0) {
+   /*if($(iom.form.parent).count > 0) {
       var txt = messages.find(iom.thread.message).
          text().slice(0, db.config.hiding.citeLength[0] - 1)
       $('title').append(' &#8212; ' + txt)
-   }
+   }*/
 
    db.config.sage.button[0] &&
       env.find(iom.form.email).after(
