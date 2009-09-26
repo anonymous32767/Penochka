@@ -303,19 +303,22 @@ var db = {
 }
 
 function settingsShow () {
-   var e = $('#penSettings');
+   var e = $('#penSettings')
    if (!e.find('table').is('table')) {
       e.append(db.genForm())
    }
    e.show();
+   return false;
 }
 
 function settingsHide() {
    $('#penSettings').hide();
+   return false;
 }
 
 function settingsToggle(e) {
    $(e).parents('table:first').find('tr:last').toggle()
+   return false;
 }
 
 function settingsDefault(defs, sid) {

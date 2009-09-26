@@ -1,5 +1,5 @@
 source = jquery.min.js jquery.cookie.js jquery.json.js\
-	 jquery.imgboard.js settings.js main.js
+	 jquery.imgboard.js settings.js  main.js
 
 all: penochka.js 
 

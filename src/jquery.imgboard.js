@@ -107,7 +107,7 @@ iom = {
       user: 'input[name=akane]',
       email: 'input[name=nabiki]',
       title: 'input[name=kasumi]',
-      postmessage: 'textarea[name=shampoo]',
+      message: 'textarea[name=shampoo]',
       file: 'input[name=file]',
       turtest: 'input[name=captcha]',
       turimage: '#imgcaptcha',
@@ -305,10 +305,17 @@ function dvach () {
    };
 
    return function (obj,f) {
-      const css = '#penOptions {padding: 8px} .penVal, .penLoc, .penDef { display:block; text-align:right; float: right;position: relative; margin:3px; margin-left: 8px; height:26px; line-height:1;} .penRow {display: block; position: relative; clear: both; } .penTab {margin-left: 22px} #penOptions input { height: 24px;} .penBig {font-size: 16pt}';
+      const css = '#penSetttings {padding: 8px} .penVal, .penLoc, .penDef { display:block; text-align:right; float: right;position: relative; margin:3px; margin-left: 8px; height:26px; line-height:1;} .penRow {display: block; position: relative; clear: both; } .penTab {margin-left: 22px} #penOptions input { height: 24px;} .penBig {font-size: 16pt}';
 
       var threadsRaw = obj.find('#delform');
       var cloned = threadsRaw.clone()
+
+      $('div.adminbar:first').append(
+         $.ui.controlLink(
+            ' - [|Настройки|]',
+            function () { settingsShow() }
+         )
+      )
 
       parse(cloned);
       process(cloned);
@@ -318,7 +325,7 @@ function dvach () {
          append(
             $.ui.controlLink(
                '[|Сохранить и закрыть|]',
-               function () { db.saveCfg(defaults);settingsHide() }
+               function () { db.saveCfg(defaults); settingsHide() }
             ))
       settings.
          append($('<h1 style="float:left;margin:0;padding:0;" class="logo">Два.ч &#8212; Настройки</h1>')).
@@ -327,12 +334,6 @@ function dvach () {
 
       $('body').prepend(settings)
 
-      $(iom.menu).append(
-         $.ui.controlLink(
-            ' - [|Настройки|]',
-            function () { settingsShow() }
-         )
-      )
       $('body').append('<div id="cache" style="display:none" />')
       addStyle(css)
       f(obj, cloned)
