@@ -42,6 +42,14 @@ function addStyle( css ) {
       style.appendChild( document.createTextNode(css) );
    return style;
 }
+/* Some useful stuff */
+jQuery.fn.extend({
+   /* Finds element parent which has class passed in argument. */
+   findc:
+   function(cls) {
+      return $(this).is(cls) ? $(this) : $(this).parents(cls)
+   }
+})
 
 /* */
 /*
@@ -71,6 +79,46 @@ var blatx =
    Now function destructive - it's overrides native id's of
    elements.
 */
+
+iom = {
+   tid: '.penThread',
+   pid: '.penPost',
+   post: {
+      anchor: 'a[name]',
+      image: 'a img',
+      imageinfo: 'span.filesize',
+      abbr: 'div.abbrev',
+      abbrlink: 'div.abbrev a',
+      message: 'blockquote:not(.penRefs):first',
+      ref: 'span.reflink',
+      reflink: 'span.reflink a',
+      title: 'span.replytitle, span.filetitle',
+      poster: 'span.commentpostername, span.postername',
+      email: 'span.commentpostername a, span.postername a'
+   },
+   thread: {
+      ref: 'span.reflink:first',
+      reflink: 'span.reflink:first a',
+      message: 'blockquote:not(.penRefs):first',
+      moar: 'span.omittedposts',
+      eot: '.penPost:last'
+   },
+   form: {
+      user: 'input[name=akane]',
+      email: 'input[name=nabiki]',
+      title: 'input[name=kasumi]',
+      postmessage: 'textarea[name=shampoo]',
+      file: 'input[name=file]',
+      turtest: 'input[name=captcha]',
+      turimage: '#imgcaptcha',
+      password: 'input[name=password]',
+      parent: 'input[name=parent]'
+   },
+   anchors: 'blockquote a[onclick]',
+   menu: 'div.adminbar',
+   options: '#penOptions',
+   postform: '#postform'
+}
 
 function dvach () {
    function parse (cloned) {
@@ -111,189 +159,60 @@ function dvach () {
    }
 
    function process(cloned) {
-      cloned.anchors().each(
+      cloned.find(iom.anchors).each(
          function () {
-            var a = $(this).attr('href').split('#')
+	    var subj = $(this)
+            var a = subj.attr('href').split('#')
             var refurl = a[0]
             var refid = a[1]
             if (!refid) {
                // Op post workaround
-               refid = $(this).attr('href').split('.')[0].split('/').reverse()[0]
+               refid = subj.attr('href').split('.')[0].split('/').reverse()[0]
             }
             var pid = 'p' + refid
-            $(this).attr('refid', pid)
-            $(this).attr('refurl', refurl)
+	    var spid = subj.findc(iom.pid).attr('id')
+            subj.attr('refid', pid)
+            subj.attr('refurl', refurl)
             if(!$.references[pid]) {
                $.references[pid] = []
             }
-            $.references[pid][$(this).pid()]=$(this).pid()
+            $.references[pid][spid]=spid
          })
-      cloned.moar().each(
+      cloned.find(iom.thread.moar).each(
          function () {
             $(this).html($(this).text().split('.')[0]+'. ')
          })
-      cloned.image().each(
+      cloned.find(iom.post.image).each(
          function () {
-            var altsrc = $(this).a().attr('href')
-            var w = $(this).attr('width')
-            var h = $(this).attr('height')
-            $(this).attr('altsrc',altsrc)
-            $(this).attr('style','height: '+h+'px; width:'+w+'px;')
-            $(this).attr('altstyle','display:block;clear: both;min-height: '+h+'px; min-width: '+w+'px')
-            $(this).removeAttr('height')
-            $(this).removeAttr('width')
+	    var subj = $(this)
+            var altsrc = subj.a().attr('href')
+            var w = subj.attr('width')
+            var h = subj.attr('height')
+            subj.attr('altsrc',altsrc)
+            subj.attr('style','height: '+h+'px; width:'+w+'px;')
+            subj.attr('altstyle','display:block;clear: both;min-height: '+h+'px; min-width: '+w+'px')
+            subj.removeAttr('height')
+            subj.removeAttr('width')
          }
       )
    }
 
    jQuery.fn.extend({
-      anchor:
-      function() {
-         return $(this).find('a[name]')
-      },
-
-      image:
-      function() {
-         return $(this).find('a img')
-      },
-
-      imageinfo:
-      function() {
-         return $(this).find('span.filesize')
-      },
-
-      moar:
-      function() {
-         return $(this).find('span.omittedposts')
-      },
-
-      msg:
-      function() {
-         return $(this).find('blockquote:not(.penRefs):first')
-      },
-
-      reflink:
-      function() {
-         return $(this).find('span.reflink')
-      },
-
-      msgtitle:
-      function() {
-         return $(this).find('span.replytitle')
-      },
-
-      msgusername:
-      function() {
-         return $(this).find('span.commentpostername')
-      },
-
-      msgemail:
-      function() {
-         return $(this).find('span.commentpostername a').attr('href')
-      },
-
-      pid:
-      function() {
-         if ($(this).hasClass('penPost')) {
-            return $(this).attr('id')
-         } else {
-            return $(this).parents('.penPost').attr('id')
-         }
-      },
-
-      tid:
-      function() {
-         if ($(this).hasClass('penThread')) {
-            return $(this).attr('id')
-         } else {
-            return $(this).parents('.penThread').attr('id')
-         }
-      },
-
-      anchors:
-      function() {
-         return $(this).find('blockquote a[onclick]')
-      },
-
-      threads:
-      function() {
-         if ($(this).hasClass('penThread')) {
-            return $(this)
-         } else {
-            return $(this).find('.penThread')
-         }
-      },
-
-      posts:
-      function() {
-         return $(this).find('.penPost')
-      },
-
-      references:
-      function(pid) {
-         return $(this).find("a[refid='"+pid+"']")
-      },
-
-      menu:
-      function() {
-         return $(this).find('div.adminbar')
-      },
-
-      options:
-      function() {
-         return $(this).find('#penOptions')
-      },
-      postform:
-      function () {
-         return $(this).find('#postform')
-      },
-      user:
-      function () {
-         return $(this).find('input[name=akane]')
-      },
-      email:
-      function () {
-         return $(this).find('input[name=nabiki]')
-      },
-      title:
-      function () {
-         return $(this).find('input[name=kasumi]')
-      },
-      postmessage:
-      function () {
-         return $(this).find('textarea[name=shampoo]')
-      },
-      file:
-      function () {
-         return $(this).find('input[name=file]')
-      },
-      captcha:
-      function () {
-         return $(this).find('input[name=captcha]')
-      },
-      passwd:
-      function () {
-         return $(this).find('input[name=password]')
-      },
-      isInThread:
-      function () {
-         return $('#postform:first input[name=parent]').val()
-      },
       tuneForThread:
       function (tid) {
          var tnum = tid.replace('t','')
          var form = $(this)
-         var lnum = $('#'+tid).find('.penPost:last').pid().replace('p','')
+         var lnum = $('#' + tid + ' ' + iom.thread.eot).findc(iom.pid).attr('id').replace('p','')
          /* Reserved: manually switch to thread gb2
 
          form.find('input[name=gb2][value=board]').removeAttr('checked')
          form.find('input[name=gb2][value=thread]').attr('checked','checked') */
          form.find('div.rules').remove()
          form.prepend('<input type="hidden" name="parent" value="' + tnum + '" />')
-         var captcha = form.find('#imgcaptcha')
-         captcha.attr(
+         var turingTest = form.find(iom.form.turimage)
+         turingTest.attr(
             'src',
-            captcha.attr('src').
+            turingTest.attr('src').
                replace(/key=\S*&/, "key=res" + tnum + "&").
                replace(/dummy=\S*/, "dummy=" + lnum)
          )
@@ -328,7 +247,7 @@ function dvach () {
       },
       refs :
       function (content) {
-         return '<blockquote class="penRefs"><small>Ссылки '+content+'</small></blockquote>'
+         return '<blockquote class="penRefs"><small>Ссылки '+content+'.</small></blockquote>'
       },
       preview :
       function (id,x,y,url, use_ajax, f) {
@@ -353,11 +272,15 @@ function dvach () {
          }
          process(obj)
          f(obj)
-         obj.anchor().remove()
+         obj.find(iom.post.anchor).remove()
          obj.addClass('reply')
          obj.attr('style','position:absolute; top:' + y +
                   'px; left:' + x + 'px;display:block;')
          return obj
+      },
+      loadTizer: function (x, y, id) {
+         return $('<div style="position:absolute;top:' + y +
+                  'px;left:' + x + 'px;z-index:99;background-color:maroon;color:white;padding:2px;font-weight:bold;" id="itiz' + id + '">Загрузка...</div>')
       },
       controlLink :
       function(title, handler) {
@@ -404,7 +327,7 @@ function dvach () {
 
       $('body').prepend(settings)
 
-      $('div.adminbar:first').append(
+      $(iom.menu).append(
          $.ui.controlLink(
             ' - [|Настройки|]',
             function () { settingsShow() }

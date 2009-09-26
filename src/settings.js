@@ -1,47 +1,47 @@
 /*
  * vim: ts=3 sts=3 cindent expandtab
  * jquery.imgboard - jquery extensions for imageboards.
- * 
+ *
  * Copyright (c) 2009, anonymous
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are 
+ * modification, are permitted provided that the following conditions are
  * met:
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the anonymous nor the names of its contributors 
- *       may be used to endorse or promote products derived from this 
+ *     * Neither the name of the anonymous nor the names of its contributors
+ *       may be used to endorse or promote products derived from this
  *       software without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY anonymous ''AS IS'' AND ANY  EXPRESS OR 
+ *
+ * THIS SOFTWARE IS PROVIDED BY anonymous ''AS IS'' AND ANY  EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
- * IN NO EVENT SHALL anonymous BE LIABLE FOR ANY DIRECT, INDIRECT, 
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL anonymous BE LIABLE FOR ANY DIRECT, INDIRECT,
  * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
  * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR 
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
  * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 function isEmpty(obj) {
-    for(var prop in obj) {
-        if(obj.hasOwnProperty(prop))
-            return false;
-    }
-    return true;
+   for(var prop in obj) {
+      if(obj.hasOwnProperty(prop))
+         return false;
+   }
+   return true;
 }
 
 var defaults = {
    forwardReferences: {
-		v: [true, 'Карта дискуссии'],
-		asDog: [false, 'В виде собаки']
-	},
+      v: [true, 'Карта дискуссии'],
+      asDog: [false, 'В виде собаки']
+   },
    unfoldImages: [true,'Развертывать изображения'],
    unfoldThreads: [true, 'Кнопка развертывания треда'],
    replyForm: [true, 'Форма ответа в конце треда'],
@@ -61,12 +61,12 @@ var defaults = {
    hiding: {
       v: [undefined, '<b class="penBig">Скрытие</b>'],
       threads: [true,'Скрытие потоков'],
-		citeLength: [35, 'Показывать цитату из оп-поста, букв'],
+      citeLength: [35, 'Показывать цитату из оп-поста, букв'],
       posts: [false,'Скрытие сообщений'],
       goodStealth: [false,'Аккуратно скрывать']
    },
    state: {
-      v: [undefined,'<b class="penBig">Хранение данных</b>'],   
+      v: [undefined,'<b class="penBig">Хранение данных</b>'],
       constPasswd: ['', 'Постоянный пароль'],
       expirationTime: [3,'Хранить информацию о скрытых тредах, дн.']
    },
@@ -87,26 +87,25 @@ var db = {
    },
    getval:
    function (pfx,obj) {
-      var o = obj
       for(var i in pfx) {
-	 o = o[pfx[i]]
-	 if(!o) {
-	    return undefined;
-	 }
+         obj = obj[pfx[i]]
+         if(!obj) {
+            return undefined;
+         }
       }
-      return o
+      return obj
    },
    setval:
    function (pfx,o,v) {
       var hd = pfx.slice(0,1)[0]
       var tl = pfx.slice(1)
       if(tl[0]) {
-	 if (!o[hd]) {
-	    o[hd] = {}
-	 }
-	 db.setval(tl,o[hd],v)
+         if (!o[hd]) {
+            o[hd] = {}
+         }
+         db.setval(tl,o[hd],v)
       } else {
-	 o[hd] = v
+         o[hd] = v
       }
    },
    getinp:
@@ -126,11 +125,11 @@ var db = {
       var e = $('#penSet' + key)
       switch (typeof val) {
       case 'boolean':
-			if (val) {
-				e.attr('checked','checked')
-			} else {
-				e.removeAttr('checked')
-			}
+         if (val) {
+            e.attr('checked','checked')
+         } else {
+            e.removeAttr('checked')
+         }
          break;
       case 'number':
       case 'string':
@@ -138,173 +137,169 @@ var db = {
          break;
       }
    },
-   __iter: 
+   __iter:
    function (list, f, p) {
       for (var key in list) {
-	 var pfx = p.slice(); /* slice is a stupid array copy in js */
-	 pfx.push(key)
-	 if (list[key] instanceof Array) {
-	    f(list[key],pfx)
-	 } else {
-	    this.__iter(list[key],f,pfx)
-	 }
+         var pfx = p.slice(); /* slice is a stupid array copy in js */
+         pfx.push(key)
+         if (list[key] instanceof Array) {
+            f(list[key],pfx)
+         } else {
+            this.__iter(list[key],f,pfx)
+         }
       }
    },
-   loadCfg: 
-      function (defs) {
-	 var gcfg = $.evalJSON($.cookie('penCfgGlobal')) || {};
-	 var lcfg = $.evalJSON($.cookie('penCfg')) || {};
-         this.hidden = $.evalJSON($.cookie('penHidden')) || {};
-	 var i = 0;
-	 var sv = this.setval;
-	 var cfg = {};
-	 this.__iter(
-	    defs,
-	    function (v,pfx) {
-	       var nv = []
-	       nv[0] = v[0]
-	       nv[1] = v[1]
-	       sv(pfx, cfg, nv)
-	       nv.push(i);
-	       if (typeof lcfg[i] != 'undefined') {
-				 nv[0] = lcfg[i]
-				 nv.push('local')
-	       } else if (typeof gcfg[i] != 'undefined') {
-				 nv[0] = gcfg[i]
-	       }
-	       i++
-	    },
-	    []
-	 )
-	 this.config = cfg
-      },
-   saveCfg: 
-      function (defs) {
-			var lcfg = [];
-			var gcfg = [];
-			db.__iter(
-				db.config,
-				function (v,pfx) {
-					var iv = db.getinp(v[2])
-					var dv = db.getval(pfx,defs)[0]
-					if($('#penSetLoc' + v[2]).attr('checked') == 'checked') {
-						lcfg[v[2]] = iv
-					} else {
-						if(iv != dv) {
-							gcfg[v[2]] = iv
-							lcfg.splice(v[2], 1)
-						} else {
-							gcfg.splice(v[2], 1)
-							lcfg.splice(v[2], 1)
-						}
-					}
-				},
-				[]
-			)
-			if(!isEmpty(gcfg)) {
-            $.cookie('penCfgGlobal', $.toJSON(gcfg), {path: '/', expires: 9000})
-			} else {
-				/* Negative expiration time deletes cookie */
-				$.cookie('penCfgGlobal', '', {path: '/', expires: -1})
-			}
-			if(!isEmpty(lcfg)) {
-            $.cookie('penCfg', $.toJSON(lcfg), {expires: 9000})
-			} else {
-				/* Here too */
-				$.cookie('penCfg', '', {expires: -1})
-			}
-      },
+   loadCfg:
+   function (defs) {
+      var gcfg = $.evalJSON($.cookie('penCfgGlobal')) || {};
+      var lcfg = $.evalJSON($.cookie('penCfg')) || {};
+      this.hidden = $.evalJSON($.cookie('penHidden')) || {};
+      var i = 0;
+      var sv = this.setval;
+      var cfg = {};
+      this.__iter(
+         defs,
+         function (v,pfx) {
+            var nv = []
+            nv[0] = v[0]
+            nv[1] = v[1]
+            sv(pfx, cfg, nv)
+            nv.push(i);
+            if (typeof lcfg[i] != 'undefined') {
+               nv[0] = lcfg[i]
+               nv.push('local')
+            } else if (typeof gcfg[i] != 'undefined') {
+               nv[0] = gcfg[i]
+            }
+            i++
+         },
+         []
+      )
+      this.config = cfg
+   },
+   saveCfg:
+   function (defs) {
+      var lcfg = [];
+      var gcfg = [];
+      db.__iter(
+         db.config,
+         function (v,pfx) {
+            var iv = db.getinp(v[2])
+            var dv = db.getval(pfx,defs)[0]
+            if($('#penSetLoc' + v[2]).attr('checked') == 'checked') {
+               lcfg[v[2]] = iv
+            } else {
+               if(iv != dv) {
+                  gcfg[v[2]] = iv
+                  lcfg.splice(v[2], 1)
+               } else {
+                  gcfg.splice(v[2], 1)
+                  lcfg.splice(v[2], 1)
+               }
+            }
+         },
+         []
+      )
+      if(!isEmpty(gcfg)) {
+         $.cookie('penCfgGlobal', $.toJSON(gcfg), {path: '/', expires: 9000})
+      } else {
+         /* Negative expiration time deletes cookie */
+         $.cookie('penCfgGlobal', '', {path: '/', expires: -1})
+      }
+      if(!isEmpty(lcfg)) {
+         $.cookie('penCfg', $.toJSON(lcfg), {expires: 9000})
+      } else {
+         /* Here too */
+         $.cookie('penCfg', '', {expires: -1})
+      }
+   },
    saveState:
-      function () {
-         var out = {};
-         var t = new Date().getTime()
-         var presistentHidden = $('.penThread:visible .penPost:hidden, .penThread:hidden');
-         presistentHidden.each(
-            function () {
-               out[$(this).attr('id')] = t
-            }
-         )
-         for (var i in this.hidden) {
-            if (!out[i] && (t - this.hidden[i]) < this.config.state.expirationTime[0]*86400 && $('#'+i).is(':hidden')) {
-               out[i] = this.hidden[i]
-            }
+   function () {
+      var out = {};
+      var t = new Date().getTime()
+      var presistentHidden = $('.penThread:visible .penPost:hidden, .penThread:hidden');
+      presistentHidden.each(
+         function () {
+            out[$(this).attr('id')] = t
          }
-         this.hidden = out;
-         $.cookie('penHidden',$.toJSON(this.hidden),{expires: 9000});
-      },
+      )
+      for (var i in this.hidden) {
+         if (!out[i] && (t - this.hidden[i]) < this.config.state.expirationTime[0]*86400 && $('#'+i).is(':hidden')) {
+            out[i] = this.hidden[i]
+         }
+      }
+      this.hidden = out;
+      $.cookie('penHidden',$.toJSON(this.hidden),{expires: 9000});
+   },
    __form: "",
    genForm:
-      function () {
-         var obj = this;
-         var genf = 
-            function (desc, key, val, loc, add) {
-					var locchk = $('<span class="penLoc">')
-					var defbtn = $('<span class="penDef">')
-					var result = $('<span class="penVal">')
-					if(typeof val != 'undefined') {
-						locchk.append(
-							'<input type="checkbox" ' +
-								(loc ? 'checked="checked"' : '') +
-								'id="penSetLoc'+key+'" /> Локально')
-						defbtn.append(
-							$('<input type="button" value="По умолчанию" />').
-								click(
-									function () {
-										settingsDefault(defaults,key)
-									}))
-					}
-               switch (typeof val) {
-               case 'boolean':
-                  result.append(
-							'<input type="checkbox" id="penSet' + key + '" ' + 
-								(val ? 'checked="checked"' : ' ') + '>')
-						break;
-               case 'number':
-               case 'string':
-                  result.append(
-							'<input type="text" id="penSet' + key + '" ' + 
-								'value="' + val + '">')
-						break;
-					default:
-						break;
-					}
-					var tab = $('<div class="penRow">')
-					tab.append('<span class="penDesc">' + desc + '</span>').
-						append(defbtn).
-						append(locchk).
-						append(result)
-					//add.appendTo(tab2)
-					//tab1.appendTo(tab)
-					//$('<br clear="both" />').appendTo(tab)
-					//tab2.appendTo(tab)
-					return [tab, add ? $('<div class=penTab>').append(add) : '']
+   function () {
+      var obj = this;
+      var genf =
+         function (desc, key, val, loc, add) {
+            var locchk = $('<span class="penLoc">')
+            var defbtn = $('<span class="penDef">')
+            var result = $('<span class="penVal">')
+            if(typeof val != 'undefined') {
+               locchk.append(
+                  '<input type="checkbox" ' +
+                     (loc ? 'checked="checked"' : '') +
+                     'id="penSetLoc'+key+'" /> Локально')
+               defbtn.append(
+                  $('<input type="button" value="По умолчанию" />').
+                     click(
+                        function () {
+                           settingsDefault(defaults,key)
+                        }))
             }
-         var walk_n_gen =
-            function (list) {
-               var out = $('<span/>');
-					var t = [];
-               for (var key in list) {
-                  if (key == 'v') {
-                     continue
-                  }
-                  if (list[key] instanceof Array) { 
-                     t = genf(list[key][1], list[key][2], list[key][0], list[key][3], '')
-                  } else {
-                     t = genf(list[key].v[1], list[key].v[2], list[key].v[0], list[key].v[3], walk_n_gen(list[key]))
-                  }
-						for(var k in t) {
-							out.append(t[k])
-						}
+            switch (typeof val) {
+            case 'boolean':
+               result.append(
+                  '<input type="checkbox" id="penSet' + key + '" ' +
+                     (val ? 'checked="checked"' : ' ') + '>')
+               break;
+            case 'number':
+            case 'string':
+               result.append(
+                  '<input type="text" id="penSet' + key + '" ' +
+                     'value="' + val + '">')
+               break;
+            default:
+               break;
+            }
+            var tab = $('<div class="penRow">')
+            tab.append('<span class="penDesc">' + desc + '</span>').
+               append(defbtn).
+               append(locchk).
+               append(result)
+            return [tab, add ? $('<div class=penTab>').append(add) : '']
+         }
+      var walk_n_gen =
+         function (list) {
+            var out = $('<span/>');
+            var t = [];
+            for (var key in list) {
+               if (key == 'v') {
+                  continue
                }
-               return out
+               if (list[key] instanceof Array) {
+                  t = genf(list[key][1], list[key][2], list[key][0], list[key][3], '')
+               } else {
+                  t = genf(list[key].v[1], list[key].v[2], list[key].v[0], list[key].v[3], walk_n_gen(list[key]))
+               }
+               for(var k in t) {
+                  out.append(t[k])
+               }
             }
+            return out
+         }
 
-         if (!this.__form) {
-            this.__form = walk_n_gen(db.config);
-				this.__form.append('<hr/><hr/>')
-         } 
-         return this.__form
+      if (!this.__form) {
+         this.__form = walk_n_gen(db.config);
+         this.__form.append('<hr/><hr/>')
       }
+      return this.__form
+   }
 }
 
 function settingsShow () {
@@ -323,13 +318,13 @@ function settingsToggle(e) {
    $(e).parents('table:first').find('tr:last').toggle()
 }
 
-function settingsDefault(defs,sid) {
+function settingsDefault(defs, sid) {
    db.__iter(
       db.config,
       function (v,pfx) {
-			if (v[2] == sid) {
-				db.setinp(sid, db.getval(pfx, defs)[0])
-			}
+         if (v[2] == sid) {
+            db.setinp(sid, db.getval(pfx, defs)[0])
+         }
       },
       [])
 }
