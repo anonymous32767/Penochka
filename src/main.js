@@ -86,18 +86,24 @@ function unfold(id) {
                function () {
                   toggleThread(id)
                })
-         )
-         o.attr('id', 'fold'+id)
+         ).after(
+	    $.ui.controlLink(
+               ' [|Ответ|]',
+               function () {
+                  window.location.href = ''
+               })
+	 )
+         n.attr('id', 'fold'+id)
          toggleThread(id)
          wait.swap(moar)
       }
    
    var o = $('#'+id)
-   var moar = o.moar()
+   var moar = o.find(iom.thread.moar)
    var wait = $('<span>Загрузка треда...</span>')
    var url = o.find(iom.post.reflink).attr('href').split('#')[0]
    moar.swap(wait)
-   if(!$('#cache #'+id).attr('id')) {
+   if($('#cache #'+id).length > 0) {
       replace(o, $('#cache #'+id))
    } else {
       o.ajaxThread(
@@ -112,10 +118,17 @@ function unfold(id) {
 }
 
 function toggleThread(id) {
-   if(!$('#fold'+id).attr('id')) {
+   var swapid =
+      function (o1, o2) {
+	 var t = o1.attr('id')
+	 o1.attr('id', o2.attr('id'))
+	 o2.attr('id', t)
+      }
+   if($('#fold'+id).length == 0) {
       unfold(id)
    } else {
       $('#'+id).swap('#fold'+id)
+      swapid($('#'+id), $('#fold'+id))
    }
 }
 
@@ -310,14 +323,14 @@ apply_me = function (env, messages) {
                      '[|Развернуть|]',
                      function () { toggleThread(tid) }
                   ))
-               var moar2 = moar.clone(true)
+               /*var moar2 = moar.clone()
                if (db.config.replyForm[0]) {
                   moar2.append(
                      $.ui.controlLink(
                         ' [|Ответить|]',
                         function () { showReplyForm(tid) }
                      ))}
-               subj.find(iom.thread.eot).append(moar2)
+               subj.find(iom.thread.eot).append(moar2) */
             }
             if (db.config.replyForm[0]) {
                subj.find(iom.post.reflink).each(
@@ -364,11 +377,11 @@ apply_me = function (env, messages) {
       return
    }
 
-   /*if($(iom.form.parent).count > 0) {
+   if($(iom.form.parent).length > 0) {
       var txt = messages.find(iom.thread.message).
          text().slice(0, db.config.hiding.citeLength[0] - 1)
       $('title').append(' &#8212; ' + txt)
-   }*/
+   }
 
    db.config.sage.button[0] &&
       env.find(iom.form.email).after(
