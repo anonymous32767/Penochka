@@ -288,12 +288,11 @@ function dvach () {
          return $('<span />').
             append(textArray[0]).
             append(
-               $('<a href="javascript:()">' + textArray[1] + '</a>').
-                  click(
-                     function () {
-                        handler ()
-                        return false
-                     })).
+               $('<a href="javascript:">' + textArray[1] + '</a>').
+		  click(function () {
+		     handler ()
+		     return false
+		  })).
             append(textArray[2])
       },
       tizer :
@@ -310,7 +309,7 @@ function dvach () {
       var threadsRaw = obj.find('#delform');
       var cloned = threadsRaw.clone()
 
-      $('div.adminbar:first').append(
+      $('div.adminbar').append(
          $.ui.controlLink(
             ' - [|Настройки|]',
             function () { settingsShow() }
