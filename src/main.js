@@ -45,10 +45,8 @@ jQuery.fn.swap = function(b){
 var apply_me = {}
 
 /* */
-/* FIXME 1. Append only where needed
-         2. Toggling doesn't work  */
 function showReplyForm(id, citeid) {
-   if(!id) 
+   if(!id)
       return
    var subj = $(iom.postform+id)
    if(subj.attr('id')) {
@@ -56,76 +54,60 @@ function showReplyForm(id, citeid) {
       if (typeof citeid != undefined) {
          var msg = subj.find(iom.form.message)
          msg.val(msg.val() + '>>' + citeid.replace('p',''))
-	 msg[0].focus()
+         msg[0].focus()
       }
       return
    } else {
-      var subj = $(iom.postform).clone().tuneForThread(id);
+      var subj = $(iom.postform).clone(true).tuneForThread(id);
       subj.attr('id', 'postform' + id);
       subj.prepend(
-	 $('<div style="float:right">').
+         $('<div style="float:right">').
             append(
-               $.ui.controlLink(
-		  '[|Скрыть|]',
-		  function() { $(iom.postform + id).hide() }
-               )))
+               $.ui.multiLink([
+                  ['Скрыть',
+                   function() { $(iom.postform + id).hide() }]
+               ])))
       $('#'+ id + ' ' + iom.thread.eot).after(subj)
       showReplyForm(id, citeid)
    }
 }
 
 /* */
-
-function unfold(id) {
-   id = id.replace('fold','')
-   var replace =
-      function (o,n) {
-         n.find(iom.thread.ref).after(
-            $.ui.controlLink(
-               '[|Свернуть обратно|]',
-               function () {
-                  toggleThread(id)
-               })
-         ).after(
-	    $.ui.controlLink(
-               ' [|Ответ|]',
-               function () {
-                  window.location.href = ''
-               })
-	 )
-         n.attr('id', 'fold'+id)
-         toggleThread(id)
-         wait.swap(moar)
-      }
-   
-   var o = $('#'+id)
-   var moar = o.find(iom.thread.moar)
-   var wait = $('<span>Загрузка треда...</span>')
-   var url = o.find(iom.post.reflink).attr('href').split('#')[0]
-   moar.swap(wait)
-   if($('#cache #'+id).length > 0) {
-      replace(o, $('#cache #'+id))
+function cacheThread(idurl, cb) {
+   if (idurl.search(/\//) == -1) {
+      var o = $('#'+idurl)
+      var moar = o.find(iom.thread.moar)
+      var moarBkp = moar.clone(true)
+      moar.text('Загрузка треда...')
+      var url = o.find(iom.post.reflink).attr('href').split('#')[0]
    } else {
-      o.ajaxThread(
-	 url,
-	 function(e) {
-            apply_me(undefined, e)
-            var ue = e.find('#'+id)
-            ue.appendTo('#cache')
-            replace(o, $('#cache #'+id))
-	 })
+      var url = idurl
    }
+   $.fn.ajaxThread(
+      url,
+      function(e) {
+         apply_me(e, true)
+         var ue = e.find(iom.tid)
+         var id = ue.attr('id')
+         ue.appendTo('#cache')
+         ue.attr('id', 'fold'+id)
+         if (moarBkp)
+            moar.replaceWith(moarBkp)
+         if (cb)
+            cb()
+      })
 }
 
-function toggleThread(id) {
+function toggleThread(id, useAjax) {
    var swapid =
       function (o1, o2) {
-	 var t = o1.attr('id')
-	 o1.attr('id', o2.attr('id'))
-	 o2.attr('id', t)
+         var t = o1.attr('id')
+         o1.attr('id', o2.attr('id'))
+         o2.attr('id', t)
       }
-   if($('#fold'+id).length == 0) {
-      unfold(id)
+   if(($('#fold'+id).length == 0)) {
+      if (useAjax)
+         cacheThread(id, function () { toggleThread(id, false) })
    } else {
       $('#'+id).swap('#fold'+id)
       swapid($('#'+id), $('#fold'+id))
@@ -151,12 +133,12 @@ function refold(id) {
    var ofs = subj.offset();
    if(!$("#itiz"+id).attr('id')) {
       subj.one(
-	 "load",
+         "load",
          function () {
             $('#itiz'+id).hide()
          })
       subj.a().before(
-	 $.ui.loadTizer(ofs.left, ofs.top, id)
+         $.ui.loadTizer(ofs.left, ofs.top, id)
       )
    }
    swapAttr(subj, 'style', 'altstyle')
@@ -187,20 +169,28 @@ function apply_isense(a) {
 var z = 0;
 var ist = {};
 
-function intelli(x,y,id,url) {
+function intelli(x, y, id, url) {
    clearTimeout(ist[id])
    ist[id] = setTimeout(
       function () {
-         var obj = $.ui.preview(
-	    id, x, y, url,
-            db.config.intelliSense.ajax[0],
-            function (x) { apply_me(undefined, x) })
-         if(!obj) {
-            return
+         $('#is'+id).remove()
+         var obj = {}
+         if(($('#'+id).length == 0) && url) {
+            cacheThread(url, function () { intelli(x, y, id) })
+            obj = $.ui.preview(
+               $('<div></div>').text('Загрузка...').attr('id', 'is' + id),
+               x, y)
+         } else {
+            obj = $.ui.preview(id, x, y)
          }
          obj.attr('id','is'+id);
-         obj.attr('refid', id);
-         apply_isense(obj)
+         obj.hover(
+            function(evt) {
+               clearTimeout(ist[id])
+            },
+            function(evt) {
+               outelli(id)
+            })
          obj.css('z-index', z++);
          $('body').prepend(obj);
       },
@@ -229,7 +219,7 @@ function sage(env) {
       ttl.val(ttl.val() == 'sage' ? '' : 'sage')
       var msg = env.find(iom.form.message)
       db.config.sage.capsBold[0] &&
-	 ttl.val(ttl.val() == '**SAGE**' ? '' : '**SAGE**')
+         ttl.val(ttl.val() == '**SAGE**' ? '' : '**SAGE**')
    }
 }
 
@@ -244,17 +234,17 @@ function chktizer(obj, id, tp) {
             '...)'
       } else { var cite = '' }
       tizText = 'Тред ' + id.replace('t','№') + ' ' + cite +
-         ' скрыт. [|Показать|]'
+         ' скрыт. ['
    } else {
       tizText = 'Пост ' + id.replace('p','№') + ' ' +
-         ' скрыт. [|Показать|]'
+         ' скрыт. ['
    }
    obj.before($.ui.tizer(
       id,
-      $.ui.controlLink(
-         tizText,
-         function () { toggleVisible(id) }
-      )
+      $.ui.multiLink([
+         ['Показать',
+          function () { toggleVisible(id) }]
+      ], tizText)
       , tp))
 }
 
@@ -267,129 +257,82 @@ function apply_refs(a, body) {
    }
 }
 
-apply_me = function (env, messages) {
-   messages.find(iom.pid).each(
-      function () {
-         var subj = $(this)
-         var pid = subj.attr('id')
-         if(db.config.hiding.posts[0]) {
-            subj.find(iom.post.ref).after($.ui.controlLink(
-               '[|X|]',
-               function () { chktizer(subj, pid, false); toggleVisible(pid) }
-            ))
-         }
-         /* Censore */
-         if(db.config.censore.v[0]) {
-            var censf = true;
-            if(censf) {
-               db.hidden[pid]=1
-            }
-         }
-         if (db.config.forwardReferences.v[0] && $.references[pid]) {
-            var refs =
-               function () {
-                  var r = [];
-                  for (j in $.references[pid]) {
-                     r.push($.ui.anchor($.references[pid][j]))
-                  }
-                  return $.ui.refs(r.join(', '))
-               }
-            if(db.config.forwardReferences.asDog[0]) {
-               subj.find(iom.post.ref).after(
-		     $.ui.controlLink(
-			'[|ц|]', function () {}
-		     ))
-            } else {
-               subj.find(iom.post.message).before(refs())
-            }
-         }
-      }
-   )
+function addBokmark(id) {
+   // todo
+}
 
-   db.config.hiding.threads[0] &&
-      messages.find(iom.tid).each(
-         function () {
-            var subj = $(this)
-            var tid = subj.attr('id')
-            subj.find(iom.thread.ref).after($.ui.controlLink(
-               '[|Скрыть тред|]',
-               function () { chktizer(subj, tid, true); toggleVisible(tid) }
-            ))
-            var moar = subj.find(iom.thread.moar)
-            if (moar && db.config.unfoldThreads[0]) {
-               /* Thread unfolding */
-               moar.append(
-                  $.ui.controlLink(
-                     '[|Развернуть|]',
-                     function () { toggleThread(tid) }
-                  ))
-               /*var moar2 = moar.clone()
-               if (db.config.replyForm[0]) {
-                  moar2.append(
-                     $.ui.controlLink(
-                        ' [|Ответить|]',
-                        function () { showReplyForm(tid) }
-                     ))}
-               subj.find(iom.thread.eot).append(moar2) */
-            }
-            if (db.config.replyForm[0]) {
-               subj.find(iom.post.reflink).each(
-                  function () {
-		     var subj = $(this)
-                     var pid = subj.findc(iom.pid).attr('id')
-                     subj.click(
-                        function () { showReplyForm(tid, pid); return false; }
-                     )}
-               )}
-         }
-      )
-
-   db.config.unfoldImages[0] &&
-      messages.find(iom.post.image).each(
-         function () {
-	    var subj = $(this)
-            subj.a().click(
-               function () {
-                  return refold(subj.findc(iom.pid).attr('id'))
-               }
-            ).removeAttr('target')
-         }
-      )
-
-   db.config.intelliSense.v[0] &&
-      messages.find(iom.anchors).each(
-         function () { apply_isense($(this)) }
-      )
-
-
-   for(var objId in db.hidden) {
-      /* It's an low level alternative of toggle method
-          * TODO Rewrite toggle for suitable usage in this
-          * place (may be impossible). */
-      var subj = messages.find('#'+objId)
-      subj.css('display','none')
-      chktizer(subj, objId, objId.search(/t/) == -1 ? false : true)
-      messages.find('#tiz'+objId).css('display','block')
+function withSelection(subj, f){
+   if (document.selection){
+      var str = document.selection.createRange().text;
+      var sel = document.selection.createRange();
+      sel.text=f(str);
+   } else if (typeof subj.selectionStart != 'undefined') {
+      var before, after, selection;
+      before= subj.value.substring(0, subj.selectionStart)
+      selection = subj.value.substring(subj.selectionStart, subj.selectionEnd)
+      after = subj.value.substring(subj.selectionEnd, subj.value.length)
+      subj.value= String.concat(before, f(selection), after)
    }
+}
 
-   /* Board environment setup. No messages processing below this */
-   if(!env) {
-      return
-   }
-
+function setupEnv (db, env) {
+   var bmenu = [['Настройки',
+            function () { settingsShow() }]]
+   if (1) 
+      bmenu.push(['Закладки',
+            function () {  }])
+   
+   $(iom.menu).append(
+         $.ui.multiLink(bmenu, '- [')
+      )
+   
    if($(iom.form.parent).length > 0) {
-      var txt = messages.find(iom.thread.message).
-         text().slice(0, db.config.hiding.citeLength[0] - 1)
-      $('title').append(' &#8212; ' + txt)
+      $('title').append(
+         ' &#8212; ' +
+            $.ui.threadCite(env.find(iom.tid).attr('id'), db.config.hiding.citeLength[0] - 1))
    }
+
+   if (db.config.sage.button[0]) {
+      env.find(iom.form.email).after(
+         $.ui.multiLink([
+            ['Сажа',
+             function () { sage() }]
+         ], ' <b>[', ']</b>')
+      )}
 
    db.config.sage.button[0] &&
-      env.find(iom.form.email).after(
-         $.ui.controlLink(
-            ' <b>[</b>|<b>Сажа</b>|<b>]</b>',
-            function () { sage() }
-         )
-      )
+      env.find(iom.postform + ' ' + iom.form.submit).after(
+         $.ui.multiLink([
+            ['КБ', function () {
+               withSelection(
+                  env.find(iom.form.message),
+                  function (s) { return '**'+s.toUpperCase()+'**' }) }],
+            ['<span class="spoiler">SP</span>', function () {
+               withSelection(
+                  env.find(iom.form.message),
+                  function (s) { return '%%'+s+'%%' }) }]
+         ],' <b>[',']</b>'))
+
+   db.config.sage.button[0] &&
+      env.find(iom.postform + ' ' + iom.form.submit).after(
+         $.ui.multiLink([
+            ['Ж', function () {
+               withSelection(
+                  env.find(iom.form.message),
+                  function (s) { return '**'+s+'**' }) }],
+            ['<i>К</i>', function () {
+               withSelection(
+                  env.find(iom.form.message),
+                  function (s) { return '*'+s+'*' }) }],
+            ['<s>З</s>', function () {
+               withSelection(
+                  env.find(iom.form.message),
+                  function (s) { return '**'+s+'**' }) }],
+            ['<u>П</u>', function () {
+               withSelection(
+                  env.find(iom.form.message),
+                  function (s) { return '__'+s+'__' }) }],
+         ],' <b>[',']</b>'))
 
    db.config.sage.sageMan[0] &&
       sage(env)
@@ -414,20 +357,122 @@ apply_me = function (env, messages) {
          }
       }
    )
+}
+
+apply_me = function (messages, isSecondary) {
+   messages.find(iom.pid).each(
+      function () {
+         var subj = $(this)
+         var pid = subj.attr('id')
+         if(db.config.hiding.posts[0]) {
+            subj.find(iom.post.ref).after($.ui.multiLink([
+               ['X',
+                function () { chktizer(subj, pid, false); toggleVisible(pid) }]
+            ]))
+         }
+         /* Censore */
+         if(db.config.censore.v[0]) {
+            var censf = true;
+            if(censf) {
+               db.hidden[pid]=1
+            }
+         }
+         if (db.config.forwardReferences.v[0] && $.references[pid]) {
+            var refs =
+               function () {
+                  var r = [];
+                  for (j in $.references[pid]) {
+                     r.push($.ui.anchor($.references[pid][j]))
+                  }
+                  return $.ui.refs(r.join(', '))
+               }
+            if(db.config.forwardReferences.asDog[0]) {
+               subj.find(iom.post.ref).after(
+                  $.ui.multiLink([
+                     ['ц', function () {}]
+                  ]))
+            } else {
+               subj.find(iom.post.message).before(refs())
+            }
+         }
+      }
+   )
+
+   db.config.hiding.threads[0] &&
+      messages.find(iom.tid).each(
+         function () {
+            var subj = $(this)
+            var tid = subj.attr('id')
+            var turl = subj.find(iom.thread.reflink).attr('href').split('#')[0]
+            var tmenu = []
+            var trm = subj.find(iom.thread.ref).next('a')
+	    if (trm.length == 0) {
+	       subj.find(iom.thread.ref).after('&nbsp; [<a/>]')
+	       trm = subj.find(iom.thread.ref).next('a')
+	    }
+            if (db.config.hiding.threads[0])
+               tmenu.push([
+                  'Скрыть',
+                  function () { chktizer(subj, tid, true); toggleVisible(tid) }])
+            if (db.config.unfoldThreads[0] && (subj.find(iom.thread.moar).length | isSecondary))
+               tmenu.push([
+                  isSecondary ? 'Свернуть' : 'Развернуть',
+                  function () { toggleThread(tid, !isSecondary) }])
+            if (1)
+               tmenu.push([
+                  'В закладки',
+                  function () {  }])
+	    if ($(iom.form.parent).length == 0)
+               tmenu.push([
+		  'Ответ',
+		  function () { window.location.href = turl }])
+
+            trm.replaceWith($.ui.multiLink(tmenu, '', ''))
+            if (db.config.replyForm[0]) {
+               subj.find(iom.post.reflink).each(
+                  function () {
+                     var subj = $(this)
+                     var pid = subj.findc(iom.pid).attr('id')
+                     subj.click(
+                        function () { showReplyForm(tid, pid); return false; }
+                     )}
+               )}
+         }
+      )
+
+   db.config.unfoldImages[0] &&
+      messages.find(iom.post.image).each(
+         function () {
+            var subj = $(this)
+            subj.a().click(
+               function () {
+                  return refold(subj.findc(iom.pid).attr('id'))
+               }
+            ).removeAttr('target')
+         }
+      )
+
+   db.config.intelliSense.v[0] &&
+      messages.find(iom.anchors).each(
+         function () { apply_isense($(this)) }
+      )
+
+
+   for(var objId in db.hidden) {
+      /* It's an low level alternative of toggle method
+          * TODO Rewrite toggle for suitable usage in this
+          * place (may be impossible). */
+      var subj = messages.find('#'+objId)
+      subj.css('display','none')
+      chktizer(subj, objId, objId.search(/t/) == -1 ? false : true)
+      messages.find('#tiz'+objId).css('display','block')
+   }
 
    /* Bookmarks */
-   //$('body').append('<div style="position:fixed; left:70%; top:0; width: 3%; height: 6%" class="reply">')
+   //$('body').append('<div style="position:fixed; right:0%; top:10%; width: 3%; height: 6%" class="reply">')
 }
 
 /* */
 db.loadCfg(defaults)
 
-if (typeof GM_setValue != "undefined") {
-   /* we are under firefox's greasemonkey */
-   document = unsafeWindow.document
-   var f = dvach()
-   f($(unsafeWindow.document), apply_me)
-} else {
-   $(document).ok(apply_me)
-}
-
+$(document).ok(db, setupEnv, apply_me)

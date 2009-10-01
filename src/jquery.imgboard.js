@@ -101,6 +101,7 @@ iom = {
       reflink: 'span.reflink:first a',
       message: 'blockquote:not(.penRefs):first',
       moar: 'span.omittedposts',
+      title: 'span.filetitle',
       eot: '.penPost:last'
    },
    form: {
@@ -112,10 +113,11 @@ iom = {
       turtest: 'input[name=captcha]',
       turimage: '#imgcaptcha',
       password: 'input[name=password]',
-      parent: 'input[name=parent]'
+      parent: 'input[name=parent]',
+      submit: 'input[type=submit]'
    },
    anchors: 'blockquote a[onclick]',
-   menu: 'div.adminbar',
+   menu: 'div.adminbar:first',
    options: '#penOptions',
    postform: '#postform'
 }
@@ -126,24 +128,25 @@ function dvach () {
       var currThread = $('<span></span>');
       cloned.contents().each(
          function () {
-            if ($(this).is('table')) {
+	    var subj = $(this)
+            if (subj.is('table')) {
                if (opPost) {
                   currThread.append(opPost);
                   opPost = false;
                }
-               $(this).attr('id', 'p' + $(this).find('a[name]').attr('name'));
-               $(this).addClass('penPost');
+               subj.attr('id', 'p' + $(this).find('a[name]').attr('name'));
+               subj.addClass('penPost');
             }
             if(opPost) {
-               opPost.append(this);
-               if($(this).is('a') && $(this).attr('name')) {
-                  currThread.attr('id', 't'+$(this).attr('name'));
+               opPost.append(subj);
+               if(subj.is('a') && subj.attr('name')) {
+                  currThread.attr('id', 't'+subj.attr('name'));
                   currThread.addClass('penThread');
-                  opPost.attr('id', 'p'+$(this).attr('name'));
+                  opPost.attr('id', 'p'+subj.attr('name'));
                   opPost.addClass('penPost');
                }
             } else if (currThread) {
-               currThread.append(this);
+               currThread.append(subj);
             }
             if ($(this).is('hr')) {
                if (opPost) {
@@ -161,7 +164,7 @@ function dvach () {
    function process(cloned) {
       cloned.find(iom.anchors).each(
          function () {
-	    var subj = $(this)
+            var subj = $(this)
             var a = subj.attr('href').split('#')
             var refurl = a[0]
             var refid = a[1]
@@ -170,7 +173,7 @@ function dvach () {
                refid = subj.attr('href').split('.')[0].split('/').reverse()[0]
             }
             var pid = 'p' + refid
-	    var spid = subj.findc(iom.pid).attr('id')
+            var spid = subj.findc(iom.pid).attr('id')
             subj.attr('refid', pid)
             subj.attr('refurl', refurl)
             if(!$.references[pid]) {
@@ -184,7 +187,7 @@ function dvach () {
          })
       cloned.find(iom.post.image).each(
          function () {
-	    var subj = $(this)
+            var subj = $(this)
             var altsrc = subj.a().attr('href')
             var w = subj.attr('width')
             var h = subj.attr('height')
@@ -238,6 +241,7 @@ function dvach () {
 
    jQuery.xlatb = xlatb;
    jQuery.references = [];
+   jQuery.bookmarks = [];
 
    jQuery.ui = {
       anchor :
@@ -250,50 +254,44 @@ function dvach () {
          return '<blockquote class="penRefs"><small>Ссылки '+content+'.</small></blockquote>'
       },
       preview :
-      function (id,x,y,url, use_ajax, f) {
-         if($('#is'+id).attr('id') || !id) {
-            return false;
-         }
-         var obj = $('#'+id).clone()
-         if (!obj.attr('id')) {
-            if(use_ajax) {
-               obj.ajaxThread(
-                  url,
-                  function (e) {
-                     f(e)
-                     $('#cache').append(e)
-                     $('#is'+id).remove()
-                     intelli(x,y,id,url)
-                  })
-               obj = $('<div>Загрузка...</div>')
-            } else {
-               obj = $('<div>Недосягаемо.</div>')
-            }
-         }
-         process(obj)
-         f(obj)
-         obj.find(iom.post.anchor).remove()
+      function (idobj, x, y) {
+	 if (typeof idobj == 'string') {
+            var obj = $('#'+idobj).clone(true)
+	 } else {
+	    var obj = idobj
+	 }
          obj.addClass('reply')
          obj.attr('style','position:absolute; top:' + y +
                   'px; left:' + x + 'px;display:block;')
          return obj
       },
+      threadCite:
+      function (id, len) {
+	 var subj = $('#' + id) 
+	 var topic = subj.find(iom.thread.title).text()
+	 return ((topic ? topic + '//' : '') +
+	  subj.find(iom.thread.message).text()).
+	    slice(0, len)
+      },
       loadTizer: function (x, y, id) {
          return $('<div style="position:absolute;top:' + y +
                   'px;left:' + x + 'px;z-index:99;background-color:maroon;color:white;padding:2px;font-weight:bold;" id="itiz' + id + '">Загрузка...</div>')
       },
-      controlLink :
-      function(title, handler) {
-         var textArray = title.split('|')
-         return $('<span />').
-            append(textArray[0]).
-            append(
-               $('<a href="javascript:">' + textArray[1] + '</a>').
-		  click(function () {
-		     handler ()
-		     return false
-		  })).
-            append(textArray[2])
+      multiLink :
+      function(handlers, begin, end, sep) {
+	 begin = begin != null ? begin : '['
+	 end =  end != null ? end : ']'
+	 sep =  sep != null ? sep : ' / '
+	 var ancs = []
+	 for(var i = 0; i < handlers.length; i++)
+	    ancs.push('<a href="javascript:">'+handlers[i][0]+'</a>')
+	 var j = 0
+	 var res = $('<span>' + begin + ancs.join(sep) + end + '</span>')
+	 res.find('a').each(
+	    function () {
+	       $(this).click(handlers[j++][1])
+	    })
+	 return res
       },
       tizer :
       function(id,body,hasHr) {
@@ -309,23 +307,16 @@ function dvach () {
       var threadsRaw = obj.find('#delform');
       var cloned = threadsRaw.clone()
 
-      $('div.adminbar').append(
-         $.ui.controlLink(
-            ' - [|Настройки|]',
-            function () { settingsShow() }
-         )
-      )
-
       parse(cloned);
       process(cloned);
 
       var settings = $('<div id="penSettings" style="display:none"></div>');
       var closeDiv = $('<div style="float:right" />').
          append(
-            $.ui.controlLink(
-               '[|Сохранить и закрыть|]',
-               function () { db.saveCfg(defaults); settingsHide() }
-            ))
+            $.ui.multiLink([
+               ['Сохранить и закрыть',
+               function () { db.saveCfg(defaults); settingsHide() }]
+            ]))
       settings.
          append($('<h1 style="float:left;margin:0;padding:0;" class="logo">Два.ч &#8212; Настройки</h1>')).
          append(closeDiv).
@@ -335,24 +326,30 @@ function dvach () {
 
       $('body').append('<div id="cache" style="display:none" />')
       addStyle(css)
-      f(obj, cloned)
+      f(cloned)
       threadsRaw.replaceWith(cloned);
    };
 }/* end of 2ch */
-
-var converge = {}
 
 jQuery.fn.extend({
    a: function () {
       return $(this).parents('a:first');
    },
-   ok: function(f) {
-      this.ready(
-         function () {
-            converge = dvach()
-            converge($(this), f)
-         }
-      )
-
+   ok: function(db, env, msg) {
+      if (typeof GM_setValue != "undefined") {
+         /* we are under firefox's greasemonkey */
+         document = unsafeWindow.document
+         var converge = dvach()
+         converge($(unsafeWindow.document), msg)
+         env(db, $(unsafeWindow.document))
+      } else {
+         this.ready(
+            function () {
+               var converge = dvach()
+               converge($(this), msg)
+               env(db, $(this))
+            }
+         )
+      }
    }
 })
