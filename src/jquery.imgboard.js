@@ -122,19 +122,19 @@ iom = {
    postform: '#postform'
 }
 
-function dvach () {
+function dvach (onload) {
    function parse (cloned) {
       var opPost = $('<span></span>');
       var currThread = $('<span></span>');
       cloned.contents().each(
          function () {
-	    var subj = $(this)
+            var subj = $(this)
             if (subj.is('table')) {
                if (opPost) {
                   currThread.append(opPost);
                   opPost = false;
                }
-               subj.attr('id', 'p' + $(this).find('a[name]').attr('name'));
+               subj.attr('id', 'p' + subj.find('a[name]').attr('name'));
                subj.addClass('penPost');
             }
             if(opPost) {
@@ -146,15 +146,15 @@ function dvach () {
                   opPost.addClass('penPost');
                }
             } else if (currThread) {
-               currThread.append(subj);
+               currThread.append(this);
             }
             if ($(this).is('hr')) {
                if (opPost) {
                   currThread.append(opPost);
                }
                cloned.append(currThread);
-               opPost = $('<span></span>');
-               currThread = $('<span></span>');
+               opPost = $('<span/>');
+               currThread = $('<span/>');
             }
          }
       );
@@ -255,11 +255,11 @@ function dvach () {
       },
       preview :
       function (idobj, x, y) {
-	 if (typeof idobj == 'string') {
+         if (typeof idobj == 'string') {
             var obj = $('#'+idobj).clone(true)
-	 } else {
-	    var obj = idobj
-	 }
+         } else {
+            var obj = idobj
+         }
          obj.addClass('reply')
          obj.attr('style','position:absolute; top:' + y +
                   'px; left:' + x + 'px;display:block;')
@@ -267,11 +267,11 @@ function dvach () {
       },
       threadCite:
       function (id, len) {
-	 var subj = $('#' + id) 
-	 var topic = subj.find(iom.thread.title).text()
-	 return ((topic ? topic + '//' : '') +
-	  subj.find(iom.thread.message).text()).
-	    slice(0, len)
+         var subj = $('#' + id)
+         var topic = subj.find(iom.thread.title).text()
+         return ((topic ? topic + '//' : '') +
+                 subj.find(iom.thread.message).text()).
+            slice(0, len)
       },
       loadTizer: function (x, y, id) {
          return $('<div style="position:absolute;top:' + y +
@@ -279,19 +279,22 @@ function dvach () {
       },
       multiLink :
       function(handlers, begin, end, sep) {
-	 begin = begin != null ? begin : '['
-	 end =  end != null ? end : ']'
-	 sep =  sep != null ? sep : ' / '
-	 var ancs = []
-	 for(var i = 0; i < handlers.length; i++)
-	    ancs.push('<a href="javascript:">'+handlers[i][0]+'</a>')
-	 var j = 0
-	 var res = $('<span>' + begin + ancs.join(sep) + end + '</span>')
-	 res.find('a').each(
-	    function () {
-	       $(this).click(handlers[j++][1])
-	    })
-	 return res
+         begin = begin != null ? begin : '['
+         end =  end != null ? end : ']'
+         sep =  sep != null ? sep : ' / '
+         var ancs = $('<span>')
+         for(var i = 0; i < handlers.length; i++) {
+	    if (typeof handlers[i][1] == 'string') {
+	       ancs.append('<a href="' + handlers[i][1] + '">' + handlers[i][0] + '</a>')
+	    } else {
+	       ancs.append($('<a href="javascript:">' + handlers[i][0] + '</a>').
+			  click(handlers[i][1]))
+	    }
+	    if (handlers.length - i != 1) {
+	       ancs.append(sep)
+	    }
+	 }
+         return ancs.append(end).prepend(begin)
       },
       tizer :
       function(id,body,hasHr) {
@@ -300,6 +303,8 @@ function dvach () {
             append(hasHr ? "<br clear='both' /><hr />" : "")
       }
    };
+
+   onload()
 
    return function (obj,f) {
       const css = '#penSetttings {padding: 8px} .penVal, .penLoc, .penDef { display:block; text-align:right; float: right;position: relative; margin:3px; margin-left: 8px; height:26px; line-height:1;} .penRow {display: block; position: relative; clear: both; } .penTab {margin-left: 22px} #penOptions input { height: 24px;} .penBig {font-size: 16pt}';
@@ -315,7 +320,7 @@ function dvach () {
          append(
             $.ui.multiLink([
                ['Сохранить и закрыть',
-               function () { db.saveCfg(defaults); settingsHide() }]
+                function () { db.saveCfg(defaults); settingsHide() }]
             ]))
       settings.
          append($('<h1 style="float:left;margin:0;padding:0;" class="logo">Два.ч &#8212; Настройки</h1>')).
@@ -339,15 +344,21 @@ jQuery.fn.extend({
       if (typeof GM_setValue != "undefined") {
          /* we are under firefox's greasemonkey */
          document = unsafeWindow.document
-         var converge = dvach()
+         var converge = dvach(function() { env(db, $(this)) })
          converge($(unsafeWindow.document), msg)
-         env(db, $(unsafeWindow.document))
       } else {
          this.ready(
             function () {
-               var converge = dvach()
-               converge($(this), msg)
-               env(db, $(this))
+               var subj = $(this)
+               var converge = dvach(function() { env(db, subj) })
+               converge(subj, msg)
+               scope.timer.diff('penochka sync');
+               scope.timer.init();
+               setTimeout(function() {
+                  scope.timer.diff('async queue');
+                  $('p.footer a:last').
+                     after(' + <a href="http://github.com/anonymous32767/Penochka/" title="' + scope.timer.cache + ' total: ' + scope.timer.total + 'ms">penochka 0.4d</a>')
+               },0);
             }
          )
       }

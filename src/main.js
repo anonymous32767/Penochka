@@ -257,8 +257,12 @@ function apply_refs(a, body) {
    }
 }
 
-function addBokmark(id) {
-   // todo
+function addBookmark(id) {
+   var subj = $('#'+id)
+   var turl = subj.find(iom.thread.reflink).attr('href').split('#')[0]
+   var tcite =  $.ui.threadCite(id, db.config.hiding.citeLength[0] - 1)
+   $.bookmarks[turl]=tcite
+   storeBookmarks()
 }
 
 function withSelection(subj, f){
@@ -277,19 +281,19 @@ function withSelection(subj, f){
 
 function setupEnv (db, env) {
    var bmenu = [['Настройки',
-            function () { settingsShow() }]]
-   if (1) 
+                 function () { settingsShow() }]]
+   if (1)
       bmenu.push(['Закладки',
-            function () {  }])
-   
+                  function () {  }])
+
    $(iom.menu).append(
-         $.ui.multiLink(bmenu, '- [')
-      )
-   
+      $.ui.multiLink(bmenu, '- [')
+   )
+
    if($(iom.form.parent).length > 0) {
       $('title').append(
          ' &#8212; ' +
-            $.ui.threadCite(env.find(iom.tid).attr('id'), db.config.hiding.citeLength[0] - 1))
+            $.ui.threadCite('delform', db.config.hiding.citeLength[0] - 1))
    }
 
    if (db.config.sage.button[0]) {
@@ -346,6 +350,7 @@ function setupEnv (db, env) {
       function (key) {
          var recoded = $.xlatb[String.fromCharCode(key.which).toLowerCase()]
          if (recoded) {
+	    alert(recoded)
             /* Not a perfect piece of code, but
                   i'm thank you eurekafag (: */
             var caret = key.target.selectionStart
@@ -406,10 +411,10 @@ apply_me = function (messages, isSecondary) {
             var turl = subj.find(iom.thread.reflink).attr('href').split('#')[0]
             var tmenu = []
             var trm = subj.find(iom.thread.ref).next('a')
-	    if (trm.length == 0) {
-	       subj.find(iom.thread.ref).after('&nbsp; [<a/>]')
-	       trm = subj.find(iom.thread.ref).next('a')
-	    }
+            if (trm.length == 0) {
+               subj.find(iom.thread.ref).after('&nbsp; [<a/>]')
+               trm = subj.find(iom.thread.ref).next('a')
+            }
             if (db.config.hiding.threads[0])
                tmenu.push([
                   'Скрыть',
@@ -421,13 +426,11 @@ apply_me = function (messages, isSecondary) {
             if (1)
                tmenu.push([
                   'В закладки',
-                  function () {  }])
-	    if ($(iom.form.parent).length == 0)
+                  function () { addBookmark(tid) }])
+            if ($(iom.form.parent).length == 0)
                tmenu.push([
-		  'Ответ',
-		  function () { window.location.href = turl }])
-
-            trm.replaceWith($.ui.multiLink(tmenu, '', ''))
+                  'Ответ', turl])
+            trm.after($.ui.multiLink(tmenu, '', '')).remove()
             if (db.config.replyForm[0]) {
                subj.find(iom.post.reflink).each(
                   function () {
@@ -467,12 +470,9 @@ apply_me = function (messages, isSecondary) {
       chktizer(subj, objId, objId.search(/t/) == -1 ? false : true)
       messages.find('#tiz'+objId).css('display','block')
    }
-
-   /* Bookmarks */
-   //$('body').append('<div style="position:fixed; right:0%; top:10%; width: 3%; height: 6%" class="reply">')
 }
 
 /* */
 db.loadCfg(defaults)
 
-$(document).ok(db, setupEnv, apply_me)
+$(document).ok(db, setupEnv, apply_me) 

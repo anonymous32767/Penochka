@@ -1,4 +1,4 @@
-source = jquery.min.js jquery.cookie.js jquery.json.js\
+source = timer.js utf7.js jquery.min.js jquery.cookie.js jquery.json.js\
 	 jquery.imgboard.js settings.js  main.js
 
 all: penochka.js 

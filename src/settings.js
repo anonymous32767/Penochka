@@ -331,3 +331,19 @@ function settingsDefault(defs, sid) {
       },
       [])
 }
+
+function storeBookmarks() {
+   var bm = []
+   for(var i in $.bookmarks) {
+      bm.push(i)
+      bm.push($.bookmarks[i])
+   }
+   $.cookie('penBms',mybase64(bm.join('|')),{expires: 9000});
+}
+
+function loadBookmarks() {
+   var bm = mydebase64($.cookie('penBms')).split('|')
+   for(var i = 0; i < bm.length; i+=2) {
+      $.bookmarks[bm[i]] = bm[i + 1]
+   }
+}
