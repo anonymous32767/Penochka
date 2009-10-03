@@ -350,12 +350,11 @@ function setupEnv (db, env) {
       function (key) {
          var recoded = $.xlatb[String.fromCharCode(key.which).toLowerCase()]
          if (recoded) {
-	    alert(recoded)
             /* Not a perfect piece of code, but
                   i'm thank you eurekafag (: */
             var caret = key.target.selectionStart
-            var str = turingTest.val()
-            turingTest.val(str.substring(0,caret) + recoded + str.substring(caret))
+            var str = key.target.value
+            key.target.value = str.substring(0,caret) + recoded + str.substring(caret)
             key.target.selectionStart = caret+1
             key.target.selectionEnd = caret+1
             return false
