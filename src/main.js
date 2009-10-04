@@ -377,7 +377,6 @@ function setupEnv (db, env) {
    db.config.sage.sageMan[0] &&
       sage(env)
 
-   /* Const password */
    db.config.state.constPasswd[0] &&
       env.find(iom.form.password).val(db.config.state.constPasswd[0])
 
