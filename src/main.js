@@ -54,6 +54,17 @@ function showReplyForm(id, citeid) {
       if (typeof citeid != undefined) {
          var msg = subj.find(iom.form.message)
          msg.val(msg.val() + '>>' + citeid.replace('p',''))
+	 if (1) {
+	    var firstDoNot = true
+	    var img = subj.find(iom.form.turimage).each(
+	       function () {
+		  if (firstDoNot) {
+		     firstDoNot = false
+		  } else {
+		     $(this).click()
+		  }
+	       })
+	 }
          msg[0].focus()
       }
       return
@@ -86,6 +97,7 @@ function cacheThread(idurl, cb) {
    $.fn.ajaxThread(
       url,
       function(e) {
+	 e.find(iom.thread.reflink).attr('href', url)
          apply_me(e, true)
          var ue = e.find(iom.tid)
          var id = ue.attr('id')
@@ -257,12 +269,17 @@ function apply_refs(a, body) {
    }
 }
 
-function addBookmark(id) {
+function toggleBookmark(id) {
    var subj = $('#'+id)
-   var turl = subj.find(iom.thread.reflink).attr('href').split('#')[0]
-   var tcite =  $.ui.threadCite(id, db.config.hiding.citeLength[0] - 1)
-   $.bookmarks[turl]=tcite
+   var url = subj.find(iom.thread.reflink).attr('href').split('#')[0]
+   if ($.bookmarks[url]) {
+      $.bookmarks[url] = null
+   } else {
+      var tcite =  $.ui.threadCite(id, db.config.hiding.citeLength[0] - 1)
+      $.bookmarks[url]=tcite
+   }
    storeBookmarks()
+   return $.bookmarks[url]
 }
 
 function withSelection(subj, f){
@@ -280,15 +297,34 @@ function withSelection(subj, f){
 }
 
 function setupEnv (db, env) {
+   loadBookmarks()
+
    var bmenu = [['Настройки',
                  function () { settingsShow() }]]
    if (1)
       bmenu.push(['Закладки',
-                  function () {  }])
+                  function () { toggleBookmarks() }])
 
    $(iom.menu).append(
       $.ui.multiLink(bmenu, '- [')
    )
+
+   if (1) {
+      env.find(iom.postform).submit(function () {
+	 var t = $(this).parents(iom.tid)
+	 var tid = t.attr('id')
+	 if (!toggleBookmark(tid)) {
+	    toggleBookmark(tid)
+	 }
+      })
+   }
+   
+   if (1) {
+      var img = env.find(iom.form.turimage)
+      img.css('padding-right', '3px').
+	 after(img.clone(true)).click().
+	 after(img.clone(true)).click()
+   }
 
    if($(iom.form.parent).length > 0) {
       $('title').append(
@@ -424,8 +460,8 @@ apply_me = function (messages, isSecondary) {
                   function () { toggleThread(tid, !isSecondary) }])
             if (1)
                tmenu.push([
-                  'В закладки',
-                  function () { addBookmark(tid) }])
+                  $.bookmarks[turl] ? 'Из закладок' : 'В закладки',
+                  function (e) { $(e.target).text(toggleBookmark(tid) ? 'Из закладок' : 'В закладки') }])
             if ($(iom.form.parent).length == 0)
                tmenu.push([
                   'Ответ', turl])

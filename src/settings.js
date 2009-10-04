@@ -303,11 +303,17 @@ var db = {
 }
 
 function settingsShow () {
-   var e = $('#penSettings')
-   if (!e.find('table').is('table')) {
-      e.append(db.genForm())
+   if ($('#penSettings').length == 0) {
+      $.ui.window(
+         'penSettings',
+         'Два.ч - Настройки',
+         $.ui.multiLink([
+            ['Сохранить и закрыть',
+             function () { db.saveCfg(defaults); settingsHide() }]
+         ])).
+         append(db.genForm())
    }
-   e.show();
+   $('#penSettings').show();
    return false;
 }
 
@@ -332,18 +338,62 @@ function settingsDefault(defs, sid) {
       [])
 }
 
-function storeBookmarks() {
+function storeBookmarks () {
    var bm = []
    for(var i in $.bookmarks) {
+      if(!$.bookmarks[i])
+         continue
       bm.push(i)
       bm.push($.bookmarks[i])
    }
-   $.cookie('penBms',mybase64(bm.join('|')),{expires: 9000});
+   $.cookie('penBms', b64encode(bm.join('|')),{expires: 9000});
 }
 
-function loadBookmarks() {
-   var bm = mydebase64($.cookie('penBms')).split('|')
-   for(var i = 0; i < bm.length; i+=2) {
-      $.bookmarks[bm[i]] = bm[i + 1]
+function loadBookmarks () {
+   try {
+      var bm = b64decode($.cookie('penBms')).split('|')
+      for(var i = 0; i < bm.length; i+=2) {
+         $.bookmarks[bm[i]] = bm[i + 1]
+      }
+   } catch (err) {}
+}
+
+function genBookmarks () {
+   var bmarks = $('<span id="penBmsIn">')
+   var id = 0;
+   for(i in $.bookmarks) {
+      if (!$.bookmarks[i])
+         continue
+      var bm = $('<div class="penDesc"> <a class="penBmLink" href="' + i + '">' + i.replace(/.*?(\d+).*/, '$1') + '</a> ' + $.bookmarks[i] + '</div>')
+      bmarks.append(bm.prepend(
+         $.ui.multiLink([
+            ['x',
+             function (evt) {
+                var subj = $(evt.target).parents('div:first')
+                $.bookmarks[subj.find('a.penBmLink').attr('href')] = null
+                storeBookmarks ()
+                subj.remove()
+             }]
+         ])
+      ))
+      id++
    }
+   return bmarks
+}
+
+function toggleBookmarks () {
+   if ($('#penBms').length == 0) {
+      $.ui.window(
+         'penBms',
+         'Два.ч - Закладки',
+         $.ui.multiLink([
+            ['Закрыть',
+             function () { toggleBookmarks () }]
+         ])).
+         append(genBookmarks()).
+         append('<br /><br clear="both"/>')
+   } else {
+      $('#penBmsIn').replaceWith(genBookmarks())
+   }
+   $('#penBms').toggle()
 }

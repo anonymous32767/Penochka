@@ -282,25 +282,39 @@ function dvach (onload) {
          begin = begin != null ? begin : '['
          end =  end != null ? end : ']'
          sep =  sep != null ? sep : ' / '
-         var ancs = $('<span>')
-         for(var i = 0; i < handlers.length; i++) {
-	    if (typeof handlers[i][1] == 'string') {
-	       ancs.append('<a href="' + handlers[i][1] + '">' + handlers[i][0] + '</a>')
-	    } else {
-	       ancs.append($('<a href="javascript:">' + handlers[i][0] + '</a>').
-			  click(handlers[i][1]))
-	    }
-	    if (handlers.length - i != 1) {
-	       ancs.append(sep)
-	    }
-	 }
-         return ancs.append(end).prepend(begin)
+         var ancs = []
+         for(var i = 0; i < handlers.length; i++)
+            if (typeof handlers[i][1] == 'string') {
+               ancs.push('<a href="' + handlers[i][1] + '">'+handlers[i][0]+'</a>')
+            } else {
+               ancs.push('<a href="javascript:">'+handlers[i][0]+'</a>')
+            }
+         var j = 0
+         var res = $('<span>' + begin + ancs.join(sep) + end + '</span>')
+         res.find('a').each(
+            function () {
+               var subj = $(this)
+               if (subj.attr('href') == 'javascript:') {
+                  $(this).click(handlers[j][1])
+               }
+               j++
+            })
+         return res
       },
       tizer :
       function(id,body,hasHr) {
          return $("<div id=\'tiz" + id + "\' style='display:none;' />").
             append(body).
             append(hasHr ? "<br clear='both' /><hr />" : "")
+      },
+      window:
+      function(id, title, menu) {
+         var div = $('<div id="' + id + '" style="display:none"></div>').
+            append($('<h1 style="float:left;margin:0;padding:0;" class="logo">' + title + '</h1>')).
+            append(menu.css('float', 'right')).
+            append('<br clear="borh" /><br />')
+         $('body').prepend(div)
+         return div
       }
    };
 
@@ -314,20 +328,6 @@ function dvach (onload) {
 
       parse(cloned);
       process(cloned);
-
-      var settings = $('<div id="penSettings" style="display:none"></div>');
-      var closeDiv = $('<div style="float:right" />').
-         append(
-            $.ui.multiLink([
-               ['Сохранить и закрыть',
-                function () { db.saveCfg(defaults); settingsHide() }]
-            ]))
-      settings.
-         append($('<h1 style="float:left;margin:0;padding:0;" class="logo">Два.ч &#8212; Настройки</h1>')).
-         append(closeDiv).
-         append('<br clear="borh" /><br />')
-
-      $('body').prepend(settings)
 
       $('body').append('<div id="cache" style="display:none" />')
       addStyle(css)
