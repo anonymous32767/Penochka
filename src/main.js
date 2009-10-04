@@ -275,7 +275,7 @@ function toggleBookmark(id) {
    if ($.bookmarks[url]) {
       $.bookmarks[url] = null
    } else {
-      var tcite =  $.ui.threadCite(id, db.config.hiding.citeLength[0] - 1)
+      var tcite =  $.ui.threadCite(id, db.config.bookmarks.citeLength[0] - 1)
       $.bookmarks[url]=tcite
    }
    storeBookmarks()
@@ -301,7 +301,7 @@ function setupEnv (db, env) {
 
    var bmenu = [['Настройки',
                  function () { settingsShow() }]]
-   if (1)
+   if (db.config.bookmarks.v[0])
       bmenu.push(['Закладки',
                   function () { toggleBookmarks() }])
 
@@ -309,7 +309,7 @@ function setupEnv (db, env) {
       $.ui.multiLink(bmenu, '- [')
    )
 
-   if (1) {
+   if (db.config.bookmarks.v[0]) {
       env.find(iom.postform).submit(function () {
 	 var t = $(this).parents(iom.tid)
 	 var tid = t.attr('id')
@@ -319,28 +319,29 @@ function setupEnv (db, env) {
       })
    }
    
-   if (1) {
+   if (db.config.form.tripleCaptcha[0]) {
       var img = env.find(iom.form.turimage)
       img.css('padding-right', '3px').
 	 after(img.clone(true)).click().
 	 after(img.clone(true)).click()
    }
-
+   
+   if (db.config.citeInTitle[0]) {
    if($(iom.form.parent).length > 0) {
       $('title').append(
          ' &#8212; ' +
             $.ui.threadCite('delform', db.config.hiding.citeLength[0] - 1))
    }
 
-   if (db.config.sage.button[0]) {
+   if (db.config.form.sageButton[0]) {
       env.find(iom.form.email).after(
          $.ui.multiLink([
             ['Сажа',
              function () { sage() }]
          ], ' <b>[', ']</b>')
       )}
-
-   db.config.sage.button[0] &&
+   }
+   if (db.config.form.formatButtons[0]) {
       env.find(iom.postform + ' ' + iom.form.submit).after(
          $.ui.multiLink([
             ['КБ', function () {
@@ -353,7 +354,6 @@ function setupEnv (db, env) {
                   function (s) { return '%%'+s+'%%' }) }]
          ],' <b>[',']</b>'))
 
-   db.config.sage.button[0] &&
       env.find(iom.postform + ' ' + iom.form.submit).after(
          $.ui.multiLink([
             ['Ж', function () {
@@ -373,6 +373,7 @@ function setupEnv (db, env) {
                   env.find(iom.form.message),
                   function (s) { return '__'+s+'__' }) }],
          ],' <b>[',']</b>'))
+   }
 
    db.config.sage.sageMan[0] &&
       sage(env)
@@ -458,7 +459,7 @@ apply_me = function (messages, isSecondary) {
                tmenu.push([
                   isSecondary ? 'Свернуть' : 'Развернуть',
                   function () { toggleThread(tid, !isSecondary) }])
-            if (1)
+            if (db.config.bookmarks.v[0])
                tmenu.push([
                   $.bookmarks[turl] ? 'Из закладок' : 'В закладки',
                   function (e) { $(e.target).text(toggleBookmark(tid) ? 'Из закладок' : 'В закладки') }])
@@ -466,7 +467,16 @@ apply_me = function (messages, isSecondary) {
                tmenu.push([
                   'Ответ', turl])
             trm.after($.ui.multiLink(tmenu, '', '')).remove()
-            if (db.config.replyForm[0]) {
+	    var moar = subj.find(iom.thread.moar).clone()
+	    if (moar.length == 0) {
+	       moar = $('<span class="omittedposts"></span>')
+	    }
+	    moar.append($.ui.multiLink([
+	       ['Ответить', function () { showReplyForm(tid) }],
+	       [isSecondary ? 'Свернуть' : 'Развернуть', function () { toggleThread(tid, !isSecondary) }]
+	    ]))
+	    subj.find(iom.thread.eot).after(moar)
+            if (db.config.form.showInThread[0]) {
                subj.find(iom.post.reflink).each(
                   function () {
                      var subj = $(this)

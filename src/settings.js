@@ -44,7 +44,14 @@ var defaults = {
    },
    unfoldImages: [true,'Развертывать изображения'],
    unfoldThreads: [true, 'Кнопка развертывания треда'],
-   replyForm: [true, 'Форма ответа в конце треда'],
+   citeInTitle: [true, 'Показывать цитату оп-поста в заголовке страницы'],
+   form: {
+      v: [true,'<b class="penBig">Форма ответа</b>'],
+      showInThread: [true, 'Форма ответа в конце треда'],
+      tripleCaptcha: [false, 'Дублировать капчу'],
+      sageButton: [true, 'Кнопка сажи'],
+      formatButtons: [true, 'Кнопки форматирования']
+   },
    intelliSense: {
       v: [true,'<b class="penBig">Intellisense</b>'],
       ajax: [true, 'Автоматически подгружать пропущенные сообщения'],
@@ -55,8 +62,7 @@ var defaults = {
       v: [undefined, '<b class="penBig">Сажа</b>'],
       sageMan: [false, 'Я &#8212; человек-<b>САЖА</b>'],
       capsBold: [false, '<b>КАПСБОЛД</b>'],
-      inAllFields: [false, 'Сажа идет во все поля'],
-      button: [true, 'Кнопка сажи']
+      inAllFields: [false, 'Сажа идет во все поля']
    },
    hiding: {
       v: [undefined, '<b class="penBig">Скрытие</b>'],
@@ -77,6 +83,10 @@ var defaults = {
       email: ['', 'Электропочта (сажа)'],
       msg: ['', 'Текст сообщения'],
       total: ['', 'Всё сообщение']
+   },
+   bookmarks: {
+      v: [true,'<b class="penBig">Закладки</b>'],
+      citeLength: [55, 'Длина цитаты из оп-поста в закладках']
    }
 }
 
