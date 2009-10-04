@@ -11,7 +11,7 @@ penochka.js: $(source)
 	echo "// @include        http://2-ch.ru/*" >> $@
 	echo "// @include        http://*.2-ch.ru/*" >> $@
 	echo "// @exclude        */src/*" >> $@
-	echo "// @run-at	 document-start" >> $@
+	echo "// @run-at         document-start" >> $@
 	echo "// ==/UserScript==" >> $@
 	cat $^ >> $@
 

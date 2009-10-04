@@ -219,24 +219,7 @@ function dvach (onload) {
                turingTest.attr('src').
 		  replace(/key=\S*&/, "key=res" + tnum + "&").
 		  replace(/dummy=\S*/, "dummy=" + lnum)
-            )} else if (form.find('#captchadiv').length > 0) {
-	       
-	       form.find(iom.form.turtest).focus(
-		  function (e) {
-		     var img = $('<img alt="обновить captcha" src="/b/captcha.pl?key=res' + 
-				 tnum + '&amp;dummy=' + lnum + 
-				 '" onclick="update_captcha(this)" id="imgcaptcha" />')
-		     img.css('padding-right', '3px')
-		     var subj = $(e.target)
-		     if (1) {
-			subj.after(img.clone(true)).
-			   after(img.clone(true).click()).
-			   after(img.clone(true).click())
-		     } else {
-			subj.after(img.clone(true))
-		     }
-		  })
-	    } 
+            )}
          return form
       },
       ajaxThread:
@@ -334,12 +317,16 @@ function dvach (onload) {
          $('body').prepend(div)
          return div
       }
-   };
-
-   setTimeout(onload, 0)
+   }
 
    return function (obj,f) {
       const css = '#penSetttings {padding: 8px} .penVal, .penLoc, .penDef { display:block; text-align:right; float: right;position: relative; margin:3px; margin-left: 8px; height:26px; line-height:1;} .penRow {display: block; position: relative; clear: both; } .penTab {margin-left: 22px} #penOptions input { height: 24px;} .penBig {font-size: 16pt}';
+      if (obj.find('#captchadiv').length > 0) {
+	 obj.find(iom.form.turtest).
+	    after('<img alt="обновить" src="/b/captcha.pl?key=mainpage&amp;dummy=" onclick="update_captcha(this)" id="imgcaptcha" />').focus(function () { return false; })
+      }
+      
+      onload()
 
       var threadsRaw = obj.find('#delform');
       var cloned = threadsRaw.clone()

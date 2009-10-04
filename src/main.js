@@ -283,17 +283,16 @@ function toggleBookmark(id) {
 }
 
 function withSelection(subj, f){
-   if (document.selection){
-      var str = document.selection.createRange().text;
-      var sel = document.selection.createRange();
-      sel.text=f(str);
-   } else if (typeof subj.selectionStart != 'undefined') {
-      var before, after, selection;
-      before= subj.value.substring(0, subj.selectionStart)
-      selection = subj.value.substring(subj.selectionStart, subj.selectionEnd)
-      after = subj.value.substring(subj.selectionEnd, subj.value.length)
-      subj.value= String.concat(before, f(selection), after)
-   }
+   var before, after, selection;
+   subj.each(
+      function () {
+	 if (this.value != '') {
+	    before = this.value.substring(0, this.selectionStart)
+	    selection = this.value.substring(this.selectionStart, this.selectionEnd)
+	    after = this.value.substring(this.selectionEnd, this.value.length)
+	    this.value = before.concat(f(selection), after)
+	 }
+   })
 }
 
 function setupEnv (db, env) {
@@ -467,15 +466,17 @@ apply_me = function (messages, isSecondary) {
                tmenu.push([
                   'Ответ', turl])
             trm.after($.ui.multiLink(tmenu, '', '')).remove()
-	    var moar = subj.find(iom.thread.moar).clone()
-	    if (moar.length == 0) {
-	       moar = $('<span class="omittedposts"></span>')
+	    if($(iom.form.parent).length == 0) {
+	       var moar = subj.find(iom.thread.moar).clone()
+	       if (moar.length == 0) {
+		  moar = $('<span class="omittedposts"></span>')
+	       }
+	       moar.append($.ui.multiLink([
+		  ['Ответить', function () { showReplyForm(tid) }],
+		  [isSecondary ? 'Свернуть' : 'Развернуть', function () { toggleThread(tid, !isSecondary) }]
+	       ]))
+	       subj.find(iom.thread.eot).after(moar)
 	    }
-	    moar.append($.ui.multiLink([
-	       ['Ответить', function () { showReplyForm(tid) }],
-	       [isSecondary ? 'Свернуть' : 'Развернуть', function () { toggleThread(tid, !isSecondary) }]
-	    ]))
-	    subj.find(iom.thread.eot).after(moar)
             if (db.config.form.showInThread[0]) {
                subj.find(iom.post.reflink).each(
                   function () {
