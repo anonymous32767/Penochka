@@ -45,15 +45,15 @@ jQuery.fn.swap = function(b){
 var apply_me = {}
 
 /* */
-function showReplyForm(id, citeid) {
+function showReplyForm(id, cite, parent) {
    if(!id)
       return
    var subj = $(iom.postform+id)
    if(subj.attr('id')) {
       subj.show()
-      if (typeof citeid != undefined) {
+      if (typeof cite != undefined) {
          var msg = subj.find(iom.form.message)
-         msg.val(msg.val() + '>>' + citeid.replace('p',''))
+         msg.val(msg.val() + cite)
          if (1) {
             var firstDoNot = true
             var img = subj.find(iom.form.turimage).each(
@@ -78,8 +78,10 @@ function showReplyForm(id, citeid) {
                   ['Скрыть',
                    function() { $(iom.postform + id).hide() }]
                ])))
-      $('#'+ id + ' ' + iom.thread.eot).after(subj)
-      showReplyForm(id, citeid)
+      if (!parent) 
+	 parent = $('#'+ id + ' ' + iom.thread.eot)
+      parent.after(subj)
+      showReplyForm(id, cite)
    }
 }
 
@@ -253,13 +255,18 @@ function chktizer(obj, id, tp) {
       tizText = 'Пост ' + id.replace('p','№') + ' ' +
          ' скрыт. ['
    }
-   obj.before($.ui.tizer(
+   var tizer = $.ui.tizer(
       id,
       $.ui.multiLink([
          ['Показать',
-          function () { toggleVisible(id) }]
+          function () { toggleVisible(id) }],
+	 ['Сажа',
+	  function () { 
+	     showReplyForm(id, tizText + 'Показать / Сажа]', tizer);
+	     sage($(iom.postform+id)) }]
       ], tizText)
-      , tp))
+      , tp)
+   obj.before(tizer)
 }
 
 function apply_refs(a, body) {
@@ -380,6 +387,15 @@ function setupEnv (db, env) {
                withSelection(
                   env.find(iom.form.message),
                   function (s) { return '__'+s+'__' }) }],
+	    ['<tt>Код</tt>', function () {
+               withSelection(
+                  env.find(iom.form.message),
+                  function (s) { 
+		     if (s.search(/\n/) != -1) {
+			return '    '+s.replace(/\n/g, '\n    ')
+		     } else {
+			return '`'+s+'`' }
+		  }) }]
          ],' <b>[',']</b>'))
    }
 
@@ -491,7 +507,9 @@ apply_me = function (messages, isSecondary) {
                      var subj = $(this)
                      var pid = subj.findc(iom.pid).attr('id')
                      subj.click(
-                        function () { showReplyForm(tid, pid); return false; }
+                        function () { 
+			   showReplyForm(tid, '>>'+pid.replace('p','')); 
+			   return false; }
                      )}
                )}
          }

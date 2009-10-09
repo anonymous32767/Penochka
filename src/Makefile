@@ -6,7 +6,7 @@ all: penochka.js
 penochka.js: $(source)
 	echo "// ==UserScript==" > $@
 	echo "// @name           Govno 3 aka penochka" >> $@
-	echo "// @version	 " >> $@
+	echo "// @version	 VeRsIoN" >> $@
 	echo "// @description    Penochka imgboard script." >> $@
 	echo "// @include        http://2-ch.ru/*" >> $@
 	echo "// @include        http://*.2-ch.ru/*" >> $@
