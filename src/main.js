@@ -370,7 +370,12 @@ function setupEnv (db, env) {
             ['<s>З</s>', function () {
                withSelection(
                   env.find(iom.form.message),
-                  function (s) { return '**'+s+'**' }) }],
+                  function (s) { 
+		     var l = s.length
+		     for (var i = 0; i < l; i++) {
+			s += '^H'
+		     }
+		  return s }) }],
             ['<u>П</u>', function () {
                withSelection(
                   env.find(iom.form.message),
