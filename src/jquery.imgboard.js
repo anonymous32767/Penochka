@@ -219,7 +219,9 @@ function dvach (onload) {
                turingTest.attr('src').
 		  replace(/key=\S*&/, "key=res" + tnum + "&").
 		  replace(/dummy=\S*/, "dummy=" + lnum)
-            )}
+            )
+	    turingTest.click()
+	 }
          return form
       },
       ajaxThread:
@@ -349,7 +351,7 @@ jQuery.fn.extend({
       if (typeof GM_setValue != "undefined") {
          /* we are under firefox's greasemonkey */
          document = unsafeWindow.document
-         var converge = dvach(function() { env(db, $(this)) })
+         var converge = dvach(function() { env(db, $(unsafeWindow.document)) })
          converge($(unsafeWindow.document), msg)
       } else {
          this.ready(

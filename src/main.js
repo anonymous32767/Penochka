@@ -54,17 +54,17 @@ function showReplyForm(id, citeid) {
       if (typeof citeid != undefined) {
          var msg = subj.find(iom.form.message)
          msg.val(msg.val() + '>>' + citeid.replace('p',''))
-	 if (1) {
-	    var firstDoNot = true
-	    var img = subj.find(iom.form.turimage).each(
-	       function () {
-		  if (firstDoNot) {
-		     firstDoNot = false
-		  } else {
-		     $(this).click()
-		  }
-	       })
-	 }
+         if (1) {
+            var firstDoNot = true
+            var img = subj.find(iom.form.turimage).each(
+               function () {
+                  if (firstDoNot) {
+                     firstDoNot = false
+                  } else {
+                     $(this).click()
+                  }
+               })
+         }
          msg[0].focus()
       }
       return
@@ -88,8 +88,8 @@ function cacheThread(idurl, cb) {
    if (idurl.search(/\//) == -1) {
       var o = $('#'+idurl)
       var moar = o.find(iom.thread.moar)
-      var moarBkp = moar.clone(true)
-      moar.text('Загрузка треда...')
+      var load = $('<span class="penLoadMoar">Загрузка треда...</span>')
+      moar.hide().after(load)
       var url = o.find(iom.post.reflink).attr('href').split('#')[0]
    } else {
       var url = idurl
@@ -97,14 +97,16 @@ function cacheThread(idurl, cb) {
    $.fn.ajaxThread(
       url,
       function(e) {
-	 e.find(iom.thread.reflink).attr('href', url)
+         e.find(iom.thread.reflink).attr('href', url)
          apply_me(e, true)
          var ue = e.find(iom.tid)
          var id = ue.attr('id')
          ue.appendTo('#cache')
          ue.attr('id', 'fold'+id)
-         if (moarBkp)
-            moar.replaceWith(moarBkp)
+         if (moar) {
+            moar.show()
+            o.find('span.penLoadMoar').remove()
+         }
          if (cb)
             cb()
       })
@@ -286,13 +288,13 @@ function withSelection(subj, f){
    var before, after, selection;
    subj.each(
       function () {
-	 if (this.value != '') {
-	    before = this.value.substring(0, this.selectionStart)
-	    selection = this.value.substring(this.selectionStart, this.selectionEnd)
-	    after = this.value.substring(this.selectionEnd, this.value.length)
-	    this.value = before.concat(f(selection), after)
-	 }
-   })
+         if (this.value != '') {
+            before = this.value.substring(0, this.selectionStart)
+            selection = this.value.substring(this.selectionStart, this.selectionEnd)
+            after = this.value.substring(this.selectionEnd, this.value.length)
+            this.value = before.concat(f(selection), after)
+         }
+      })
 }
 
 function setupEnv (db, env) {
@@ -304,32 +306,34 @@ function setupEnv (db, env) {
       bmenu.push(['Закладки',
                   function () { toggleBookmarks() }])
 
-   $(iom.menu).append(
+   env.find(iom.menu).append(
       $.ui.multiLink(bmenu, '- [')
    )
 
    if (db.config.bookmarks.v[0]) {
       env.find(iom.postform).submit(function () {
-	 var t = $(this).parents(iom.tid)
-	 var tid = t.attr('id')
-	 if (!toggleBookmark(tid)) {
-	    toggleBookmark(tid)
-	 }
+         var t = $(this).parents(iom.tid)
+         var tid = t.attr('id')
+         if (!toggleBookmark(tid)) {
+            toggleBookmark(tid)
+         }
       })
    }
-   
+
    if (db.config.form.tripleCaptcha[0]) {
       var img = env.find(iom.form.turimage)
       img.css('padding-right', '3px').
-	 after(img.clone(true)).click().
-	 after(img.clone(true)).click()
+         after(img.clone(true)).click().
+         after(img.clone(true)).click()
    }
-   
+
    if (db.config.citeInTitle[0]) {
-   if($(iom.form.parent).length > 0) {
-      $('title').append(
-         ' &#8212; ' +
-            $.ui.threadCite('delform', db.config.hiding.citeLength[0] - 1))
+      if($(iom.form.parent).length > 0) {
+         $('title').append(
+            ' &#8212; ' +
+               $.ui.threadCite('delform', db.config.hiding.citeLength[0] - 1))
+   
+      }
    }
 
    if (db.config.form.sageButton[0]) {
@@ -339,7 +343,7 @@ function setupEnv (db, env) {
              function () { sage() }]
          ], ' <b>[', ']</b>')
       )}
-   }
+
    if (db.config.form.formatButtons[0]) {
       env.find(iom.postform + ' ' + iom.form.submit).after(
          $.ui.multiLink([
@@ -464,18 +468,18 @@ apply_me = function (messages, isSecondary) {
             if ($(iom.form.parent).length == 0)
                tmenu.push([
                   'Ответ', turl])
-            trm.after($.ui.multiLink(tmenu, '', '')).remove()
-	    if($(iom.form.parent).length == 0) {
-	       var moar = subj.find(iom.thread.moar).clone()
-	       if (moar.length == 0) {
-		  moar = $('<span class="omittedposts"></span>')
-	       }
-	       moar.append($.ui.multiLink([
-		  ['Ответить', function () { showReplyForm(tid) }],
-		  [isSecondary ? 'Свернуть' : 'Развернуть', function () { toggleThread(tid, !isSecondary) }]
-	       ]))
-	       subj.find(iom.thread.eot).after(moar)
-	    }
+            trm.replaceWith($.ui.multiLink(tmenu, '', ''))
+            if($(iom.form.parent).length == 0) {
+               var moar = subj.find(iom.thread.moar).clone()
+               if (moar.length == 0) {
+                  moar = $('<span class="omittedposts"></span>')
+               }
+	       tmenu[tmenu.length-1] = [
+		  'Ответить',
+	          function () { showReplyForm(tid) }]
+               moar.append($.ui.multiLink(tmenu))
+               subj.find(iom.thread.eot).after(moar)
+            }
             if (db.config.form.showInThread[0]) {
                subj.find(iom.post.reflink).each(
                   function () {
@@ -520,4 +524,4 @@ apply_me = function (messages, isSecondary) {
 /* */
 db.loadCfg(defaults)
 
-$(document).ok(db, setupEnv, apply_me) 
+$(document).ok(db, setupEnv, apply_me)
