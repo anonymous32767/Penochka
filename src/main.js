@@ -544,7 +544,6 @@ apply_me = function (messages, isSecondary) {
    }
 }
 
-/* */
 db.loadCfg(defaults)
 
 $(document).ok(db, setupEnv, apply_me)
