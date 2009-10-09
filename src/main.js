@@ -51,22 +51,11 @@ function showReplyForm(id, cite, parent) {
    var subj = $(iom.postform+id)
    if(subj.attr('id')) {
       subj.show()
-      if (typeof cite != undefined) {
+      if (cite) {
          var msg = subj.find(iom.form.message)
          msg.val(msg.val() + cite)
-         if (1) {
-            var firstDoNot = true
-            var img = subj.find(iom.form.turimage).each(
-               function () {
-                  if (firstDoNot) {
-                     firstDoNot = false
-                  } else {
-                     $(this).click()
-                  }
-               })
-         }
-         msg[0].focus()
       }
+      msg[0].focus()
       return
    } else {
       var subj = $(iom.postform).clone(true).tuneForThread(id);
@@ -229,7 +218,7 @@ function sage(env) {
    var email = env.find(iom.form.email)
    email.val(email.val() == 'sage' ? '' : 'sage')
    if (db.config.sage.inAllFields[0]) {
-      var pstr = env.find(iom.form.poster)
+      var pstr = env.find(iom.form.user)
       pstr.val(pstr.val() == 'sage' ? '' : 'sage')
       var ttl = env.find(iom.form.title)
       ttl.val(ttl.val() == 'sage' ? '' : 'sage')
