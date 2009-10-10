@@ -43,11 +43,15 @@ var defaults = {
       asDog: [false, 'В виде собаки']
    },
    unfoldImages: [true,'Развертывать изображения'],
+   fitImages: [true,'Подгонять изображения под ширину экрана'],
    unfoldThreads: [true, 'Кнопка развертывания треда'],
+   threadMenu: [true, 'Меню треда'],
    citeInTitle: [true, 'Показывать цитату оп-поста в заголовке страницы'],
    form: {
       v: [true,'<b class="penBig">Форма ответа</b>'],
       showInThread: [true, 'Форма ответа в конце треда'],
+      hideInThread: [true, 'Скрывать верхнюю форму в треде'],
+      hideInIndex: [false, 'Скрывать верхнюю форму в индексе'],
       tripleCaptcha: [false, 'Дублировать капчу'],
       sageButton: [true, 'Кнопка сажи'],
       formatButtons: [true, 'Кнопки форматирования']
@@ -86,7 +90,8 @@ var defaults = {
    },
    bookmarks: {
       v: [true,'<b class="penBig">Закладки</b>'],
-      citeLength: [55, 'Длина цитаты из оп-поста в закладках']
+      citeLength: [55, 'Длина цитаты из оп-поста в закладках'],
+      autoAdd: [true, 'При ответе в тред закладывать его автоматически']
    }
 }
 
@@ -356,7 +361,7 @@ function storeBookmarks () {
       bm.push(i)
       bm.push($.bookmarks[i])
    }
-   $.cookie('penBms', b64encode(bm.join('|')),{expires: 9000});
+   $.cookie('penBms', b64encode(bm.join('|')),{path: '/', expires: 9000});
 }
 
 function loadBookmarks () {
@@ -374,7 +379,7 @@ function genBookmarks () {
    for(i in $.bookmarks) {
       if (!$.bookmarks[i])
          continue
-      var bm = $('<div class="penDesc"> <a class="penBmLink" href="' + i + '">' + i.replace(/.*?(\d+).*/, '$1') + '</a> ' + $.bookmarks[i] + '</div>')
+      var bm = $('<div class="penDesc"> /' + i.replace(/.*?(\w+).*/, '$1') + '/ <a class="penBmLink" href="' + i + '">' + i.replace(/.*?(\d+).*/, '$1') + '</a> ' + $.bookmarks[i] + '</div>')
       bmarks.append(bm.prepend(
          $.ui.multiLink([
             ['x',

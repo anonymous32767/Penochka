@@ -97,6 +97,7 @@ iom = {
       email: 'span.commentpostername a, span.postername a'
    },
    thread: {
+      header: 'div.theader',
       ref: 'span.reflink:first',
       reflink: 'span.reflink:first a',
       message: 'blockquote:not(.penRefs):first',
@@ -193,7 +194,7 @@ function dvach (onload) {
             var h = subj.attr('height')
             subj.attr('altsrc',altsrc)
             subj.attr('style','height: '+h+'px; width:'+w+'px;')
-            subj.attr('altstyle','display:block;clear: both;min-height: '+h+'px; min-width: '+w+'px')
+            subj.attr('altstyle','clear: both;min-height: '+h+'px; min-width: '+w+'px;')
             subj.removeAttr('height')
             subj.removeAttr('width')
          }
@@ -364,7 +365,7 @@ jQuery.fn.extend({
                setTimeout(function() {
                   scope.timer.diff('async queue');
                   $('p.footer a:last').
-                     after(' + <a href="http://github.com/anonymous32767/Penochka/" title="' + scope.timer.cache + ' total: ' + scope.timer.total + 'ms">penochka VeRsIoN</a>')
+                     after(' + <a href="http://github.com/anonymous32767/Penochka/" title="' + scope.timer.cache + ' total: ' + scope.timer.total + 'ms">penochka UnStAbLe</a>')
                },0);
             }
          )

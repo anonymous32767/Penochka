@@ -14,7 +14,7 @@ install: compiled
 compiled: 
 	cd src; make;
 	mv src/penochka.js $(target)
-	sed -e 's/VeRsIoN/$(v)/g' penochka.js > penochka1.js
+	sed -e 's/UnStAbLe/$(v)/g' penochka.js > penochka1.js
 	mv penochka1.js penochka.js
 
 clean:
@@ -23,8 +23,6 @@ clean:
 
 build: 	
 	make compiled
-	sed -e 's/VeRsIoN/$(v)/g' penochka.js > penochka1.js
-	mv penochka1.js penochka.js
 	git add penochka.js
 	git commit -a -m "$(m)"
 	git tag -a $(v) -m "Build $(v)"

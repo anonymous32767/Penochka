@@ -67,8 +67,8 @@ function showReplyForm(id, cite, parent) {
                   ['Скрыть',
                    function() { $(iom.postform + id).hide() }]
                ])))
-      if (!parent) 
-	 parent = $('#'+ id + ' ' + iom.thread.eot)
+      if (!parent)
+         parent = $('#'+ id + ' ' + iom.thread.eot)
       parent.after(subj)
       showReplyForm(id, cite)
    }
@@ -148,6 +148,9 @@ function refold(id) {
    }
    swapAttr(subj, 'style', 'altstyle')
    swapAttr(subj, 'src', 'altsrc')
+   if (db.config.fitImages[0]) {
+      subj.css('max-width', $(window).width() - 64 + 'px')
+   }
    return false;
 }
 
@@ -249,10 +252,10 @@ function chktizer(obj, id, tp) {
       $.ui.multiLink([
          ['Показать',
           function () { toggleVisible(id) }],
-	 ['Сажа',
-	  function () { 
-	     showReplyForm(id, tizText + 'Показать / Сажа]', tizer);
-	     sage($(iom.postform+id)) }]
+         ['Сажа',
+          function () {
+             showReplyForm(id, tizText + 'Показать / Сажа]', tizer);
+             sage($(iom.postform+id)) }]
       ], tizText)
       , tp)
    obj.before(tizer)
@@ -306,7 +309,7 @@ function setupEnv (db, env) {
       $.ui.multiLink(bmenu, '- [')
    )
 
-   if (db.config.bookmarks.v[0]) {
+   if (db.config.bookmarks.autoAdd[0]) {
       env.find(iom.postform).submit(function () {
          var t = $(this).parents(iom.tid)
          var tid = t.attr('id')
@@ -323,13 +326,35 @@ function setupEnv (db, env) {
          after(img.clone(true)).click()
    }
 
-   if (db.config.citeInTitle[0]) {
-      if($(iom.form.parent).length > 0) {
+
+   if($(iom.form.parent).length > 0) {
+      if (db.config.citeInTitle[0]) {
          $('title').append(
             ' &#8212; ' +
                $.ui.threadCite('delform', db.config.hiding.citeLength[0] - 1))
-   
       }
+      if (db.config.threadMenu[0]) {
+         env.find('hr:first').next('a:first').replaceWith(
+            $.ui.multiLink([
+               ['Переключить картинки',
+                function () { $(iom.post.image).parent().click() }],
+               ['Переключить сообщения без картинок',
+                function () { $(iom.pid).each(
+                   function () {
+                      if ($(this).find(iom.post.image).length == 0)
+                         $(this).toggle()
+                   }) }],
+            ], '', '').css('left', '0')
+         )
+      }
+      if (db.config.form.hideInThread[0]) {
+         env.find(iom.postform).hide()
+         env.find(iom.thread.header).hide()
+      }
+   }
+   if (db.config.form.hideInIndex[0]) {
+      env.find(iom.postform).hide()
+      env.find('hr').slice(0,1).hide()
    }
 
    if (db.config.form.sageButton[0]) {
@@ -366,25 +391,25 @@ function setupEnv (db, env) {
             ['<s>З</s>', function () {
                withSelection(
                   env.find(iom.form.message),
-                  function (s) { 
-		     var l = s.length
-		     for (var i = 0; i < l; i++) {
-			s += '^H'
-		     }
-		  return s }) }],
+                  function (s) {
+                     var l = s.length
+                     for (var i = 0; i < l; i++) {
+                        s += '^H'
+                     }
+                     return s }) }],
             ['<u>П</u>', function () {
                withSelection(
                   env.find(iom.form.message),
                   function (s) { return '__'+s+'__' }) }],
-	    ['<tt>Код</tt>', function () {
+            ['<tt>Код</tt>', function () {
                withSelection(
                   env.find(iom.form.message),
-                  function (s) { 
-		     if (s.search(/\n/) != -1) {
-			return '    '+s.replace(/\n/g, '\n    ')
-		     } else {
-			return '`'+s+'`' }
-		  }) }]
+                  function (s) {
+                     if (s.search(/\n/) != -1) {
+                        return '    '+s.replace(/\n/g, '\n    ')
+                     } else {
+                        return '`'+s+'`' }
+                  }) }]
          ],' <b>[',']</b>'))
    }
 
@@ -484,9 +509,9 @@ apply_me = function (messages, isSecondary) {
                if (moar.length == 0) {
                   moar = $('<span class="omittedposts"></span>')
                }
-	       tmenu[tmenu.length-1] = [
-		  'Ответить',
-	          function () { showReplyForm(tid) }]
+               tmenu[tmenu.length-1] = [
+                  'Ответить',
+                  function () { showReplyForm(tid) }]
                moar.append($.ui.multiLink(tmenu))
                subj.find(iom.thread.eot).after(moar)
             }
@@ -496,9 +521,9 @@ apply_me = function (messages, isSecondary) {
                      var subj = $(this)
                      var pid = subj.findc(iom.pid).attr('id')
                      subj.click(
-                        function () { 
-			   showReplyForm(tid, '>>'+pid.replace('p','')); 
-			   return false; }
+                        function () {
+                           showReplyForm(tid, '>>'+pid.replace('p',''));
+                           return false; }
                      )}
                )}
          }
