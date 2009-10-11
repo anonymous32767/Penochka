@@ -347,9 +347,14 @@ function setupEnv (db, env) {
             ], '', '').css('left', '0')
          )
       }
-      if (db.config.form.hideInThread[0]) {
-         env.find(iom.postform).hide()
+      if (db.config.form.moveAtEnd[0]) {
+	 var form = $(iom.postform).tuneForm()
+	 form.attr('id', 'postform'+'t'+$(iom.form.parent).attr('value'))
+	 $('#delform hr:last').before(form)
          env.find(iom.thread.header).hide()
+      }
+      if (1) {
+
       }
    }
    if (db.config.form.hideInIndex[0]) {

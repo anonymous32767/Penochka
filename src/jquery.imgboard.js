@@ -202,6 +202,11 @@ function dvach (onload) {
    }
 
    jQuery.fn.extend({
+      tuneForm:
+      function () {
+	 $(this).find('div.rules').remove()
+	 return $(this)
+      },
       tuneForThread:
       function (tid) {
          var tnum = tid.replace('t','')
@@ -211,7 +216,7 @@ function dvach (onload) {
 
          form.find('input[name=gb2][value=board]').removeAttr('checked')
          form.find('input[name=gb2][value=thread]').attr('checked','checked') */
-         form.find('div.rules').remove()
+	 form.tuneForm()
          form.prepend('<input type="hidden" name="parent" value="' + tnum + '" />')
          var turingTest = form.find(iom.form.turimage)
 	 if (turingTest.length > 0) {

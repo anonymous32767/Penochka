@@ -49,8 +49,8 @@ var defaults = {
    citeInTitle: [true, 'Показывать цитату оп-поста в заголовке страницы'],
    form: {
       v: [true,'<b class="penBig">Форма ответа</b>'],
-      showInThread: [true, 'Форма ответа в конце треда'],
-      hideInThread: [true, 'Скрывать верхнюю форму в треде'],
+      showInThread: [true, 'Показывать по клику на номере сообщения'],
+      moveAtEnd: [true, 'Переносить форму ответа в конец треда'],
       hideInIndex: [false, 'Скрывать верхнюю форму в индексе'],
       tripleCaptcha: [false, 'Дублировать капчу'],
       sageButton: [true, 'Кнопка сажи'],
