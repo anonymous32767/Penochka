@@ -311,11 +311,27 @@ function setupEnv (db, env) {
 
    if (db.config.bookmarks.autoAdd[0]) {
       env.find(iom.postform).submit(function () {
+	 var subj = $(this)
          var t = $(this).parents(iom.tid)
          var tid = t.attr('id')
          if (!toggleBookmark(tid)) {
             toggleBookmark(tid)
          }
+	 if (db.config.form.useAJAX[0]) {
+	    subj.find(iom.form.status).text('Отправка...')
+	    subj.ajaxSubmit({
+	       success: 
+	       function(responseText, statusText) {
+		  if (responseText.search(/delform/) == -1) {
+		     var errResult = responseText.match(/<h1.*?>(.*?)<br/)[1] 
+		     subj.find(iom.form.status).text(errResult)
+		  } else {
+		     subj.find(iom.form.status).text('Ok. Обновляем страницу...')
+		     window.location.reload(true)
+		  }
+	       }})
+	    return false
+	 }
       })
    }
 

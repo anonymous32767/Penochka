@@ -54,7 +54,8 @@ var defaults = {
       hideInIndex: [false, 'Скрывать верхнюю форму в индексе'],
       tripleCaptcha: [false, 'Дублировать капчу'],
       sageButton: [true, 'Кнопка сажи'],
-      formatButtons: [true, 'Кнопки форматирования']
+      formatButtons: [true, 'Кнопки форматирования'],
+      useAJAX: [true, 'Использовать AJAX']
    },
    intelliSense: {
       v: [true,'<b class="penBig">Intellisense</b>'],

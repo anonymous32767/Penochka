@@ -115,7 +115,8 @@ iom = {
       turimage: '#imgcaptcha',
       password: 'input[name=password]',
       parent: 'input[name=parent]',
-      submit: 'input[type=submit]'
+      submit: 'input[type=submit]',
+      status: 'i:first'
    },
    anchors: 'blockquote a[onclick]',
    menu: 'div.adminbar:first',
