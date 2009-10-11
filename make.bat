@@ -1,13 +1,55 @@
+@title Penochka userscript
+@echo off
+
+:main
+@cls
+@color 1F
+@echo.
+@echo               ========= Penochka (aka govno3) юзерскрипт =========
+@echo               -------------------- для 2-ch.ru -------------------
+@echo.
+@echo   Выберите действие:
+@echo    f     -   создать скрипт для Firefox, Chrome [.user.js]
+@echo    o     -   создать скрипт для Opera [.js]
+@echo    q     -   выход
+@echo.
+@echo.
+@set /p command=^>
+@if "%command%"=="q" exit
+@if "%command%"=="f" set ext=.user.js & goto make
+@if "%command%"=="o" set ext=.js & goto make
+@cls
+@echo.
+@echo   Вы ввели неправильную команду.
+@echo   Попробуйте еще раз.
+@echo.
+@echo.
+@ping -n 3 127.0.0.1 > nul
+@goto :main
+
+:make
+@if not exist src goto errmsg
+@if exist penochka%ext% del penochka%ext%
 cd src
-echo // ==UserScript== > penochka.js
-echo // @name           Govno 3 aka penochka >> penochka.js
-echo // @version        UnStAbLe >> penochka.js
-echo // @description    Penochka imgboard script. >> penochka.js
-echo // @include        http://2-ch.ru/* >> penochka.js
-echo // @include        http://*.2-ch.ru/* >> penochka.js
-echo // @exclude        */src/* >> penochka.js
-echo // @run-at         document-start >> penochka.js
-echo // ==/UserScript== >> penochka.js
-type timer.js base64.js jquery.min.js jquery.cookie.js jquery.json.js jquery.imgboard.js settings.js  main.js >> penochka.js
+@ type header.js base64.js jquery.min.js jquery.cookie.js jquery.json.js jquery.imgboard.js settings.js  main.js >> penochka%ext%
 cd ..
-move src\penochka.js penochka.js
+move src\penochka%ext% penochka%ext%
+@cls
+@echo.
+@echo   Файл успешно создан.
+@echo.
+@echo.
+@ping -n 3 127.0.0.1 > nul
+exit
+
+:errmsg
+@title Ошибка!
+@cls
+@color 0C
+@echo.
+@echo.
+@echo             Нужные для работы файлы не найдены,
+@echo             проверьте наличие папки src
+@echo.
+@ping -n 3 127.0.0.1 > nul
+exit

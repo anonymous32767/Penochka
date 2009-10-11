@@ -443,10 +443,10 @@ apply_me = function (messages, isSecondary) {
          var subj = $(this)
          var pid = subj.attr('id')
          if(db.config.hiding.posts[0]) {
-            subj.find(iom.post.ref).after($.ui.multiLink([
-               ['X',
-                function () { chktizer(subj, pid, false); toggleVisible(pid) }]
-            ]))
+            subj.find(iom.post.ref).append($.ui.multiLink([
+               ['&#215;',
+                function () { chktizer(subj, pid, false); toggleVisible(pid); return false; }]
+            ], ' ', ''))
          }
          /* Censore */
          if(db.config.censore.v[0]) {
