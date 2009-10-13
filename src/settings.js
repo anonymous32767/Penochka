@@ -101,6 +101,8 @@ var db = {
    },
    hidden: {
    },
+   filtered: {
+   },
    getval:
    function (pfx,obj) {
       for(var i in pfx) {

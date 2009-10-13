@@ -231,7 +231,7 @@ function sage(env) {
    }
 }
 
-function chktizer(obj, id, tp) {
+function chktizer(obj, id, tp, sage, filtered) {
    var tizText = "";
    if ($('#tiz' + id).attr('id') || db.config.hiding.goodStealth[0])
       return
@@ -242,21 +242,22 @@ function chktizer(obj, id, tp) {
             '...)'
       } else { var cite = '' }
       tizText = 'Тред ' + id.replace('t','№') + ' ' + cite +
-         ' скрыт. ['
+         (filtered ? ' отфильтрован' : ' скрыт') + '. ['
    } else {
       tizText = 'Пост ' + id.replace('p','№') + ' ' +
-         ' скрыт. ['
+         (filtered ? ' отфильтрован' : ' скрыт') + '. ['
+   }
+   var tmenu = [['Показать',
+          function () { toggleVisible(id) }]]
+   if (sage) {
+      tmenu.push(['Сажа',
+          function () {
+             showReplyForm(id, tizText + 'Показать / Сажа]', tizer);
+             sage($(iom.postform+id)) }])
    }
    var tizer = $.ui.tizer(
       id,
-      $.ui.multiLink([
-         ['Показать',
-          function () { toggleVisible(id) }],
-         ['Сажа',
-          function () {
-             showReplyForm(id, tizText + 'Показать / Сажа]', tizer);
-             sage($(iom.postform+id)) }]
-      ], tizText)
+      $.ui.multiLink(tmenu, tizText)
       , tp)
    obj.before(tizer)
 }
@@ -471,9 +472,29 @@ apply_me = function (messages, isSecondary) {
          }
          /* Censore */
          if(db.config.censore.v[0]) {
-            var censf = true;
+            var censf = false;
+	    if (db.config.censore.title[0] &&
+		subj.find(iom.post.title).text().search(db.config.censore.title[0]) != -1) {
+	       censf = true
+	    }
+	    if (db.config.censore.username[0] &&
+		subj.find(iom.post.poster).text().search(db.config.censore.username[0]) != -1) {
+	       censf = true
+	    }
+	    if (db.config.censore.email[0] &&
+		subj.find(iom.post.email).text().search(db.config.censore.email[0]) != -1) {
+	       censf = true
+	    }
+	    if (db.config.censore.msg[0] &&
+		subj.find(iom.post.message).text().search(db.config.censore.msg[0]) != -1) {
+	       censf = true
+	    }
+	    if (db.config.censore.total[0] &&
+		subj.text().search(db.config.censore.total[0]) != -1) {
+	       censf = true
+	    }
             if(censf) {
-               db.hidden[pid]=1
+               db.filtered[pid]=1
             }
          }
          if (db.config.forwardReferences.v[0] && $.references[pid]) {
@@ -512,7 +533,7 @@ apply_me = function (messages, isSecondary) {
             if (db.config.hiding.threads[0])
                tmenu.push([
                   'Скрыть',
-                  function () { chktizer(subj, tid, true); toggleVisible(tid) }])
+                  function () { chktizer(subj, tid, true, true); toggleVisible(tid) }])
             if (db.config.unfoldThreads[0] && (subj.find(iom.thread.moar).length | isSecondary))
                tmenu.push([
                   isSecondary ? 'Свернуть' : 'Развернуть',
@@ -573,8 +594,17 @@ apply_me = function (messages, isSecondary) {
           * TODO Rewrite toggle for suitable usage in this
           * place (may be impossible). */
       var subj = messages.find('#'+objId)
-      subj.css('display','none')
+      subj.css('display', 'none')
       chktizer(subj, objId, objId.search(/t/) == -1 ? false : true)
+      messages.find('#tiz'+objId).css('display','block')
+   }
+   for (var objId in db.filtered) {
+      /* It's an low level alternative of toggle method
+          * TODO Rewrite toggle for suitable usage in this
+          * place (may be impossible). */
+      var subj = messages.find('#'+objId)
+      subj.css('display', 'none')
+      chktizer(subj, objId, false, false, true)
       messages.find('#tiz'+objId).css('display','block')
    }
 }

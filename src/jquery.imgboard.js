@@ -91,7 +91,7 @@ iom = {
       abbrlink: 'div.abbrev a',
       message: 'blockquote:not(.penRefs):first',
       ref: 'span.reflink',
-      reflink: 'span.reflink a',
+      reflink: 'span.reflink a:first',
       title: 'span.replytitle, span.filetitle',
       poster: 'span.commentpostername, span.postername',
       email: 'span.commentpostername a, span.postername a'
