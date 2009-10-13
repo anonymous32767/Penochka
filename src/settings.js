@@ -238,7 +238,8 @@ var db = {
       var presistentHidden = $('.penThread:visible .penPost:hidden, .penThread:hidden');
       presistentHidden.each(
          function () {
-            out[$(this).attr('id')] = t
+	    var id = $(this).attr('id')
+            if (!db.filtered[id]) { out[id] = t }
          }
       )
       for (var i in this.hidden) {
