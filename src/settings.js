@@ -169,9 +169,9 @@ var db = {
    },
    loadCfg:
    function (defs) {
-      var gcfg = $.evalJSON($.cookie('penCfgGlobal')) || {};
-      var lcfg = $.evalJSON($.cookie('penCfg')) || {};
-      this.hidden = $.evalJSON($.cookie('penHidden')) || {};
+      var gcfg = $.evalJSON(io('penCfgGlobal')) || {};
+      var lcfg = {}; //$.evalJSON($.cookie('penCfg')) || {};
+      this.hidden = $.evalJSON(io('penHidden')) || {};
       var i = 0;
       var sv = this.setval;
       var cfg = {};
@@ -219,17 +219,16 @@ var db = {
          []
       )
       if(!isEmpty(gcfg)) {
-         $.cookie('penCfgGlobal', $.toJSON(gcfg), {path: '/', expires: 9000})
+         io('penCfgGlobal', $.toJSON(gcfg))
       } else {
          /* Negative expiration time deletes cookie */
-         $.cookie('penCfgGlobal', '', {path: '/', expires: -1})
+         io('penCfgGlobal', null)
       }
-      if(!isEmpty(lcfg)) {
+      /* if(!isEmpty(lcfg)) {
          $.cookie('penCfg', $.toJSON(lcfg), {expires: 9000})
       } else {
-         /* Here too */
          $.cookie('penCfg', '', {expires: -1})
-      }
+      } */
    },
    saveState:
    function () {
@@ -248,7 +247,7 @@ var db = {
          }
       }
       this.hidden = out;
-      $.cookie('penHidden',$.toJSON(this.hidden),{expires: 9000});
+      io('penHidden', $.toJSON(this.hidden));
    },
    __form: "",
    genForm:
@@ -365,12 +364,12 @@ function storeBookmarks () {
       bm.push(i)
       bm.push($.bookmarks[i])
    }
-   $.cookie('penBms', b64encode(bm.join('|')),{path: '/', expires: 9000});
+   io('penBms', b64encode(bm.join('|')));
 }
 
 function loadBookmarks () {
    try {
-      var bm = b64decode($.cookie('penBms')).split('|')
+      var bm = b64decode(io('penBms')).split('|')
       for(var i = 0; i < bm.length; i+=2) {
          $.bookmarks[bm[i]] = bm[i + 1]
       }

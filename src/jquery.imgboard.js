@@ -89,6 +89,7 @@ iom = {
       imageinfo: 'span.filesize',
       abbr: 'div.abbrev',
       abbrlink: 'div.abbrev a',
+      wholemessage: 'blockquote',
       message: 'blockquote:not(.penRefs):first',
       ref: 'span.reflink',
       reflink: 'span.reflink a:first',
@@ -328,7 +329,7 @@ function dvach (onload) {
       }
    }
 
-   return function (obj,f) {
+   return function (obj, f, aft) {
       const css = '#penSetttings {padding: 8px} .penVal, .penLoc, .penDef { display:block; text-align:right; float: right;position: relative; margin:3px; margin-left: 8px; height:26px; line-height:1;} .penRow {display: block; position: relative; clear: both; } .penTab {margin-left: 22px} #penOptions input { height: 24px;} .penBig {font-size: 16pt}';
       if (obj.find('#captchadiv').length > 0) {
 	 obj.find(iom.form.turtest).
@@ -347,6 +348,7 @@ function dvach (onload) {
       addStyle(css)
       f(cloned)
       threadsRaw.replaceWith(cloned);
+      aft()
    };
 }/* end of 2ch */
 
@@ -354,25 +356,18 @@ jQuery.fn.extend({
    a: function () {
       return $(this).parents('a:first');
    },
-   ok: function(db, env, msg) {
+   ok: function(db, env, msg, aft) {
       if (typeof GM_setValue != "undefined") {
          /* we are under firefox's greasemonkey */
          document = unsafeWindow.document
          var converge = dvach(function() { env(db, $(unsafeWindow.document)) })
-         converge($(unsafeWindow.document), msg)
+         converge($(unsafeWindow.document), msg, aft)
       } else {
          this.ready(
             function () {
                var subj = $(this)
                var converge = dvach(function() { env(db, subj) })
-               converge(subj, msg)
-               scope.timer.diff('penochka sync');
-               scope.timer.init();
-               setTimeout(function() {
-                  scope.timer.diff('async queue');
-                  $('p.footer a:last').
-                     after(' + <a href="http://github.com/anonymous32767/Penochka/" title="' + scope.timer.cache + ' total: ' + scope.timer.total + 'ms">penochka UnStAbLe</a>')
-               },0);
+               converge(subj, msg, aft)
             }
          )
       }
