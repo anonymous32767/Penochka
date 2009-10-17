@@ -45,7 +45,7 @@ jQuery.fn.swap = function(b){
 var apply_me = {}
 
 /* */
-function showReplyForm(id, cite, parent) {
+function showReplyForm(id, cite, parent, hideHide) {
    if(!id)
       return
    var subj = $(iom.postform+id)
@@ -60,13 +60,14 @@ function showReplyForm(id, cite, parent) {
    } else {
       var subj = $(iom.postform).clone(true).tuneForThread(id);
       subj.attr('id', 'postform' + id);
-      subj.prepend(
-         $('<div style="float:right">').
-            append(
-               $.ui.multiLink([
-                  ['Скрыть',
-                   function() { $(iom.postform + id).hide() }]
-               ])))
+      if (!hideHide)
+	 subj.prepend(
+            $('<div style="float:right">').
+               append(
+		  $.ui.multiLink([
+                     ['Скрыть',
+                      function() { $(iom.postform + id).hide() }]
+		  ]))) 
       if (!parent)
          parent = $('#'+ id + ' ' + iom.thread.eot)
       parent.after(subj)
@@ -271,13 +272,13 @@ function apply_refs(a, body) {
    }
 }
 
-function toggleBookmark(id) {
-   var subj = $('#'+id)
-   var url = subj.find(iom.thread.reflink).attr('href').split('#')[0]
+function toggleBookmark(tid) {
+   var subj = $('#'+tid)
+   var url = $.turl(tid)
    if ($.bookmarks[url]) {
       $.bookmarks[url] = null
    } else {
-      var tcite =  $.ui.threadCite(id, db.config.bookmarks.citeLength[0] - 1)
+      var tcite =  $.ui.threadCite(tid, db.config.bookmarks.citeLength[0] - 1)
       $.bookmarks[url]=tcite
    }
    storeBookmarks()
@@ -321,6 +322,7 @@ function setupEnv (db, env) {
          if (db.config.form.useAJAX[0]) {
             subj.find(iom.form.status).text('Отправка...')
             subj.ajaxSubmit({
+	       timeout: 0,
                success:
                function(responseText, statusText) {
                   if (responseText.search(/delform/) == -1) {
@@ -351,7 +353,7 @@ function setupEnv (db, env) {
                $.ui.threadCite('delform', db.config.hiding.citeLength[0] - 1))
       }
       if (db.config.threadMenu[0]) {
-         env.find('hr:first').next('a:first').replaceWith(
+         env.find('hr:first').next('a:first').after (
             $.ui.multiLink([
                ['Переключить картинки',
                 function () { $(iom.post.image).parent().click() }],
@@ -361,7 +363,7 @@ function setupEnv (db, env) {
                       if ($(this).find(iom.post.image).length == 0)
                          $(this).toggle()
                    }) }],
-            ], '', '').css('left', '0')
+            ], ' / ', '').css('left', '0')
          )
       }
       if (db.config.form.moveAtEnd[0]) {
@@ -605,7 +607,7 @@ apply_me = function (messages, isSecondary) {
 
 function postSetup () {
    if (db.config.form.moveAtEnd[0] && $(iom.form.parent).length > 0) {
-      showReplyForm($(iom.tid).attr('id'))
+      showReplyForm($(iom.tid).attr('id'), null, null, true)
    }
    scope.timer.diff('penochka sync');
    scope.timer.init();

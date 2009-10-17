@@ -250,6 +250,12 @@ function dvach (onload) {
       }
    });
 
+   jQuery.extend({
+      turl: function (tid) {
+	 return '/s/res/'+tid.replace(/\D/g, '')+'.html'
+      }
+   });
+
    jQuery.xlatb = xlatb;
    jQuery.references = [];
    jQuery.bookmarks = [];
