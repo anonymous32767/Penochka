@@ -120,7 +120,7 @@ iom = {
       status: 'i:first'
    },
    anchors: 'blockquote a[onclick]',
-   menu: 'div.adminbar:first',
+   menu: 'div.adminbar:first a:last',
    options: '#penOptions',
    postform: '#postform'
 }

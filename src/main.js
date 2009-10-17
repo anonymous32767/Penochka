@@ -307,8 +307,8 @@ function setupEnv (db, env) {
       bmenu.push(['Закладки',
                   function () { toggleBookmarks() }])
 
-   env.find(iom.menu).append(
-      $.ui.multiLink(bmenu, '- [')
+   env.find(iom.menu).after(
+      $.ui.multiLink(bmenu, ' / ', '')
    )
 
    if (db.config.bookmarks.autoAdd[0]) { // !!!

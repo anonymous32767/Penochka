@@ -169,9 +169,15 @@ var db = {
    },
    loadCfg:
    function (defs) {
-      var gcfg = $.evalJSON(io('penCfgGlobal')) || {};
+      var gcfg = {};
+      this.hidden = {};
+      try {
+	 var gcfg = $.evalJSON(io('penCfgGlobal'))
+      } catch (err) { };
       var lcfg = {}; //$.evalJSON($.cookie('penCfg')) || {};
-      this.hidden = $.evalJSON(io('penHidden')) || {};
+      try {
+	 this.hidden = $.evalJSON(io('penHidden'))
+      } catch (err) {}
       var i = 0;
       var sv = this.setval;
       var cfg = {};
