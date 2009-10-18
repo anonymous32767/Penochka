@@ -42,6 +42,7 @@ function addStyle( css ) {
       style.appendChild( document.createTextNode(css) );
    return style;
 }
+
 /* Some useful stuff */
 jQuery.fn.extend({
    /* Finds element parent which has class passed in argument. */
@@ -349,7 +350,6 @@ function dvach (onload) {
 
       parse(cloned);
       process(cloned);
-
       $('body').append('<div id="cache" style="display:none" />')
       addStyle(css)
       f(cloned)

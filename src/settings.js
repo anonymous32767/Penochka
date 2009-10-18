@@ -1,6 +1,6 @@
 /*
  * vim: ts=3 sts=3 cindent expandtab
- * jquery.imgboard - jquery extensions for imageboards.
+ * settings.js - penochka preferences system.
  *
  * Copyright (c) 2009, anonymous
  * All rights reserved.
@@ -29,395 +29,151 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-function isEmpty(obj) {
-   for(var prop in obj) {
-      if(obj.hasOwnProperty(prop))
-         return false;
-   }
-   return true;
-}
-
-var defaults = {
-   forwardReferences: {
-      v: [true, 'Карта дискуссии'],
-      asDog: [false, 'В виде собаки']
-   },
-   unfoldImages: [true,'Развертывать изображения'],
-   fitImages: [true,'Подгонять изображения под ширину экрана'],
-   unfoldThreads: [true, 'Кнопка развертывания треда'],
-   threadMenu: [true, 'Меню треда'],
-   citeInTitle: [true, 'Показывать цитату оп-поста в заголовке страницы'],
-   form: {
-      v: [true,'<b class="penBig">Форма ответа</b>'],
-      showInThread: [true, 'Показывать по клику на номере сообщения'],
-      moveAtEnd: [true, 'Переносить форму ответа в конец треда'],
-      hideInIndex: [false, 'Скрывать верхнюю форму в индексе'],
-      tripleCaptcha: [false, 'Дублировать капчу'],
-      sageButton: [true, 'Кнопка сажи'],
-      formatButtons: [true, 'Кнопки форматирования'],
-      useAJAX: [true, 'Использовать AJAX']
-   },
-   intelliSense: {
-      v: [true,'<b class="penBig">Intellisense</b>'],
-      ajax: [true, 'Автоматически подгружать пропущенные сообщения'],
-      fallback: [100,'Замедление на отпадание'],
-      raiseup: [0,'Замедление на срабатывание']
-   },
-   sage: {
-      v: [undefined, '<b class="penBig">Сажа</b>'],
-      sageMan: [false, 'Я &#8212; человек-<b>САЖА</b>'],
-      capsBold: [false, '<b>КАПСБОЛД</b>'],
-      inAllFields: [false, 'Сажа идет во все поля']
-   },
-   hiding: {
-      v: [undefined, '<b class="penBig">Скрытие</b>'],
-      threads: [true,'Скрытие потоков'],
-      citeLength: [35, 'Показывать цитату из оп-поста, букв'],
-      posts: [false,'Скрытие сообщений'],
-      goodStealth: [false,'Аккуратно скрывать']
-   },
-   state: {
-      v: [undefined,'<b class="penBig">Хранение данных</b>'],
-      constPasswd: ['', 'Постоянный пароль'],
-      expirationTime: [3,'Хранить информацию о скрытых тредах, дн.']
-   },
-   censore: {
-      v: [false, '<b class="penBig">Фильтрация</b>'],
-      username: ['', 'Имя пользователя'],
-      title: ['', 'Заголовок'],
-      email: ['', 'Электропочта (сажа)'],
-      msg: ['', 'Текст сообщения'],
-      total: ['', 'Всё сообщение']
-   },
-   bookmarks: {
-      v: [true,'<b class="penBig">Закладки</b>'],
-      citeLength: [55, 'Длина цитаты из оп-поста в закладках'],
-      autoAdd: [true, 'При ответе в тред закладывать его автоматически']
-   }
-}
-
 var db = {
-   config:{
+   ready: false,
+   cfg: {},
+   dflt: {},
+   name: {},
+   children: {},
+   hidden: {},
+   filtered: {},
+   bookmarks: {},
+   global: {
+      domain: '',
+      board: ''
    },
-   hidden: {
-   },
-   filtered: {
-   },
-   getval:
-   function (pfx,obj) {
-      for(var i in pfx) {
-         obj = obj[pfx[i]]
-         if(!obj) {
-            return undefined;
-         }
+   s : function (id, title, parent, defval, description, examples) {
+      if (defval) {
+	 this.cfg[id] = defval
+	 this.dflt[id] = defval
       }
-      return obj
-   },
-   setval:
-   function (pfx,o,v) {
-      var hd = pfx.slice(0,1)[0]
-      var tl = pfx.slice(1)
-      if(tl[0]) {
-         if (!o[hd]) {
-            o[hd] = {}
-         }
-         db.setval(tl,o[hd],v)
-      } else {
-         o[hd] = v
+      this.name[id] = title
+      if (!this.children[parent]) {
+	 this.children[parent] = []
       }
+      this.children[parent].push(id)
    },
-   getinp:
-   function (key) {
-      var e = $('#penSet' + key)
-      switch (e.attr('type')) {
-      case 'checkbox':
-         return e.attr('checked') ? true : false;
-         break;
-      case 'text':
-         return  e.attr('value');
-         break;
+   init : function () {
+      /* Группы настроек */
+      this.s ('feats', 'Возможности');
+      this.s ('form',  'Форма ответа');
+      this.s ('sage',  'Сажа');
+      this.s ('cens',  'Фильтрация');
+      this.s ('view',  'Оформление');
+      this.s ('sys',   'Системные');
+      this.s ('ftune', 'Тонкие настройки');
+
+      /* Теперь сами настройки */
+      this.s ('hide', 'Скрытие', 'feats');
+      this.s ('thrdHide', 'Потоков', 'hide', true);
+      this.s ('pstsHide', 'Сообщений', 'hide', false);
+      this.s ('iSense', 'Превью цитируемых (>>) сообщений', 'feats', true);
+      this.s ('fwdRefs', 'Обратные ссылки', 'feats', true);
+      this.s ('imgsUnfold', 'Развертывание картинок', 'feats', true);
+      this.s ('thrdUnfold', 'Развертывание тредов', 'feats', true);
+      this.s ('thrdMenu', 'Меню треда', 'feats', true);
+      this.s ('constPwd', 'Постоянный пароль на удаление', 'feats', '')
+      this.s ('bmarks', 'Закладки', 'feats', true)
+
+      this.s ('fastReply', 'Быстрый ответ', 'form', true);
+      this.s ('thrdMove', 'Переносить вниз, находясь в треде', 'form', true);
+      this.s ('idxHide', 'Скрывать, находясь на главной', 'form', false);
+      this.s ('sageBtn', 'Кнопка сажи', 'form', true);
+      this.s ('fmtBtns', 'Кнопки форматирования', 'form', true);
+      this.s ('tripleTt', 'Троировать капчу', 'form', true);
+
+      this.s ('sageMan', 'Я &#8212; человек-<b>САЖА</b>', 'sage', false);
+      this.s ('sageInAllFields', 'Сажа идет во все поля', 'sage', false);
+
+      this.s ('compact', 'Компактное отображение', 'view', true);
+
+      this.s ('censTitle', 'Компактное отображение', 'cens', true);
+      this.s ('censUser', 'Компактное отображение', 'cens', true);
+      this.s ('censMail', 'Компактное отображение', 'cens', true);
+      this.s ('censMsg', 'Компактное отображение', 'cens', true);
+      this.s ('censTotal', 'Компактное отображение', 'cens', true);
+
+      this.s ('useAJAX', 'Использовать асинхронный яваскрипт', 'sys', true);
+
+      this.s ('hidePure', 'Скрывать без следа', 'ftune', false);
+      this.s ('censPure', 'Скрывать отфильтрованное без следа', 'ftune', true);
+      this.s ('fitImgs', 'При развертывании подгонять картинки по ширине', 'ftune', true);
+      this.s ('citeInTitle', 
+	       'Показывать цитату из треда в заголовке страницы (&lt;title&gt;)', 
+	       'ftune', true);
+      this.s ('hideCiteLen', 'Размер цитаты скрытых объектов', 'ftune', 55);
+      this.s ('ttlCiteLen', 'Размер цитаты в заголовке', 'ftune', 55);
+      this.s ('bmCiteLen', 'Размер цитаты в закладках', 'ftune', 55);
+      this.s ('delay', 'Замедление в создании превью', 'ftune');
+      this.s ('iSenseUp', 'На притяжение', 'delay', 0);
+      this.s ('iSenseDn', 'На отпадание',  'delay', 200);
+      this.s ('bmAutoAdd', 'Автоматически добавлять тред в закладки при ответе',  'ftune', true);
+
+      this.global.domain = window.location.hostname
+      this.global.board = window.location.pathname.replace(/^\/(\w+)\/.*$/, '$1')
+      this.ready = true;
+   },
+   load : function (obj, name) {
+      if (!this.ready) {
+	 this.init()
       }
-   },
-   setinp:
-   function (key,val) {
-      var e = $('#penSet' + key)
-      switch (typeof val) {
-      case 'boolean':
-         if (val) {
-            e.attr('checked','checked')
-         } else {
-            e.removeAttr('checked')
-         }
-         break;
-      case 'number':
-      case 'string':
-         return  e.attr('value', val);
-         break;
-      }
-   },
-   __iter:
-   function (list, f, p) {
-      for (var key in list) {
-         var pfx = p.slice(); /* slice is a stupid array copy in js */
-         pfx.push(key)
-         if (list[key] instanceof Array) {
-            f(list[key],pfx)
-         } else {
-            this.__iter(list[key],f,pfx)
-         }
-      }
-   },
-   loadCfg:
-   function (defs) {
-      var gcfg = {};
-      this.hidden = {};
+      var raw = []
       try {
-	 var gcfg = $.evalJSON(io('penCfgGlobal'))
-      } catch (err) { };
-      var lcfg = {}; //$.evalJSON($.cookie('penCfg')) || {};
-      try {
-	 this.hidden = $.evalJSON(io('penHidden'))
-      } catch (err) {}
-      var i = 0;
-      var sv = this.setval;
-      var cfg = {};
-      this.__iter(
-         defs,
-         function (v,pfx) {
-            var nv = []
-            nv[0] = v[0]
-            nv[1] = v[1]
-            sv(pfx, cfg, nv)
-            nv.push(i);
-            if (typeof lcfg[i] != 'undefined') {
-               nv[0] = lcfg[i]
-               nv.push('local')
-            } else if (typeof gcfg[i] != 'undefined') {
-               nv[0] = gcfg[i]
-            }
-            i++
-         },
-         []
-      )
-      this.config = cfg
+	 raw = io(name).split('|')
+      } catch (err) { raw = [] }
+      /* TODO: Unescape this */
+      for (var i = 0; i < raw.length; i+=2) {
+	 if (raw[i + 1]) 
+	    obj[raw[i]] = raw[i + 1]
+      }
    },
-   saveCfg:
-   function (defs) {
-      var lcfg = [];
-      var gcfg = [];
-      db.__iter(
-         db.config,
-         function (v,pfx) {
-            var iv = db.getinp(v[2])
-            var dv = db.getval(pfx,defs)[0]
-            if($('#penSetLoc' + v[2]).attr('checked') == 'checked') {
-               lcfg[v[2]] = iv
-            } else {
-               if(iv != dv) {
-                  gcfg[v[2]] = iv
-                  lcfg.splice(v[2], 1)
-               } else {
-                  gcfg.splice(v[2], 1)
-                  lcfg.splice(v[2], 1)
-               }
-            }
-         },
-         []
-      )
-      if(!isEmpty(gcfg)) {
-         io('penCfgGlobal', $.toJSON(gcfg))
+   save : function (obj, name) {
+      var raw = [];
+      /* TODO: Escape this */
+      for (i in obj) {
+	 raw.push(i)
+	 raw.push(obj[i])
+      }
+      if (raw) {
+	 io(name, raw.join('|'))
       } else {
-         /* Negative expiration time deletes cookie */
-         io('penCfgGlobal', null)
+	 io(name, null)
       }
-      /* if(!isEmpty(lcfg)) {
-         $.cookie('penCfg', $.toJSON(lcfg), {expires: 9000})
-      } else {
-         $.cookie('penCfg', '', {expires: -1})
-      } */
    },
-   saveState:
-   function () {
-      var out = {};
-      var t = new Date().getTime()
-      var presistentHidden = $('.penThread:visible .penPost:hidden, .penThread:hidden');
-      presistentHidden.each(
-         function () {
-	    var id = $(this).attr('id')
-            if (!db.filtered[id]) { out[id] = t }
-         }
-      )
-      for (var i in this.hidden) {
-         if (!out[i] && (t - this.hidden[i]) < this.config.state.expirationTime[0]*86400 && $('#'+i).is(':hidden')) {
-            out[i] = this.hidden[i]
-         }
-      }
-      this.hidden = out;
-      io('penHidden', $.toJSON(this.hidden));
+   loadCfg : function () {
+      this.load(this.cfg, 'penCfg')
    },
-   __form: "",
-   genForm:
-   function () {
-      var obj = this;
-      var genf =
-         function (desc, key, val, loc, add) {
-            var locchk = $('<span class="penLoc">')
-            var defbtn = $('<span class="penDef">')
-            var result = $('<span class="penVal">')
-            if(typeof val != 'undefined') {
-               locchk.append(
-                  '<input type="checkbox" ' +
-                     (loc ? 'checked="checked"' : '') +
-                     'id="penSetLoc'+key+'" /> Локально')
-               defbtn.append(
-                  $('<input type="button" value="По умолчанию" />').
-                     click(
-                        function () {
-                           settingsDefault(defaults,key)
-                        }))
-            }
-            switch (typeof val) {
-            case 'boolean':
-               result.append(
-                  '<input type="checkbox" id="penSet' + key + '" ' +
-                     (val ? 'checked="checked"' : ' ') + '>')
-               break;
-            case 'number':
-            case 'string':
-               result.append(
-                  '<input type="text" id="penSet' + key + '" ' +
-                     'value="' + val + '">')
-               break;
-            default:
-               break;
-            }
-            var tab = $('<div class="penRow">')
-            tab.append('<span class="penDesc">' + desc + '</span>').
-               append(defbtn).
-               append(locchk).
-               append(result)
-            return [tab, add ? $('<div class=penTab>').append(add) : '']
-         }
-      var walk_n_gen =
-         function (list) {
-            var out = $('<span/>');
-            var t = [];
-            for (var key in list) {
-               if (key == 'v') {
-                  continue
-               }
-               if (list[key] instanceof Array) {
-                  t = genf(list[key][1], list[key][2], list[key][0], list[key][3], '')
-               } else {
-                  t = genf(list[key].v[1], list[key].v[2], list[key].v[0], list[key].v[3], walk_n_gen(list[key]))
-               }
-               for(var k in t) {
-                  out.append(t[k])
-               }
-            }
-            return out
-         }
-
-      if (!this.__form) {
-         this.__form = walk_n_gen(db.config);
-         this.__form.append('<hr/><hr/>')
+   saveCfg : function () {
+      var delta = [];
+      for (var i in this.cfg) {
+	 if (cfg[i] != this.dflt[i]) {
+	    delta.push(i); delta.push(cfg[i]);
+	 }
+	 this.save(delta, 'penCfg')
       }
-      return this.__form
-   }
-}
-
-function settingsShow () {
-   if ($('#penSettings').length == 0) {
-      $.ui.window(
-         'penSettings',
-         'Два.ч - Настройки',
-         $.ui.multiLink([
-            ['Сохранить и закрыть',
-             function () { db.saveCfg(defaults); settingsHide() }]
-         ])).
-         append(db.genForm())
-   }
-   $('#penSettings').show();
-   return false;
-}
-
-function settingsHide() {
-   $('#penSettings').hide();
-   return false;
-}
-
-function settingsToggle(e) {
-   $(e).parents('table:first').find('tr:last').toggle()
-   return false;
-}
-
-function settingsDefault(defs, sid) {
-   db.__iter(
-      db.config,
-      function (v,pfx) {
-         if (v[2] == sid) {
-            db.setinp(sid, db.getval(pfx, defs)[0])
-         }
-      },
-      [])
-}
-
-function storeBookmarks () {
-   var bm = []
-   for(var i in $.bookmarks) {
-      if(!$.bookmarks[i])
-         continue
-      bm.push(i)
-      bm.push($.bookmarks[i])
-   }
-   io('penBms', b64encode(bm.join('|')));
-}
-
-function loadBookmarks () {
-   try {
-      var bm = b64decode(io('penBms')).split('|')
-      for(var i = 0; i < bm.length; i+=2) {
-         $.bookmarks[bm[i]] = bm[i + 1]
+   },
+   loadHidden : function () {
+      this.load(this.hidden, 'penHidden'+this.global.board)
+   },
+   saveHidden : function (board) {
+      this.save(this.hidden, 'penHidden'+this.global.board)
+   },
+   loadBookmarks : function (board) {
+      var raw = []
+      this.load(raw, 'penBookmarks')
+      for(i in raw) {
+	    var tc = raw[i].split('#')
+	    this.bookmarks[i] = {
+	       timestamp : tc.shift(),
+	       cite : tc.join('#')
+	    }
       }
-   } catch (err) {}
-}
-
-function genBookmarks () {
-   var bmarks = $('<span id="penBmsIn">')
-   var id = 0;
-   for(i in $.bookmarks) {
-      if (!$.bookmarks[i])
-         continue
-      var bm = $('<div class="penDesc"> /' + i.replace(/.*?(\w+).*/, '$1') + '/ <a class="penBmLink" href="' + i + '">' + i.replace(/.*?(\d+).*/, '$1') + '</a> ' + $.bookmarks[i] + '</div>')
-      bmarks.append(bm.prepend(
-         $.ui.multiLink([
-            ['x',
-             function (evt) {
-                var subj = $(evt.target).parents('div:first')
-                $.bookmarks[subj.find('a.penBmLink').attr('href')] = null
-                storeBookmarks ()
-                subj.remove()
-             }]
-         ])
-      ))
-      id++
+   },
+   saveBookmarks : function (board) {
+      var raw = []
+      for (var i in this.bookmarks) {
+	 raw[i] = this.bookmarks[i].timestamp + '#' + this.bookmarks[i].cite
+      }
+      this.save(raw, 'penBookmarks')
    }
-   return bmarks
-}
-
-function toggleBookmarks () {
-   if ($('#penBms').length == 0) {
-      $.ui.window(
-         'penBms',
-         'Два.ч - Закладки',
-         $.ui.multiLink([
-            ['Закрыть',
-             function () { toggleBookmarks () }]
-         ])).
-         append(genBookmarks()).
-         append('<br /><br clear="both"/>')
-   } else {
-      $('#penBmsIn').replaceWith(genBookmarks())
-   }
-   $('#penBms').toggle()
 }
