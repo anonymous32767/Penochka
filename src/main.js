@@ -274,6 +274,30 @@ function apply_refs(a, body) {
    }
 }
 
+function toggleBookmarks() {
+   var genBookmarks = function () {
+      var div = $('<span id="penBmsIn">')
+      for (i in db.bookmarks) {
+	 div.append($.ui.bookmark(i, db.bookmarks[i].cite,  db.bookmarks[i].timestamp))
+      }
+      return div
+   }
+   if ($('#penBms').length == 0) {
+      $.ui.window(
+         'penBms',
+         iom.strings.bookmarks,
+         $.ui.multiLink([
+            ['Закрыть',
+             function () { toggleBookmarks () }]
+         ])).
+         append(genBookmarks()).
+         append('<br /><br clear="both"/>')
+   } else {
+      $('#penBmsIn').replaceWith(genBookmarks())
+   }
+   $('#penBms').toggle()
+}
+
 function toggleBookmark(tid) {
    var subj = $('#'+tid)
    var url = $.turl(tid)

@@ -123,7 +123,11 @@ iom = {
    anchors: 'blockquote a[onclick]',
    menu: 'div.adminbar:first a:last',
    options: '#penOptions',
-   postform: '#postform'
+   postform: '#postform',
+   strings: {
+      bookmarks: 'Два.ч &#8212; Закладки',
+      settings: 'Два.ч &#8212; Настройки',
+   }
 }
 
 function dvach (onload) {
@@ -299,7 +303,7 @@ function dvach (onload) {
       function(handlers, begin, end, sep) {
          begin = begin != null ? begin : '['
          end =  end != null ? end : ']'
-         sep =  sep != null ? sep : ' / '
+         sep =  sep != null ? sep : ' / ' 
          var ancs = []
          for(var i = 0; i < handlers.length; i++)
             if (typeof handlers[i][1] == 'string') {
@@ -320,19 +324,36 @@ function dvach (onload) {
          return res
       },
       tizer :
-      function(id,body,hasHr) {
+      function (id, body, hasHr) {
          return $("<div id=\'tiz" + id + "\' style='display:none;' />").
             append(body).
             append(hasHr ? "<br clear='both' /><hr />" : "")
       },
       window:
-      function(id, title, menu) {
+      function (id, title, menu) {
          var div = $('<div id="' + id + '" style="display:none"></div>').
             append($('<h1 style="float:left;margin:0;padding:0;" class="logo">' + title + '</h1>')).
             append(menu.css('float', 'right')).
             append('<br clear="borh" /><br />')
          $('body').prepend(div)
          return div
+      },
+      bookmark:
+      function (url, cite, date) {
+	 return $('<div class="penDesc"> /' + url.replace(/.*?(\w+).*/, '$1') + 
+		  '/ <a class="penBmLink" href="' + url + '">' + 
+		  url.replace(/.*?(\d+).*/, '$1') + '</a> ' + cite + '</div>').
+	    prepend(
+               $.ui.multiLink([
+		  ['x',
+		   function (evt) {
+                      var subj = $(evt.target).parents('div:first')
+                      delete db.bookmarks[subj.find('a.penBmLink').attr('href')]
+                      db.saveBookmarks ()
+                      subj.remove()
+		   }]
+               ])
+	    )
       }
    }
 
