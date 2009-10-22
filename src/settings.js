@@ -34,6 +34,8 @@ var db = {
    cfg: {},
    dflt: {},
    name: {},
+   objs: {},
+   roots: [],
    children: {},
    hidden: {},
    filtered: {},
@@ -43,15 +45,26 @@ var db = {
       board: ''
    },
    s : function (id, title, parent, defval, description, examples) {
-      if (defval) {
+      if (typeof defval != 'object') {
+	 this.objs[id] = defval
+	 for(var i in defval) {
+	    this.cfg[id] = defval[i]
+	    this.dflt[id] = defval[i]
+	    break
+	 }
+      } else if (typeof defval != 'undefined') {
 	 this.cfg[id] = defval
 	 this.dflt[id] = defval
       }
       this.name[id] = title
+      if (parent) {
       if (!this.children[parent]) {
 	 this.children[parent] = []
       }
       this.children[parent].push(id)
+      } else {
+	 this.roots.push(id)
+      }
    },
    init : function () {
       /* Группы настроек */
@@ -66,7 +79,7 @@ var db = {
       /* Теперь сами настройки */
       this.s ('hide', 'Скрытие', 'feats');
       this.s ('thrdHide', 'Потоков', 'hide', true);
-      this.s ('pstsHide', 'Сообщений', 'hide', false);
+      this.s ('pstsHide', 'Сообщений', 'hide', true);
       this.s ('iSense', 'Превью цитируемых (>>) сообщений', 'feats', true);
       this.s ('fwdRefs', 'Обратные ссылки', 'feats', true);
       this.s ('imgsUnfold', 'Развертывание картинок', 'feats', true);
@@ -87,11 +100,11 @@ var db = {
 
       this.s ('compact', 'Компактное отображение', 'view', true);
 
-      this.s ('censTitle', 'Компактное отображение', 'cens', true);
-      this.s ('censUser', 'Компактное отображение', 'cens', true);
-      this.s ('censMail', 'Компактное отображение', 'cens', true);
-      this.s ('censMsg', 'Компактное отображение', 'cens', true);
-      this.s ('censTotal', 'Компактное отображение', 'cens', true);
+      this.s ('censTitle', 'Заглавие', 'cens', '');
+      this.s ('censUser', 'Имя пользователя', 'cens', '');
+      this.s ('censMail', 'E-mail (sage)', 'cens', '');
+      this.s ('censMsg', 'Текст сообщения', 'cens', '');
+      this.s ('censTotal', 'Любое место сообщения', 'cens', '');
 
       this.s ('useAJAX', 'Использовать асинхронный яваскрипт', 'sys', true);
 
@@ -119,12 +132,17 @@ var db = {
       }
       var raw = []
       try {
-	 raw = io(name).split('|')
+	 raw = io(name).replace(/\0/,'').split('|')
       } catch (err) { raw = [] }
       /* TODO: Unescape this */
       for (var i = 0; i < raw.length; i+=2) {
-	 if (raw[i + 1]) 
-	    obj[raw[i]] = raw[i + 1]
+	 if (raw[i + 1]) {
+	    if (raw[i + 1] == 'false') {
+	       obj[raw[i]] = false
+	    } else {  
+	       obj[raw[i]] = raw[i + 1]
+	    }
+	 }
       }
    },
    save : function (obj, name) {
@@ -144,13 +162,13 @@ var db = {
       this.load(this.cfg, 'penCfg')
    },
    saveCfg : function () {
-      var delta = [];
+      var delta = {};
       for (var i in this.cfg) {
-	 if (cfg[i] != this.dflt[i]) {
-	    delta.push(i); delta.push(cfg[i]);
+	 if (this.cfg[i] != this.dflt[i]) {
+	    delta[i]=this.cfg[i]
 	 }
-	 this.save(delta, 'penCfg')
       }
+      this.save(delta, 'penCfg')
    },
    loadHidden : function () {
       this.load(this.hidden, 'penHidden'+this.global.board)

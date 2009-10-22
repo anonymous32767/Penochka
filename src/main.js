@@ -278,7 +278,7 @@ function toggleBookmarks() {
    var genBookmarks = function () {
       var div = $('<span id="penBmsIn">')
       for (i in db.bookmarks) {
-	 div.append($.ui.bookmark(i, db.bookmarks[i].cite,  db.bookmarks[i].timestamp))
+         div.append($.ui.bookmark(i, db.bookmarks[i].cite,  db.bookmarks[i].timestamp))
       }
       return div
    }
@@ -311,7 +311,75 @@ function toggleBookmark(tid) {
    return db.bookmarks[url]
 }
 
-function withSelection(subj, f){
+function toggleSettings () {
+   var genVal = function (val) {
+      switch (typeof val) {
+      case 'object':
+	 break
+      case 'boolean':
+	 return '<input type="checkbox" ' + (val ? 'checked="checked"' : '') + '/>'
+	 break
+      case 'string':
+	 return '<input size="45" value="' + val + '" />'
+	 break
+      case 'number':
+	 return '<input size="8" value="' + val + '" />'
+	 break
+      default:
+	 return ''
+      }
+   }
+   var genDef = function (level) {
+      return level > 1 ? '<button>По умолчанию</button>' : ''
+   }
+   var genSettings = function () {
+      var slist = function (items, level) {
+         var setStr = '';
+	 var o = 0
+         for (var id in items) {
+            setStr += '<span id="pen' + items[id] + '" class="penSetting penLevel' + level + '">' +
+               db.name[items[id]] + ( level < 3 ? '<span class="right">' + genVal(db.cfg[items[id]]) + genDef(level) + '</span>' : genVal(db.cfg[items[id]])) + '</span>'
+            if (db.children[items[id]]) {
+               setStr += slist(db.children[items[id]], level + 1)
+            }
+	    o++
+         }
+         return setStr
+      }
+      return $(slist(db.roots, 1))
+   }
+   var saveSettings = function () {
+      $('#penSettings').find('input').each(
+	 function () {
+	    var e = $(this)
+	    var id = e.closest('span.penSetting').attr('id').replace(/^pen/, '')
+	    if (e.attr('type') == 'checkbox') {
+	       db.cfg[id] = e.attr('checked')
+	    } else { 
+	       db.cfg[id] = e.val()
+	    }
+	 })
+   }
+
+   if ($('#penSettings').length == 0) {
+      $.ui.window(
+         'penSettings',
+         iom.strings.settings,
+         $.ui.multiLink([
+            ['Применить',
+             function () { 
+		saveSettings()
+		db.saveCfg()
+		location.reload(true) }],
+	    ['Закрыть',
+	     function () { $('#penSettings').hide() }]
+         ])).
+         append(genSettings())
+   }
+   $('#penSettings').toggle()
+}
+
+function withSelection (subj, f) {
    var before, after, selection;
    subj.each(
       function () {
@@ -328,7 +396,7 @@ function setupEnv (db, env) {
    db.loadBookmarks()
 
    var bmenu = [['Настройки',
-                 function () { settingsShow() }]]
+                 function () { toggleSettings() }]]
    if (db.cfg.bmarks)
       bmenu.push(['Закладки',
                   function () { toggleBookmarks() }])
@@ -529,7 +597,7 @@ apply_me = function (messages, isSecondary) {
             function () {
                var subj = $(this)
                var pid = subj.attr('id')
-               if(db.cfg.pstsHide) {
+               if (db.cfg.pstsHide) {
                   subj.find(iom.post.ref).append($.ui.multiLink([
                      ['&#215;',
                       function () { chktizer(subj, pid, false); toggleVisible(pid); return false; }]

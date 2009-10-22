@@ -257,7 +257,7 @@ function dvach (onload) {
 
    jQuery.extend({
       turl: function (tid) {
-	 return '/s/res/'+tid.replace(/\D/g, '')+'.html'
+	 return '/' + db.global.board + '/res/'+tid.replace(/\D/g, '')+'.html'
       }
    });
 
@@ -358,11 +358,11 @@ function dvach (onload) {
    }
 
    return function (obj, f, aft) {
-      const css = '#penSetttings {padding: 8px} .penVal, .penLoc, .penDef { display:block; text-align:right; float: right;position: relative; margin:3px; margin-left: 8px; height:26px; line-height:1;} .penRow {display: block; position: relative; clear: both; } .penTab {margin-left: 22px} #penOptions input { height: 24px;} .penBig {font-size: 16pt}';
-      if (obj.find('#captchadiv').length > 0) {
+      const css = '#penSetttings {padding: 8px} #penSettings .right {float: right} #penSettings span {height: 32px} #penSettings input {margin-left: 8px; margin-right: 8px} .penLevel1, .penLevel2 {display: block} .penSetting {height: 24px;} .penLevel1 {font-size: 16pt; font-weight: bold;} .penLevel2 {padding-left: 2em;}  .penLevel3 {padding-left: 4em;}'
+      /* if (obj.find('#captchadiv').length > 0) {
 	 obj.find(iom.form.turtest).
 	    after('<img alt="обновить" src="/b/captcha.pl?key=mainpage&amp;dummy=" onclick="update_captcha(this)" id="imgcaptcha" />').focus(function () { return false; })
-      }
+      } */
       
       onload()
 
