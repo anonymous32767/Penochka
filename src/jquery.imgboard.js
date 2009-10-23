@@ -211,8 +211,8 @@ function dvach (onload) {
    jQuery.fn.extend({
       tuneForm:
       function () {
-	 $(this).find('div.rules').remove()
-	 return $(this)
+         $(this).find('div.rules').remove()
+         return $(this)
       },
       tuneForThread:
       function (tid) {
@@ -223,18 +223,24 @@ function dvach (onload) {
 
          form.find('input[name=gb2][value=board]').removeAttr('checked')
          form.find('input[name=gb2][value=thread]').attr('checked','checked') */
-	 form.tuneForm()
+         form.tuneForm()
          form.prepend('<input type="hidden" name="parent" value="' + tnum + '" />')
          var turingTest = form.find(iom.form.turimage)
-	 if (turingTest.length > 0) {
-            turingTest.attr(
-               'src',
-               turingTest.attr('src').
-		  replace(/key=\S*&/, "key=res" + tnum + "&").
-		  replace(/dummy=\S*/, "dummy=" + lnum)
-            )
-	    turingTest.click()
-	 }
+         
+	 if (turingTest.length == 0) {
+	    turingTest = $('<img alt="обновить" src="/' + db.global.board + '/captcha.pl?key=mainpage&amp;dummy=" onclick="update_captcha(this)" id="imgcaptcha" />')
+	    turingTest.focus(function () { return false; })
+            form.find(iom.form.turtest).
+               after(turingTest)
+         }
+
+         turingTest.attr(
+            'src',
+            turingTest.attr('src').
+               replace(/key=\S*&/, "key=res" + tnum + "&").
+               replace(/dummy=\S*/, "dummy=" + lnum)
+         )
+         turingTest.click()
          return form
       },
       ajaxThread:
@@ -257,7 +263,7 @@ function dvach (onload) {
 
    jQuery.extend({
       turl: function (tid) {
-	 return '/' + db.global.board + '/res/'+tid.replace(/\D/g, '')+'.html'
+         return '/' + db.global.board + '/res/'+tid.replace(/\D/g, '')+'.html'
       }
    });
 
@@ -301,9 +307,9 @@ function dvach (onload) {
       },
       multiLink :
       function(handlers, begin, end, sep, cssClass) {
-	 begin = begin != null ? begin : '['
+         begin = begin != null ? begin : '['
          end =  end != null ? end : ']'
-         sep =  sep != null ? sep : ' / ' 
+         sep =  sep != null ? sep : ' / '
          var ancs = []
          for(var i = 0; i < handlers.length; i++)
             if (typeof handlers[i][1] == 'string') {
@@ -312,21 +318,21 @@ function dvach (onload) {
                ancs.push('<a href="javascript:">'+handlers[i][0]+'</a>')
             }
          var j = 0
-         var res = $('<span class="' + (cssClass ? cssClass : 'penMl') + '">' 
-		     + begin + ancs.join(sep) + end + '</span>')
-	 var lastA = false
+         var res = $('<span class="' + (cssClass ? cssClass : 'penMl') + '">'
+                     + begin + ancs.join(sep) + end + '</span>')
+         var lastA = false
          res.find('a').each(
             function () {
                var subj = $(this)
                if (subj.attr('href') == 'javascript:') {
                   subj.click(handlers[j][1])
                }
-	       if(!lastA)
-		     subj.addClass('first')
-	       lastA = subj
+               if(!lastA)
+                  subj.addClass('first')
+               lastA = subj
                j++
             })
-	 lastA.addClass('last')
+         lastA.addClass('last')
          return res
       },
       tizer :
@@ -346,30 +352,30 @@ function dvach (onload) {
       },
       bookmark:
       function (url, cite, date) {
-	 return $('<div class="penDesc"> /' + url.replace(/.*?(\w+).*/, '$1') + 
-		  '/ <a class="penBmLink" href="' + url + '">' + 
-		  url.replace(/.*?(\d+).*/, '$1') + '</a> ' + cite + '</div>').
-	    prepend(
+         return $('<div class="penDesc"> /' + url.replace(/.*?(\w+).*/, '$1') +
+                  '/ <a class="penBmLink" href="' + url + '">' +
+                  url.replace(/.*?(\d+).*/, '$1') + '</a> ' + cite + '</div>').
+            prepend(
                $.ui.multiLink([
-		  ['x',
-		   function (evt) {
+                  ['x',
+                   function (evt) {
                       var subj = $(evt.target).parents('div:first')
                       delete db.bookmarks[subj.find('a.penBmLink').attr('href')]
                       db.saveBookmarks ()
                       subj.remove()
-		   }]
+                   }]
                ])
-	    )
+            )
       }
    }
 
    return function (obj, f, aft) {
       const css = '#penSetttings {padding: 8px} #penSettings .right {float: right} #penSettings span {height: 32px} #penSettings input, #penSettings select {margin-left: 8px; margin-right: 8px} .penLevel1, .penLevel2 {display: block} .penSetting {height: 24px;} .penLevel1 {font-size: 16pt; font-weight: bold;} .penLevel2 {padding-left: 2em;}  .penLevel3 {padding-left: 4em;}'
       /* if (obj.find('#captchadiv').length > 0) {
-	 obj.find(iom.form.turtest).
-	    after('<img alt="обновить" src="/b/captcha.pl?key=mainpage&amp;dummy=" onclick="update_captcha(this)" id="imgcaptcha" />').focus(function () { return false; })
+         obj.find(iom.form.turtest).
+            after('<img alt="обновить" src="/b/captcha.pl?key=mainpage&amp;dummy=" onclick="update_captcha(this)" id="imgcaptcha" />').focus(function () { return false; })
       } */
-      
+
       onload()
 
       var threadsRaw = obj.find('#delform');
