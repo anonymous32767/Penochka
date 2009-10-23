@@ -300,8 +300,8 @@ function dvach (onload) {
                   'px;left:' + x + 'px;z-index:99;background-color:maroon;color:white;padding:2px;font-weight:bold;" id="itiz' + id + '">Загрузка...</div>')
       },
       multiLink :
-      function(handlers, begin, end, sep) {
-         begin = begin != null ? begin : '['
+      function(handlers, begin, end, sep, cssClass) {
+	 begin = begin != null ? begin : '['
          end =  end != null ? end : ']'
          sep =  sep != null ? sep : ' / ' 
          var ancs = []
@@ -312,15 +312,21 @@ function dvach (onload) {
                ancs.push('<a href="javascript:">'+handlers[i][0]+'</a>')
             }
          var j = 0
-         var res = $('<span>' + begin + ancs.join(sep) + end + '</span>')
+         var res = $('<span class="' + (cssClass ? cssClass : 'penMl') + '">' 
+		     + begin + ancs.join(sep) + end + '</span>')
+	 var lastA = false
          res.find('a').each(
             function () {
                var subj = $(this)
                if (subj.attr('href') == 'javascript:') {
-                  $(this).click(handlers[j][1])
+                  subj.click(handlers[j][1])
                }
+	       if(!lastA)
+		     subj.addClass('first')
+	       lastA = subj
                j++
             })
+	 lastA.addClass('last')
          return res
       },
       tizer :
@@ -358,7 +364,7 @@ function dvach (onload) {
    }
 
    return function (obj, f, aft) {
-      const css = '#penSetttings {padding: 8px} #penSettings .right {float: right} #penSettings span {height: 32px} #penSettings input {margin-left: 8px; margin-right: 8px} .penLevel1, .penLevel2 {display: block} .penSetting {height: 24px;} .penLevel1 {font-size: 16pt; font-weight: bold;} .penLevel2 {padding-left: 2em;}  .penLevel3 {padding-left: 4em;}'
+      const css = '#penSetttings {padding: 8px} #penSettings .right {float: right} #penSettings span {height: 32px} #penSettings input, #penSettings select {margin-left: 8px; margin-right: 8px} .penLevel1, .penLevel2 {display: block} .penSetting {height: 24px;} .penLevel1 {font-size: 16pt; font-weight: bold;} .penLevel2 {padding-left: 2em;}  .penLevel3 {padding-left: 4em;}'
       /* if (obj.find('#captchadiv').length > 0) {
 	 obj.find(iom.form.turtest).
 	    after('<img alt="обновить" src="/b/captcha.pl?key=mainpage&amp;dummy=" onclick="update_captcha(this)" id="imgcaptcha" />').focus(function () { return false; })

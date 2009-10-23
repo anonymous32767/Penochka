@@ -312,9 +312,20 @@ function toggleBookmark(tid) {
 }
 
 function toggleSettings () {
-   var genVal = function (val) {
+   var genVal = function (id, val) {
+      var selected = null
+      if(db.combos[id]) {
+	 selected = val
+	 val = db.combos[id]
+      }
       switch (typeof val) {
       case 'object':
+	 var retstr = '<select>'
+	 
+	 for (var k in val) {
+	    retstr += '<option '+(k == selected ? 'selected="selected"':'')+' name="' + k + '">' + val[k] + '</option>'
+	 }
+	 return retstr + '</select>'
 	 break
       case 'boolean':
 	 return '<input type="checkbox" ' + (val ? 'checked="checked"' : '') + '/>'
@@ -338,7 +349,7 @@ function toggleSettings () {
 	 var o = 0
          for (var id in items) {
             setStr += '<span id="pen' + items[id] + '" class="penSetting penLevel' + level + '">' +
-               db.name[items[id]] + ( level < 3 ? '<span class="right">' + genVal(db.cfg[items[id]]) + genDef(level) + '</span>' : genVal(db.cfg[items[id]])) + '</span>'
+               db.name[items[id]] + ( level < 3 ? '<span class="right">' + genVal(items[id], db.cfg[items[id]]) + genDef(level) + '</span>' : genVal(items[id], db.cfg[items[id]])) + '</span>'
             if (db.children[items[id]]) {
                setStr += slist(db.children[items[id]], level + 1)
             }
@@ -346,15 +357,22 @@ function toggleSettings () {
          }
          return setStr
       }
-      return $(slist(db.roots, 1))
+      return $(slist(db.roots, 1)).find('button').click(
+	 function () {
+	    var e = $(this)
+	    var id = e.closest('span.penSetting').attr('id').replace(/^pen/, '')
+	    db.cfg[id] = db.dflt[id]
+	 })
    }
    var saveSettings = function () {
-      $('#penSettings').find('input').each(
+      $('#penSettings').find('input, option:selected').each(
 	 function () {
 	    var e = $(this)
 	    var id = e.closest('span.penSetting').attr('id').replace(/^pen/, '')
 	    if (e.attr('type') == 'checkbox') {
 	       db.cfg[id] = e.attr('checked')
+	    } else if (e.is('option')) {
+	       db.cfg[id] = e.attr('name')
 	    } else { 
 	       db.cfg[id] = e.val()
 	    }
@@ -393,6 +411,7 @@ function withSelection (subj, f) {
 }
 
 function setupEnv (db, env) {
+   addStyle(css[db.cfg.theme])
    db.loadBookmarks()
 
    var bmenu = [['Настройки',
@@ -604,7 +623,7 @@ apply_me = function (messages, isSecondary) {
                   ], ' ', ''))
                }
                /* Censore */
-               if(0 /*db.cfg.censTitle | db.cfg.censUser | db.cfg.censMail | db.cfg.censMsg | db.cfg.censTotal*/) {
+               if(db.cfg.censTitle != '' || db.cfg.censUser != '' || db.cfg.censMail != '' || db.cfg.censMsg != '' || db.cfg.censTotal != '') {
                   var censf = false;
                   if (db.cfg.censTitle &&
                       subj.find(iom.post.title).text().search(db.cfg.censTitle) != -1) {
@@ -694,7 +713,7 @@ apply_me = function (messages, isSecondary) {
 }
 
 function postSetup () {
-   if (db.cfg.thrdMove[0] && $(iom.form.parent).length > 0) {
+   if (db.cfg.thrdMove && $(iom.form.parent).length > 0) {
       showReplyForm($(iom.tid).attr('id'), null, null, true)
    }
    scope.timer.diff('penochka sync');

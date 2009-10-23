@@ -34,7 +34,7 @@ var db = {
    cfg: {},
    dflt: {},
    name: {},
-   objs: {},
+   combos: {},
    roots: [],
    children: {},
    hidden: {},
@@ -45,8 +45,8 @@ var db = {
       board: ''
    },
    s : function (id, title, parent, defval, description, examples) {
-      if (typeof defval != 'object') {
-	 this.objs[id] = defval
+      if (typeof defval == 'object') {
+	 this.combos[id] = defval
 	 for(var i in defval) {
 	    this.cfg[id] = defval[i]
 	    this.dflt[id] = defval[i]
@@ -99,6 +99,7 @@ var db = {
       this.s ('sageInAllFields', 'Сажа идет во все поля', 'sage', false);
 
       this.s ('compact', 'Компактное отображение', 'view', true);
+      this.s ('theme', 'Тема', 'view', {photon: 'Фотон', neutron: 'Нейтрон'});
 
       this.s ('censTitle', 'Заглавие', 'cens', '');
       this.s ('censUser', 'Имя пользователя', 'cens', '');
