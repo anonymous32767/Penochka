@@ -357,12 +357,7 @@ function toggleSettings () {
          }
          return setStr
       }
-      return $(slist(db.roots, 1)).find('button').click(
-	 function () {
-	    var e = $(this)
-	    var id = e.closest('span.penSetting').attr('id').replace(/^pen/, '')
-	    db.cfg[id] = db.dflt[id]
-	 })
+      return $(slist(db.roots, 1))
    }
    var saveSettings = function () {
       $('#penSettings').find('input, option:selected').each(
