@@ -100,6 +100,7 @@ var db = {
 
       this.s ('compact', 'Компактное отображение', 'view', true);
       this.s ('theme', 'Тема', 'view', {photon: 'Фотон', neutron: 'Нейтрон'});
+      this.s ('hlPrevs', 'Подсвечивать превью ярче', 'view', true);
 
       this.s ('censTitle', 'Заглавие', 'cens', '');
       this.s ('censUser', 'Имя пользователя', 'cens', '');

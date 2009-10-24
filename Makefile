@@ -32,3 +32,8 @@ build:
 	git rm -f penochka.js
 	git commit -a -m "Build $(v) cleanup."
 	git push github master
+
+commit:
+	make compiled
+	git commit -a -m "$(m)"
+	git push github master
