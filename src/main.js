@@ -406,7 +406,15 @@ function withSelection (subj, f) {
 }
 
 function setupEnv (db, env) {
-   addStyle(css[db.cfg.theme])
+   var isNight = true
+   var thm = db.cfg.nightTime.match(/(\d+)\D+(\d+)\D+(\d+)\D+(\d+)/)
+   if(((thm[3] < db.global.time.getHours()) && (db.global.time.getHours() < thm[1])) || 
+      ((thm[3] == db.global.time.getHours()) && (thm[4] < db.global.time.getMinutes())) ||
+      ((thm[1] == db.global.time.getHours()) && (thm[2] > db.global.time.getMinutes()))) {
+      isNight = false
+      alert('day')
+   }
+   addStyle(css[isNight ? db.cfg.ntheme : db.cfg.theme])
    db.loadBookmarks()
 
    var bmenu = [['Настройки',
