@@ -288,6 +288,7 @@ function dvach (onload) {
          } else {
             var obj = idobj
          }
+	 obj.find('a[name]').removeAttr('name')
          obj.addClass(db.cfg.hlPrevs ? 'highlight' : 'reply')
          obj.attr('style','position:absolute; top:' + y +
                   'px; left:' + x + 'px;display:block;')
