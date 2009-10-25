@@ -143,7 +143,7 @@ function swapAttr(obj, a1, a2) {
 
 function refold(id) {
    var subj = $('#' + id + ' ' + iom.post.image)
-   var ofs = subj.offset();
+   /* var ofs = subj.offset();
    if(!$("#itiz"+id).attr('id')) {
       subj.one(
          "load",
@@ -153,13 +153,13 @@ function refold(id) {
       subj.a().before(
          $.ui.loadTizer(ofs.left, ofs.top, id)
       )
-   }
+   } */
    swapAttr(subj, 'style', 'altstyle')
    swapAttr(subj, 'src', 'altsrc')
    if (db.cfg.fitImgs) {
       subj.css('max-width', $(window).width() - 64 + 'px')
    }
-   return false;
+   return false
 }
 
 /* */
@@ -694,7 +694,15 @@ apply_me = function (messages, isSecondary) {
 	       if (1) {
 		  subj.find(iom.post.abbrlink).click(
 		     function () {
-			alert('1')
+			var cached = $('#cache ' + '#'+pid)
+			if (cached.length > 0) {
+			   subj.replaceWith(cached)
+			}
+			cacheThread(
+			   tid,
+			   function () {
+			      subj.find(iom.post.abbrlink).click()
+			   })
 			return false
 		     })
 	       }
