@@ -691,6 +691,13 @@ apply_me = function (messages, isSecondary) {
                       function () { chktizer(subj, pid, false); toggleVisible(pid); return false; }]
                   ], ' ', ''))
                }
+	       if (1) {
+		  subj.find(iom.post.abbrlink).click(
+		     function () {
+			alert('1')
+			return false
+		     })
+	       }
                /* Censore */
                if(db.cfg.censTitle != '' || db.cfg.censUser != '' || db.cfg.censMail != '' || db.cfg.censMsg != '' || db.cfg.censTotal != '') {
                   var censf = false;
