@@ -45,7 +45,7 @@ jQuery.fn.swap = function(b){
 var apply_me = {}
 
 /* */
-function showReplyForm(id, cite, parent, hideHide) {
+function showReplyForm(id, cite, parent, hideHide, needHr) {
    if(!id)
       return
    var subj = $(iom.postform+id)
@@ -68,6 +68,8 @@ function showReplyForm(id, cite, parent, hideHide) {
                      ['Скрыть',
                       function() { $(iom.postform + id).hide() }]
                   ])))
+      if (needHr)
+	 subj.prepend('<hr />')
       if (!parent)
          parent = $('#'+ id + ' ' + iom.thread.eot)
       parent.after(subj)
@@ -343,6 +345,32 @@ function toggleSettings () {
    var genDef = function (level) {
       return level > 1 ? '<button>По умолчанию</button>' : ''
    }
+   var defaultSetting = function (subj) {
+      var id = subj.attr('id').replace(/^pen/, '')
+      var inp = subj.find('input, select')
+      db.cfg[id] = db.dflt[id]
+      if(db.combos[id]) {
+	 for(var def in db.combos[id]) {
+	    inp.find('option:selected').removeAttr('selected')
+	    inp.find('option[name='+def+']').attr('selected', 'selected')
+	    break
+	 }
+      } else {
+	 switch (typeof db.cfg[id]) {
+	 case 'boolean':
+	    if (db.cfg[id]) {
+	       inp.attr('checked', 'checked')
+	    } else {
+	       inp.removeAttr('checked')
+	    }
+	    break
+	 case 'number':
+	 case 'string':
+	    inp.attr('value', db.cfg[id])
+	    break
+	 }	 
+      }
+   }
    var genSettings = function () {
       var slist = function (items, level) {
          var setStr = '';
@@ -357,12 +385,43 @@ function toggleSettings () {
          }
          return setStr
       }
-      return $(slist(db.roots, 1))
+      var generated = $(slist(db.roots, 1))
+      generated.find('button').click(
+	 function () {
+	    var childrenEnded = false
+	    var e = $(this).closest('span.penSetting')
+	    defaultSetting(e)
+	    e.nextAll('span.penSetting').each(
+	       function () {
+		  if (!$(this).hasClass('penLevel3')) {
+		     childrenEnded = true
+		  }
+		  if (!childrenEnded) 
+		     defaultSetting($(this))
+	       }
+	    )
+	 })
+
+      var genControls = $('<span><br /><button>Восстановить умолчания</button> <input id="penSettingsSearch" size="33" style="float:right"><br /></span>')
+      genControls.find('button').click(
+	 function () {
+	    generated.find('button').click()
+	 }
+      )
+      genControls.find('input').keypress(
+	 function () {
+	    generated.find('.penSetting:contains("' + $(this).val() + '")').hide()
+	 }
+      )
+      genControls.append(generated)
+      return genControls
    }
    var saveSettings = function () {
       $('#penSettings').find('input, option:selected').each(
 	 function () {
 	    var e = $(this)
+	    if (e.is('#penSettingsSearch'))
+	       return
 	    var id = e.closest('span.penSetting').attr('id').replace(/^pen/, '')
 	    if (e.attr('type') == 'checkbox') {
 	       db.cfg[id] = e.attr('checked')
@@ -408,11 +467,10 @@ function withSelection (subj, f) {
 function setupEnv (db, env) {
    var isNight = true
    var thm = db.cfg.nightTime.match(/(\d+)\D+(\d+)\D+(\d+)\D+(\d+)/)
-   if(((thm[3] < db.global.time.getHours()) && (db.global.time.getHours() < thm[1])) || 
+   if(((thm[3] < db.global.time.getHours()) && (thm[1] > db.global.time.getHours())) || 
       ((thm[3] == db.global.time.getHours()) && (thm[4] < db.global.time.getMinutes())) ||
       ((thm[1] == db.global.time.getHours()) && (thm[2] > db.global.time.getMinutes()))) {
       isNight = false
-      alert('day')
    }
    addStyle(css[isNight ? db.cfg.ntheme : db.cfg.theme])
    db.loadBookmarks()
@@ -471,14 +529,22 @@ function setupEnv (db, env) {
       if (db.cfg.thrdMenu) {
          env.find('hr:first').next('a:first').after (
             $.ui.multiLink([
-               ['Переключить картинки',
-                function () { $(iom.post.image).parent().click() }],
+               ['Развернуть изображения',
+                function (e) {
+		   $(iom.post.image).parent().click() 
+		}],
                ['Переключить сообщения без картинок',
                 function () { $(iom.pid).each(
                    function () {
                       if ($(this).find(iom.post.image).length == 0)
                          $(this).toggle()
                    }) }],
+	       ['Переключить сообщения без ответов на них',
+                function () { $(iom.pid).each(
+                   function () {
+                      if ($(this).find(iom.post.backrefs).length == 0)
+                         $(this).toggle()
+                   }) }]
             ], ' / ', '').css('left', '0')
          )
       }
@@ -717,7 +783,7 @@ apply_me = function (messages, isSecondary) {
 
 function postSetup () {
    if (db.cfg.thrdMove && $(iom.form.parent).length > 0) {
-      showReplyForm($(iom.tid).attr('id'), null, null, true)
+      showReplyForm($(iom.tid).attr('id'), null, null, true, true)
    }
    scope.timer.diff('penochka sync');
    scope.timer.init();
@@ -732,3 +798,5 @@ db.loadCfg()
 db.loadHidden()
 
 $(document).ok(db, setupEnv, apply_me, postSetup)
+
+

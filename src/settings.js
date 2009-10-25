@@ -47,24 +47,24 @@ var db = {
    },
    s : function (id, title, parent, defval, description, examples) {
       if (typeof defval == 'object') {
-	 this.combos[id] = defval
-	 for(var i in defval) {
-	    this.cfg[id] = defval[i]
-	    this.dflt[id] = defval[i]
-	    break
-	 }
+         this.combos[id] = defval
+         for(var i in defval) {
+            this.cfg[id] = defval[i]
+            this.dflt[id] = defval[i]
+            break
+         }
       } else if (typeof defval != 'undefined') {
-	 this.cfg[id] = defval
-	 this.dflt[id] = defval
+         this.cfg[id] = defval
+         this.dflt[id] = defval
       }
       this.name[id] = title
       if (parent) {
-      if (!this.children[parent]) {
-	 this.children[parent] = []
-      }
-      this.children[parent].push(id)
+         if (!this.children[parent]) {
+            this.children[parent] = []
+         }
+         this.children[parent].push(id)
       } else {
-	 this.roots.push(id)
+         this.roots.push(id)
       }
    },
    init : function () {
@@ -115,9 +115,9 @@ var db = {
       this.s ('hidePure', 'Скрывать без следа', 'ftune', false);
       this.s ('censPure', 'Скрывать отфильтрованное без следа', 'ftune', true);
       this.s ('fitImgs', 'При развертывании подгонять картинки по ширине', 'ftune', true);
-      this.s ('citeInTitle', 
-	       'Показывать цитату из треда в заголовке страницы (&lt;title&gt;)', 
-	       'ftune', true);
+      this.s ('citeInTitle',
+              'Показывать цитату из треда в заголовке страницы (&lt;title&gt;)',
+              'ftune', true);
       this.s ('hideCiteLen', 'Размер цитаты скрытых объектов', 'ftune', 55);
       this.s ('ttlCiteLen', 'Размер цитаты в заголовке', 'ftune', 55);
       this.s ('bmCiteLen', 'Размер цитаты в закладках', 'ftune', 55);
@@ -134,45 +134,50 @@ var db = {
    },
    load : function (obj, name) {
       if (!this.ready) {
-	 this.init()
+         this.init()
       }
       var raw = []
       try {
-	 raw = io(name).replace(/\0/,'').split('|')
+         raw = io(name).replace(/\0/,'').split('|')
       } catch (err) { raw = [] }
       /* TODO: Unescape this */
       for (var i = 0; i < raw.length; i+=2) {
-	 if (raw[i + 1]) {
-	    if (raw[i + 1] == 'false') {
-	       obj[raw[i]] = false
-	    } else {  
-	       obj[raw[i]] = raw[i + 1]
-	    }
-	 }
+         if (raw[i + 1]) {
+            if (raw[i + 1] == 'false') {
+               obj[raw[i]] = false
+            } else {
+               obj[raw[i]] = raw[i + 1]
+            }
+         }
       }
    },
    save : function (obj, name) {
       var raw = [];
       /* TODO: Escape this */
       for (i in obj) {
-	 raw.push(i)
-	 raw.push(obj[i])
+         raw.push(i)
+         raw.push(obj[i])
       }
       if (raw) {
-	 io(name, raw.join('|'))
+         io(name, raw.join('|'))
       } else {
-	 io(name, null)
+         io(name, null)
       }
    },
    loadCfg : function () {
       this.load(this.cfg, 'penCfg')
+      for (var i in this.cfg) {
+         if (typeof this.dflt[i] == 'number') {
+            this.cfg[i] = this.cfg[i] * 1
+         }
+      }
    },
    saveCfg : function () {
       var delta = {};
       for (var i in this.cfg) {
-	 if (this.cfg[i] != this.dflt[i]) {
-	    delta[i]=this.cfg[i]
-	 }
+         if (this.cfg[i] != this.dflt[i]) {
+            delta[i]=this.cfg[i]
+         }
       }
       this.save(delta, 'penCfg')
    },
@@ -186,17 +191,17 @@ var db = {
       var raw = []
       this.load(raw, 'penBookmarks')
       for(i in raw) {
-	    var tc = raw[i].split('#')
-	    this.bookmarks[i] = {
-	       timestamp : tc.shift(),
-	       cite : tc.join('#')
-	    }
+         var tc = raw[i].split('#')
+         this.bookmarks[i] = {
+            timestamp : tc.shift(),
+            cite : tc.join('#')
+         }
       }
    },
    saveBookmarks : function (board) {
       var raw = []
       for (var i in this.bookmarks) {
-	 raw[i] = this.bookmarks[i].timestamp + '#' + this.bookmarks[i].cite
+         raw[i] = this.bookmarks[i].timestamp + '#' + this.bookmarks[i].cite
       }
       this.save(raw, 'penBookmarks')
    }
