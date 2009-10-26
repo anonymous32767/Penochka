@@ -82,7 +82,7 @@ function cacheThread(idurl, cb) {
    if (idurl.search(/\//) == -1) {
       var o = $('#'+idurl)
       var moar = o.find(iom.thread.moar)
-      var load = $('<span class="penLoadMoar">Загрузка треда...</span>')
+      var load = $('<span class="penLoadMoar">' + i18n.thrdLoading + '</span>')
       moar.hide().after(load)
       var url = o.find(iom.post.reflink).attr('href').split('#')[0]
    } else {
@@ -143,17 +143,6 @@ function swapAttr(obj, a1, a2) {
 
 function refold(id) {
    var subj = $('#' + id + ' ' + iom.post.image)
-   /* var ofs = subj.offset();
-   if(!$("#itiz"+id).attr('id')) {
-      subj.one(
-         "load",
-         function () {
-            $('#itiz'+id).hide()
-         })
-      subj.a().before(
-         $.ui.loadTizer(ofs.left, ofs.top, id)
-      )
-   } */
    swapAttr(subj, 'style', 'altstyle')
    swapAttr(subj, 'src', 'altsrc')
    if (db.cfg.fitImgs) {
@@ -194,7 +183,7 @@ function intelli(x, y, id, url) {
          if(($('#'+id).length == 0) && url) {
             cacheThread(url, function () { intelli(x, y, id) })
             obj = $.ui.preview(
-               $('<div></div>').text('Загрузка...').attr('id', 'is' + id),
+               $('<div>' + i18n.thrdLoading + '</div>').attr('id', 'is' + id),
                x, y)
          } else {
             obj = $.ui.preview(id, x, y)
@@ -246,23 +235,23 @@ function chktizer(obj, id, tp, sage, filtered) {
             obj.find(iom.thread.message).text().slice(0, db.cfg.hideCiteLen - 1) +
             '...)'
       } else { var cite = '' }
-      tizText = 'Тред ' + id.replace('t','№') + ' ' + cite +
-         (filtered ? ' отфильтрован' : ' скрыт') + '. ['
+      tizText = [i18n.thrd, id.replace('t', i18n.no), cite,
+		 (filtered ? i18n.filtered : i18n.hidden) + '.'].join(' ')
    } else {
-      tizText = 'Пост ' + id.replace('p','№') + ' ' +
-         (filtered ? ' отфильтрован' : ' скрыт') + '. ['
+      tizText = [i18n.post, id.replace('p', i18n.no),
+		 (filtered ? i18n.filtered : i18n.hidden) + '.'].join(' ')
    }
-   var tmenu = [['Показать',
+   var tmenu = [[i18n.show,
                  function () { toggleVisible(id) }]]
    if (sage) {
-      tmenu.push(['Сажа',
+      tmenu.push([i18n.sage,
                   function () {
-                     showReplyForm(id, tizText + 'Показать / Сажа]', tizer);
+                     showReplyForm(id, tizText, tizer);
                      sage($(iom.postform+id)) }])
    }
    var tizer = $.ui.tizer(
       id,
-      $.ui.multiLink(tmenu, tizText)
+      $.ui.multiLink(tmenu, tizText + ' [')
       , tp)
    obj.before(tizer)
 }
@@ -289,7 +278,7 @@ function toggleBookmarks() {
          'penBms',
          iom.strings.bookmarks,
          $.ui.multiLink([
-            ['Закрыть',
+            [i18n.close,
              function () { toggleBookmarks () }]
          ])).
          append(genBookmarks()).
@@ -343,7 +332,7 @@ function toggleSettings () {
       }
    }
    var genDef = function (level) {
-      return level > 1 ? '<button>По умолчанию</button>' : ''
+      return level > 1 ? '<button>' + i18n.dflt + '</button>' : ''
    }
    var defaultSetting = function (subj) {
       var id = subj.attr('id').replace(/^pen/, '')
@@ -402,7 +391,7 @@ function toggleSettings () {
 	    )
 	 })
 
-      var genControls = $('<span><br /><button>Восстановить умолчания</button> <input id="penSettingsSearch" size="33" style="float:right"><br /></span>')
+      var genControls = $('<span><br /><button>' + i18n.allDefault + '</button> <input id="penSettingsSearch" size="33" style="float:right"><br /></span>')
       genControls.find('button').click(
 	 function () {
 	    generated.find('button').click()
@@ -438,12 +427,12 @@ function toggleSettings () {
          'penSettings',
          iom.strings.settings,
          $.ui.multiLink([
-            ['Применить',
+            [i18n.apply,
              function () { 
 		saveSettings()
 		db.saveCfg()
 		location.reload(true) }],
-	    ['Закрыть',
+	    [i18n.close,
 	     function () { $('#penSettings').hide() }]
          ])).
          append(genSettings())
@@ -472,17 +461,35 @@ function setupEnv (db, env) {
       ((thm[1] == db.global.time.getHours()) && (thm[2] > db.global.time.getMinutes()))) {
       isNight = false
    }
+
    addStyle(css[isNight ? db.cfg.ntheme : db.cfg.theme])
+
+   if (db.cfg.btnsStyle == 'text') {
+      i18n.btns = i18nButtons.text
+   } else if (db.cfg.btnsStyle == 'css') {
+      i18n.btns = i18nButtons[isNight ? db.cfg.ntheme : db.cfg.theme]
+   }
+   
    db.loadBookmarks()
 
-   var bmenu = [['Настройки',
+   if (db.cfg.overrideF5) {
+      $(window).keydown(
+	 function (e) {
+	    if (e.which == 116) {
+	       //window.frames['main'].location.reload()
+	       return false
+	    }
+	 })
+   }
+
+   var bmenu = [[i18n.settings,
                  function () { toggleSettings() }]]
    if (db.cfg.bmarks)
-      bmenu.push(['Закладки',
+      bmenu.push([i18n.bookmarks,
                   function () { toggleBookmarks() }])
 
    env.find(iom.menu).after(
-      $.ui.multiLink(bmenu, ' / ', '')
+      $.ui.multiLink(bmenu, i18n.mLinkSep, '')
    )
 
    env.find(iom.postform).submit(function () {
@@ -495,7 +502,7 @@ function setupEnv (db, env) {
          }
       }
       if (db.cfg.useAJAX) {
-         subj.find(iom.form.status).text('Отправка...')
+         subj.find(iom.form.status).text(i18n.sending)
          subj.ajaxSubmit({
             timeout: 0,
             success:
@@ -504,7 +511,7 @@ function setupEnv (db, env) {
                   var errResult = responseText.match(/<h1.*?>(.*?)<br/)[1]
                   subj.find(iom.form.status).text(errResult)
                } else {
-                  subj.find(iom.form.status).text('Ok. Обновляем страницу...')
+                  subj.find(iom.form.status).text(i18n.okReloadingNow)
                   window.location.reload(true)
                }
             }})
@@ -529,22 +536,31 @@ function setupEnv (db, env) {
       if (db.cfg.thrdMenu) {
          env.find('hr:first').next('a:first').after (
             $.ui.multiLink([
-               ['Развернуть изображения',
+               [i18n.imgs.unfold,
                 function (e) {
 		   $(iom.post.image).parent().click() 
+		   $(e.target).text(
+		      $(e.target).text() == i18n.imgs.unfold ? i18n.imgs.fold : i18n.imgs.unfold
+		   )
 		}],
-               ['Переключить сообщения без картинок',
-                function () { $(iom.pid).each(
+               [i18n.imgLess.hide,
+                function (e) { $(iom.pid).each(
                    function () {
                       if ($(this).find(iom.post.image).length == 0)
                          $(this).toggle()
-                   }) }],
-	       ['Переключить сообщения без ответов на них',
-                function () { $(iom.pid).each(
+                   })
+	           $(e.target).text(
+		      $(e.target).text() == i18n.imgLess.hide ? i18n.imgLess.show : i18n.imgLess.hide
+		   )}],
+	       [i18n.citeLess.hide,
+                function (e) { $(iom.pid).each(
                    function () {
                       if ($(this).find(iom.post.backrefs).length == 0)
                          $(this).toggle()
-                   }) }]
+                   })
+		   $(e.target).text(
+		      $(e.target).text() == i18n.citeLess.hide ? i18n.citeLess.show : i18n.citeLess.hide
+		   )}]
             ], ' / ', '').css('left', '0')
          )
       }
@@ -560,35 +576,35 @@ function setupEnv (db, env) {
    if (db.cfg.sageBtn) {
       env.find(iom.form.email).after(
          $.ui.multiLink([
-            ['Сажа',
+            [i18n.btns.sage,
              function () { sage() }]
-         ], ' <b>[', ']</b>')
+         ], i18n.btns.begin, i18n.btns.end, i18n.btns.sep)
       )}
 
    if (db.cfg.fmtBtns) {
       env.find(iom.postform + ' ' + iom.form.submit).after(
          $.ui.multiLink([
-            ['КБ', function () {
+            [i18n.btns.capsBold, function () {
                withSelection(
                   env.find(iom.form.message),
                   function (s) { return '**'+s.toUpperCase()+'**' }) }],
-            ['<span class="spoiler">SP</span>', function () {
+            [i18n.btns.spoiler, function () {
                withSelection(
                   env.find(iom.form.message),
                   function (s) { return '%%'+s+'%%' }) }]
-         ],' <b>[',']</b>'))
+         ], i18n.btns.begin, i18n.btns.end, i18n.btns.sep))
 
       env.find(iom.postform + ' ' + iom.form.submit).after(
          $.ui.multiLink([
-            ['Ж', function () {
+            [i18n.btns.bold, function () {
                withSelection(
                   env.find(iom.form.message),
                   function (s) { return '**'+s+'**' }) }],
-            ['<i>К</i>', function () {
+            [i18n.btns.italic, function () {
                withSelection(
                   env.find(iom.form.message),
                   function (s) { return '*'+s+'*' }) }],
-            ['<s>З</s>', function () {
+            [i18n.btns.striked, function () {
                withSelection(
                   env.find(iom.form.message),
                   function (s) {
@@ -597,11 +613,11 @@ function setupEnv (db, env) {
                         s += '^H'
                      }
                      return s }) }],
-            ['<u>П</u>', function () {
+            [i18n.btns.underline, function () {
                withSelection(
                   env.find(iom.form.message),
                   function (s) { return '__'+s+'__' }) }],
-            ['<tt>Код</tt>', function () {
+            [i18n.btns.source, function () {
                withSelection(
                   env.find(iom.form.message),
                   function (s) {
@@ -610,7 +626,7 @@ function setupEnv (db, env) {
                      } else {
                         return '`'+s+'`' }
                   }) }]
-         ],' <b>[',']</b>'))
+         ], i18n.btns.begin, i18n.btns.end, i18n.btns.sep))
    }
 
    /* id надо менять только после манипуляций с формой, потому что иначе
@@ -655,19 +671,19 @@ apply_me = function (messages, isSecondary) {
          }
          if (db.cfg.thrdHide)
             tmenu.push([
-               'Скрыть',
+               i18n.hide,
                function () { chktizer(subj, tid, true, true); toggleVisible(tid) }])
          if (db.cfg.thrdUnfold && (subj.find(iom.thread.moar).length | isSecondary))
             tmenu.push([
-               isSecondary ? 'Свернуть' : 'Развернуть',
+               isSecondary ? i18n.fold : i18n.unfold,
                function () { toggleThread(tid, !isSecondary) }])
          if (db.cfg.bmarks)
             tmenu.push([
-               db.bookmarks[turl] ? 'Из закладок' : 'В закладки',
-               function (e) { $(e.target).text(toggleBookmark(tid) ? 'Из закладок' : 'В закладки') }])
+               db.bookmarks[turl] ? i18n.fromBms : i18n.toBms,
+               function (e) { $(e.target).text(toggleBookmark(tid) ? i18n.fromBms : i18n.toBms) }])
          if ($(iom.form.parent).length == 0)
             tmenu.push([
-               'Ответ', turl])
+               i18n.reply, turl])
          trm.replaceWith($.ui.multiLink(tmenu, '', ''))
          if($(iom.form.parent).length == 0) {
             var moar = subj.find(iom.thread.moar).clone()
@@ -675,7 +691,7 @@ apply_me = function (messages, isSecondary) {
                moar = $('<span class="omittedposts"></span>')
             }
             tmenu[tmenu.length-1] = [
-               'Ответить',
+               i18n.replyThat,
                function () { showReplyForm(tid) }]
             moar.append($.ui.multiLink(tmenu))
             subj.find(iom.thread.eot).after(moar)
@@ -687,25 +703,10 @@ apply_me = function (messages, isSecondary) {
                var pid = subj.attr('id')
                if (db.cfg.pstsHide) {
                   subj.find(iom.post.ref).append($.ui.multiLink([
-                     ['&#215;',
+                     [i18n.hidePost,
                       function () { chktizer(subj, pid, false); toggleVisible(pid); return false; }]
                   ], ' ', ''))
                }
-	       if (1) {
-		  subj.find(iom.post.abbrlink).click(
-		     function () {
-			var cached = $('#cache ' + '#'+pid)
-			if (cached.length > 0) {
-			   subj.replaceWith(cached)
-			}
-			cacheThread(
-			   tid,
-			   function () {
-			      subj.find(iom.post.abbrlink).click()
-			   })
-			return false
-		     })
-	       }
                /* Censore */
                if(db.cfg.censTitle != '' || db.cfg.censUser != '' || db.cfg.censMail != '' || db.cfg.censMsg != '' || db.cfg.censTotal != '') {
                   var censf = false;
@@ -786,9 +787,6 @@ apply_me = function (messages, isSecondary) {
       }
    }
    for (var objId in db.filtered) {
-      /* It's an low level alternative of toggle method
-          * TODO Rewrite toggle for suitable usage in this
-          * place (may be impossible). */
       var subj = messages.find('#'+objId)
       subj.css('display', 'none')
       chktizer(subj, objId, false, false, true)

@@ -1,4 +1,4 @@
-source = header.js css.js base64.js jquery.min.js jquery.cookie.js jquery.form.js\
+source = header.js css.js i18n.js base64.js jquery.min.js jquery.cookie.js jquery.form.js\
 	 jquery.json.js storage.js jquery.imgboard.js settings.js  main.js
 
 mkbat = make.bat.tmp

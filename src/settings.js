@@ -102,6 +102,7 @@ var db = {
       this.s ('compact', 'Компактное отображение', 'view', true);
       this.s ('theme', 'Тема', 'view', {photon: 'Фотон', neutron: 'Нейтрон'});
       this.s ('ntheme', 'Ночная тема', 'view', {photon: 'Фотон', neutron: 'Нейтрон'});
+      this.s ('btnsStyle', 'Стиль кнопок форматирования', 'view', {css: 'Графические', text: 'Текстовые'});
       this.s ('hlPrevs', 'Подсвечивать превью ярче', 'view', true);
 
       this.s ('censTitle', 'Заглавие', 'cens', '');
@@ -126,6 +127,7 @@ var db = {
       this.s ('iSenseDn', 'На отпадание',  'delay', 200);
       this.s ('bmAutoAdd', 'Автоматически добавлять тред в закладки при ответе',  'ftune', true);
       this.s ('nightTime', 'Ночной интервал', 'ftune', '22:00-8:00');
+      this.s ('overrideF5', 'Перегружать только активный фрейм по F5', 'ftune', true);
 
       this.global.domain = window.location.hostname
       this.global.board = window.location.pathname.replace(/^\/(\w+)\/.*$/, '$1')

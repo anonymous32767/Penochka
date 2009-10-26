@@ -125,6 +125,7 @@ iom = {
    menu: 'div.adminbar:first a:last',
    options: '#penOptions',
    postform: '#postform',
+   unfoldImgCss: 'border: 2px dashed #EE6600;',
    strings: {
       bookmarks: 'Два.ч &#8212; Закладки',
       settings: 'Два.ч &#8212; Настройки',
@@ -202,7 +203,7 @@ function dvach (onload) {
             var h = subj.attr('height')
             subj.attr('altsrc', altsrc)
             subj.attr('style','height: '+h+'px; width:'+w+'px;')
-            subj.attr('altstyle','border: 2px dashed #EE6600; min-height: '+h+'px; min-width: '+w+'px;')
+            subj.attr('altstyle', iom.unfoldImgCss+'min-height: '+h+'px; min-width: '+w+'px;')
             subj.removeAttr('height')
             subj.removeAttr('width')
          }
