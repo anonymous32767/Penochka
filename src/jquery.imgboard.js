@@ -106,7 +106,8 @@ iom = {
       message: 'blockquote:not(.penRefs):first',
       moar: 'span.omittedposts',
       title: 'span.filetitle',
-      eot: '.penPost:last'
+      eot: '.penPost:last',
+      eotNotOp: 'table.penPost:last'
    },
    form: {
       user: 'input[name=akane]',

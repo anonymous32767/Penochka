@@ -636,7 +636,6 @@ function setupEnv (db, env) {
    /* id надо менять только после манипуляций с формой, потому что иначе
       перестает работать селектор. TODO сделать это и ненужным */
 
-
    db.cfg.sageMan &&
       sage(env)
 
@@ -698,7 +697,7 @@ apply_me = function (messages, isSecondary) {
                i18n.replyThat,
                function () { showReplyForm(tid) }]
             moar.append($.ui.multiLink(tmenu))
-            subj.find(iom.thread.eot).after(moar)
+            subj.find(iom.thread.eotNotOp).after(moar)
          }
          /** Posts **/
          subj.find(iom.pid).each(
