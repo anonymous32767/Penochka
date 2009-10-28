@@ -69,7 +69,7 @@ function showReplyForm(id, cite, parent, hideHide, needHr) {
                       function() { $(iom.postform + id).hide() }]
                   ])))
       if (needHr)
-	 subj.prepend('<hr />')
+         subj.prepend('<hr />')
       if (!parent)
          parent = $('#'+ id + ' ' + iom.thread.eot)
       parent.after(subj)
@@ -85,14 +85,19 @@ function cacheThread(idurl, cb) {
       var load = $('<span class="penLoadMoar">' + i18n.thrdLoading + '</span>')
       moar.hide().after(load)
       var url = o.find(iom.post.reflink).attr('href').split('#')[0]
+      var tid = idurl
    } else {
       var url = idurl
       var tid = $.urltid(url)
-      if (($(iom.form.parent).length > 0 && $(iom.tid).attr('id') == tid) ||
-	  ($('#fold'+tid).length > 0)) {
-	 cb()
-	 return
+   }
+   if (($(iom.form.parent).length > 0 && $(iom.tid).attr('id') == tid) ||
+       ($('#fold'+tid).length > 0)) {
+      if (moar) {
+         moar.show()
+         o.find('span.penLoadMoar').remove()
       }
+      cb()
+      return
    }
    $.fn.ajaxThread(
       url,
@@ -187,16 +192,16 @@ function intelli(x, y, id, url, threadCached) {
          $('#is'+id).remove()
          var obj = {}
          if($('#'+id).length == 0) {
-	    if (!threadCached && url) {
+            if (!threadCached && url) {
                cacheThread(url, function () { intelli(x, y, id, null, true) })
                obj = $.ui.preview(
-		  $('<div>' + i18n.thrdLoading + '</div>'),
-		  x, y)
-	    } else {
-	       obj = $.ui.preview(
-		  $('<div>' + i18n.previewError + '</div>'),
-		  x, y)
-	    }
+                  $('<div>' + i18n.thrdLoading + '</div>'),
+                  x, y)
+            } else {
+               obj = $.ui.preview(
+                  $('<div>' + i18n.previewError + '</div>'),
+                  x, y)
+            }
          } else {
             obj = $.ui.preview(id, x, y)
          }
@@ -248,10 +253,10 @@ function chktizer(obj, id, tp, sage, filtered) {
             '...)'
       } else { var cite = '' }
       tizText = [i18n.thrd, id.replace('t', i18n.no), cite,
-		 (filtered ? i18n.filtered : i18n.hidden) + '.'].join(' ')
+                 (filtered ? i18n.filtered : i18n.hidden) + '.'].join(' ')
    } else {
       tizText = [i18n.post, id.replace('p', i18n.no),
-		 (filtered ? i18n.filtered : i18n.hidden) + '.'].join(' ')
+                 (filtered ? i18n.filtered : i18n.hidden) + '.'].join(' ')
    }
    var tmenu = [[i18n.show,
                  function () { toggleVisible(id) }]]
@@ -318,29 +323,29 @@ function toggleSettings () {
    var genVal = function (id, val) {
       var selected = null
       if(db.combos[id]) {
-	 selected = val
-	 val = db.combos[id]
+         selected = val
+         val = db.combos[id]
       }
       switch (typeof val) {
       case 'object':
-	 var retstr = '<select>'
-	 
-	 for (var k in val) {
-	    retstr += '<option '+(k == selected ? 'selected="selected"':'')+' name="' + k + '">' + val[k] + '</option>'
-	 }
-	 return retstr + '</select>'
-	 break
+         var retstr = '<select>'
+
+         for (var k in val) {
+            retstr += '<option '+(k == selected ? 'selected="selected"':'')+' name="' + k + '">' + val[k] + '</option>'
+         }
+         return retstr + '</select>'
+         break
       case 'boolean':
-	 return '<input type="checkbox" ' + (val ? 'checked="checked"' : '') + '/>'
-	 break
+         return '<input type="checkbox" ' + (val ? 'checked="checked"' : '') + '/>'
+         break
       case 'string':
-	 return '<input size="45" value="' + val + '" />'
-	 break
+         return '<input size="45" value="' + val + '" />'
+         break
       case 'number':
-	 return '<input size="8" value="' + val + '" />'
-	 break
+         return '<input size="8" value="' + val + '" />'
+         break
       default:
-	 return ''
+         return ''
       }
    }
    var genDef = function (level) {
@@ -351,87 +356,87 @@ function toggleSettings () {
       var inp = subj.find('input, select')
       db.cfg[id] = db.dflt[id]
       if(db.combos[id]) {
-	 for(var def in db.combos[id]) {
-	    inp.find('option:selected').removeAttr('selected')
-	    inp.find('option[name='+def+']').attr('selected', 'selected')
-	    break
-	 }
+         for(var def in db.combos[id]) {
+            inp.find('option:selected').removeAttr('selected')
+            inp.find('option[name='+def+']').attr('selected', 'selected')
+            break
+         }
       } else {
-	 switch (typeof db.cfg[id]) {
-	 case 'boolean':
-	    if (db.cfg[id]) {
-	       inp.attr('checked', 'checked')
-	    } else {
-	       inp.removeAttr('checked')
-	    }
-	    break
-	 case 'number':
-	 case 'string':
-	    inp.attr('value', db.cfg[id])
-	    break
-	 }	 
+         switch (typeof db.cfg[id]) {
+         case 'boolean':
+            if (db.cfg[id]) {
+               inp.attr('checked', 'checked')
+            } else {
+               inp.removeAttr('checked')
+            }
+            break
+         case 'number':
+         case 'string':
+            inp.attr('value', db.cfg[id])
+            break
+         }
       }
    }
    var genSettings = function () {
       var slist = function (items, level) {
          var setStr = '';
-	 var o = 0
+         var o = 0
          for (var id in items) {
             setStr += '<span id="pen' + items[id] + '" class="penSetting penLevel' + level + '">' +
                db.name[items[id]] + ( level < 3 ? '<span class="right">' + genVal(items[id], db.cfg[items[id]]) + genDef(level) + '</span>' : genVal(items[id], db.cfg[items[id]])) + '</span>'
             if (db.children[items[id]]) {
                setStr += slist(db.children[items[id]], level + 1)
             }
-	    o++
+            o++
          }
          return setStr
       }
       var generated = $(slist(db.roots, 1))
       generated.find('button').click(
-	 function () {
-	    var childrenEnded = false
-	    var e = $(this).closest('span.penSetting')
-	    defaultSetting(e)
-	    e.nextAll('span.penSetting').each(
-	       function () {
-		  if (!$(this).hasClass('penLevel3')) {
-		     childrenEnded = true
-		  }
-		  if (!childrenEnded) 
-		     defaultSetting($(this))
-	       }
-	    )
-	 })
+         function () {
+            var childrenEnded = false
+            var e = $(this).closest('span.penSetting')
+            defaultSetting(e)
+            e.nextAll('span.penSetting').each(
+               function () {
+                  if (!$(this).hasClass('penLevel3')) {
+                     childrenEnded = true
+                  }
+                  if (!childrenEnded)
+                     defaultSetting($(this))
+               }
+            )
+         })
 
       var genControls = $('<span><br /><button>' + i18n.allDefault + '</button> <input id="penSettingsSearch" size="33" style="float:right"><br /></span>')
       genControls.find('button').click(
-	 function () {
-	    generated.find('button').click()
-	 }
+         function () {
+            generated.find('button').click()
+         }
       )
       genControls.find('input').keypress(
-	 function () {
-	    generated.find('.penSetting:contains("' + $(this).val() + '")').hide()
-	 }
+         function () {
+            generated.find('.penSetting:contains("' + $(this).val() + '")').hide()
+         }
       )
       genControls.append(generated)
       return genControls
    }
    var saveSettings = function () {
       $('#penSettings').find('input, option:selected').each(
-	 function () {
-	    var e = $(this)
-	    if (e.is('#penSettingsSearch'))
-	       return
-	    var id = e.closest('span.penSetting').attr('id').replace(/^pen/, '')
-	    if (e.attr('type') == 'checkbox') {
-	       db.cfg[id] = e.attr('checked')
-	    } else if (e.is('option')) {
-	       db.cfg[id] = e.attr('name')
-	    } else { 
-	       db.cfg[id] = e.val()
-	    }
-	 })
+         function () {
+            var e = $(this)
+            if (e.is('#penSettingsSearch'))
+               return
+            var id = e.closest('span.penSetting').attr('id').replace(/^pen/, '')
+            if (e.attr('type') == 'checkbox') {
+               db.cfg[id] = e.attr('checked')
+            } else if (e.is('option')) {
+               db.cfg[id] = e.attr('name')
+            } else {
+               db.cfg[id] = e.val()
+            }
+         })
    }
 
    if ($('#penSettings').length == 0) {
@@ -440,12 +445,12 @@ function toggleSettings () {
          iom.strings.settings,
          $.ui.multiLink([
             [i18n.apply,
-             function () { 
-		saveSettings()
-		db.saveCfg()
-		location.reload(true) }],
-	    [i18n.close,
-	     function () { $('#penSettings').hide() }]
+             function () {
+                saveSettings()
+                db.saveCfg()
+                location.reload(true) }],
+            [i18n.close,
+             function () { $('#penSettings').hide() }]
          ])).
          append(genSettings())
    }
@@ -468,7 +473,7 @@ function withSelection (subj, f) {
 function setupEnv (db, env) {
    var isNight = true
    var thm = db.cfg.nightTime.match(/(\d+)\D+(\d+)\D+(\d+)\D+(\d+)/)
-   if(((thm[3] < db.global.time.getHours()) && (thm[1] > db.global.time.getHours())) || 
+   if(((thm[3] < db.global.time.getHours()) && (thm[1] > db.global.time.getHours())) ||
       ((thm[3] == db.global.time.getHours()) && (thm[4] < db.global.time.getMinutes())) ||
       ((thm[1] == db.global.time.getHours()) && (thm[2] > db.global.time.getMinutes()))) {
       isNight = false
@@ -480,17 +485,17 @@ function setupEnv (db, env) {
    } else if (db.cfg.btnsStyle == 'css') {
       i18n.btns = i18nButtons[isNight ? db.cfg.ntheme : db.cfg.theme]
    }
-   
+
    db.loadBookmarks()
 
    if (db.cfg.overrideF5) {
       $(window).keydown(
-	 function (e) {
-	    if (e.which == 116) {
-	       //window.frames['main'].location.reload()
-	       return false
-	    }
-	 })
+         function (e) {
+            if (e.which == 116) {
+               //window.frames['main'].location.reload()
+               return false
+            }
+         })
    }
 
    var bmenu = [[i18n.settings,
@@ -500,10 +505,10 @@ function setupEnv (db, env) {
                   function () { toggleBookmarks() }])
    if (db.cfg.idxHide)
       bmenu.push([i18n.createThread,
-                  function (e) { 
-		     env.find(iom.postform).toggle()
-		     env.find('hr').slice(0,1).toggle()
-		     $(e.target).text($(e.target).text() == i18n.createThread ? $(e.target).text(i18n.hideForm) : $(e.target).text(i18n.createThread)) }])
+                  function (e) {
+                     env.find(iom.postform).toggle()
+                     env.find('hr').slice(0,1).toggle()
+                     $(e.target).text($(e.target).text() == i18n.createThread ? $(e.target).text(i18n.hideForm) : $(e.target).text(i18n.createThread)) }])
 
    env.find(iom.menu).after(
       $.ui.multiLink(bmenu, i18n.mLinkSep, '')
@@ -554,29 +559,29 @@ function setupEnv (db, env) {
             $.ui.multiLink([
                [i18n.imgs.unfold,
                 function (e) {
-		   $(iom.post.image).parent().click() 
-		   $(e.target).text(
-		      $(e.target).text() == i18n.imgs.unfold ? i18n.imgs.fold : i18n.imgs.unfold
-		   )
-		}],
+                   $(iom.post.image).parent().click()
+                   $(e.target).text(
+                      $(e.target).text() == i18n.imgs.unfold ? i18n.imgs.fold : i18n.imgs.unfold
+                   )
+                }],
                [i18n.imgLess.hide,
                 function (e) { $(iom.pid).each(
                    function () {
                       if ($(this).find(iom.post.image).length == 0)
                          $(this).toggle()
                    })
-	           $(e.target).text(
-		      $(e.target).text() == i18n.imgLess.hide ? i18n.imgLess.show : i18n.imgLess.hide
-		   )}],
-	       [i18n.citeLess.hide,
+                               $(e.target).text(
+                                  $(e.target).text() == i18n.imgLess.hide ? i18n.imgLess.show : i18n.imgLess.hide
+                               )}],
+               [i18n.citeLess.hide,
                 function (e) { $(iom.pid).each(
                    function () {
                       if ($(this).find(iom.post.backrefs).length == 0)
                          $(this).toggle()
                    })
-		   $(e.target).text(
-		      $(e.target).text() == i18n.citeLess.hide ? i18n.citeLess.show : i18n.citeLess.hide
-		   )}]
+                               $(e.target).text(
+                                  $(e.target).text() == i18n.citeLess.hide ? i18n.citeLess.show : i18n.citeLess.hide
+                               )}]
             ], ' / ', '').css('left', '0')
          )
       }
@@ -670,6 +675,33 @@ function setupEnv (db, env) {
          }
       }
    )
+   /* Event-driven attempt tiny inclusion.
+      Seriously, this handler needs to be much
+      more more (fucking english i've forgot it). */
+   $(env).click(
+      function (e) {
+         var subj = $(e.target)
+         if (subj.closest(iom.post.abbr).length > 0 && db.cfg.useAJAX) {
+            var tid = subj.closest(iom.tid).attr('id')
+            var pid = subj.closest(iom.pid).attr('id')
+            cacheThread(tid, function () {
+               var replacee = null
+               $('#'+tid+' #'+pid+' '+iom.post.wholemessage).each(
+                  function () {
+                     if(!replacee) {
+                        replacee = $(this)
+                     } else {
+                        $(this).remove()
+                     }
+                  })
+               replacee.replaceWith($('#cache #'+pid+' '+iom.post.wholemessage).clone(true))
+            })
+            return false
+         } else if (subj.attr('altsrc') && db.cfg.imgsUnfold) {
+            refold(subj.findc(iom.pid).attr('id'))
+	    return false
+         }
+      })
 }
 
 apply_me = function (messages, isSecondary) {
@@ -771,19 +803,6 @@ apply_me = function (messages, isSecondary) {
       }
    )
 
-   db.cfg.imgsUnfold &&
-      messages.find(iom.post.image).each(
-         function () {
-            var subj = $(this)
-            subj.a().click(
-               function () {
-                  return refold(subj.findc(iom.pid).attr('id'))
-               }
-            ).removeAttr('target')
-         }
-      )
-
-
    db.cfg.iSense &&
       messages.find(iom.anchors).each(
          function () { apply_isense($(this)) }
@@ -826,5 +845,3 @@ db.loadCfg()
 db.loadHidden()
 
 $(document).ok(db, setupEnv, apply_me, postSetup)
-
-
