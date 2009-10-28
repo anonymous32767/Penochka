@@ -463,7 +463,6 @@ function setupEnv (db, env) {
    }
 
    addStyle(css[isNight ? db.cfg.ntheme : db.cfg.theme])
-   alert(db.cfg.btnsStyle)
    if (db.cfg.btnsStyle == 'text') {
       i18n.btns = i18nButtons.text
    } else if (db.cfg.btnsStyle == 'css') {
