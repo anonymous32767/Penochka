@@ -87,6 +87,12 @@ function cacheThread(idurl, cb) {
       var url = o.find(iom.post.reflink).attr('href').split('#')[0]
    } else {
       var url = idurl
+      var tid = $.urltid(url)
+      if (($(iom.form.parent).length > 0 && $(iom.tid).attr('id') == tid) ||
+	  ($('#fold'+tid).length > 0)) {
+	 cb()
+	 return
+      }
    }
    $.fn.ajaxThread(
       url,
@@ -174,17 +180,23 @@ function apply_isense(a) {
 var z = 0;
 var ist = {};
 
-function intelli(x, y, id, url) {
+function intelli(x, y, id, url, threadCached) {
    clearTimeout(ist[id])
    ist[id] = setTimeout(
       function () {
          $('#is'+id).remove()
          var obj = {}
-         if(($('#'+id).length == 0) && url) {
-            cacheThread(url, function () { intelli(x, y, id) })
-            obj = $.ui.preview(
-               $('<div>' + i18n.thrdLoading + '</div>').attr('id', 'is' + id),
-               x, y)
+         if($('#'+id).length == 0) {
+	    if (!threadCached && url) {
+               cacheThread(url, function () { intelli(x, y, id, null, true) })
+               obj = $.ui.preview(
+		  $('<div>' + i18n.thrdLoading + '</div>'),
+		  x, y)
+	    } else {
+	       obj = $.ui.preview(
+		  $('<div>' + i18n.previewError + '</div>'),
+		  x, y)
+	    }
          } else {
             obj = $.ui.preview(id, x, y)
          }

@@ -133,7 +133,7 @@ iom = {
    }
 }
 
-function dvach (onload) {
+function dvach (onload, events) {
    function parse (cloned) {
       var opPost = $('<span></span>');
       var currThread = $('<span></span>');
@@ -267,6 +267,9 @@ function dvach (onload) {
    jQuery.extend({
       turl: function (tid) {
          return '/' + db.global.board + '/res/'+tid.replace(/\D/g, '')+'.html'
+      },
+      urltid: function (url) {
+	 return 't' + url.replace(/.*\/(\d+)\.html/,'$1')
       }
    });
 
