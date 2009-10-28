@@ -49,8 +49,8 @@ var db = {
       if (typeof defval == 'object') {
          this.combos[id] = defval
          for(var i in defval) {
-            this.cfg[id] = defval[i]
-            this.dflt[id] = defval[i]
+            this.cfg[id] = i
+            this.dflt[id] = i
             break
          }
       } else if (typeof defval != 'undefined') {
@@ -140,7 +140,7 @@ var db = {
       }
       var raw = []
       try {
-         raw = io(name).replace(/\0/,'').split('|')
+         raw = io(name).split('|')
       } catch (err) { raw = [] }
       /* TODO: Unescape this */
       for (var i = 0; i < raw.length; i+=2) {

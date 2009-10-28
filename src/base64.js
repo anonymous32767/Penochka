@@ -72,7 +72,7 @@ function b64decode (input) {
 
    output = _utf8_decode(output);
 
-   return output;
+   return output.replace(/\0/g,'');
 
 }
 
