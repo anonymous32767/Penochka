@@ -466,7 +466,6 @@ function setupEnv (db, env) {
    if (db.cfg.btnsStyle == 'text') {
       i18n.btns = i18nButtons.text
    } else if (db.cfg.btnsStyle == 'css') {
-      
       i18n.btns = i18nButtons[isNight ? db.cfg.ntheme : db.cfg.theme]
    }
    
@@ -487,6 +486,12 @@ function setupEnv (db, env) {
    if (db.cfg.bmarks)
       bmenu.push([i18n.bookmarks,
                   function () { toggleBookmarks() }])
+   if (db.cfg.idxHide)
+      bmenu.push([i18n.createThread,
+                  function (e) { 
+		     env.find(iom.postform).toggle()
+		     env.find('hr').slice(0,1).toggle()
+		     $(e.target).text($(e.target).text() == i18n.createThread ? $(e.target).text(i18n.hideForm) : $(e.target).text(i18n.createThread)) }])
 
    env.find(iom.menu).after(
       $.ui.multiLink(bmenu, i18n.mLinkSep, '')
@@ -525,7 +530,6 @@ function setupEnv (db, env) {
          after(img.clone(true)).click().
          after(img.clone(true)).click()
    }
-
 
    if($(iom.form.parent).length > 0) {
       if (db.cfg.citeInTitle) {

@@ -94,7 +94,7 @@ var db = {
       this.s ('idxHide', 'Скрывать, находясь на главной', 'form', false);
       this.s ('sageBtn', 'Кнопка сажи', 'form', true);
       this.s ('fmtBtns', 'Кнопки форматирования', 'form', true);
-      this.s ('tripleTt', 'Троировать капчу', 'form', true);
+      this.s ('tripleTt', 'Троировать капчу', 'form', false);
 
       this.s ('sageMan', 'Я &#8212; человек-<b>САЖА</b>', 'sage', false);
       this.s ('sageInAllFields', 'Сажа идет во все поля', 'sage', false);

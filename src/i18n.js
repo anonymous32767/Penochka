@@ -72,6 +72,8 @@ var i18nRus = {
    bookmarks: 'Закладки',
    fromBms: 'Из закладок',
    toBms: 'В закладки',
+   createThread: 'Создать тред',
+   hideForm: 'Скрыть форму',
    imgs: {
       fold: 'Свернуть изображения',
       unfold: 'Развернуть изображения'
