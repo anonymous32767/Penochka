@@ -47,7 +47,7 @@ if (window.opera) {
 
 function io(name, val) {
    try {
-      var storage = typeof localStorage === 'object' ? localStorage : globalStorage[location.hostname]
+      var storage = (typeof localStorage === 'object') && (localStorage != null) ? localStorage : globalStorage[location.hostname]
    } catch (err) { /* Worst case: use cakes */
       return _cake(name, val)
    }
