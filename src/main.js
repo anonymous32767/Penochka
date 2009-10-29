@@ -516,9 +516,9 @@ function setupEnv (db, env) {
 
    env.find(iom.postform).submit(function () {
       if (db.cfg.bmAutoAdd) {
-         var subj = $(this)
-         var t = $(this).parents(iom.tid)
-         var tid = t.attr('id')
+	 var subj = $(this)
+	 var t = $(this).parents(iom.tid)
+	 var tid = t.attr('id')
          if (!toggleBookmark(tid)) {
             toggleBookmark(tid)
          }
@@ -533,7 +533,7 @@ function setupEnv (db, env) {
                   var errResult = responseText.match(/<h1.*?>(.*?)<br/)[1]
                   subj.find(iom.form.status).text(errResult)
                } else {
-                  subj.find(iom.form.status).text(i18n.okReloadingNow)
+		  subj.find(iom.form.status).text(i18n.okReloadingNow)
                   window.location.reload(true)
                }
             }})
@@ -694,7 +694,10 @@ function setupEnv (db, env) {
                         $(this).remove()
                      }
                   })
-               replacee.replaceWith($('#cache #'+pid+' '+iom.post.wholemessage).clone(true))
+	       var replacer = $('<span/>').
+		  append($('#cache #'+pid+' '+iom.post.backrefsBlock).clone(true)).
+		  append($('#cache #'+pid+' '+iom.post.message).clone(true))
+               replacee.replaceWith(replacer)
             })
             return false
          } else if (subj.attr('altsrc') && db.cfg.imgsUnfold) {

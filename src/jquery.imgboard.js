@@ -92,6 +92,7 @@ iom = {
       abbrlink: 'div.abbrev a',
       wholemessage: 'blockquote',
       backrefs: 'blockquote.penRefs a',
+      backrefsBlock: 'blockquote.penRefs',
       message: 'blockquote:not(.penRefs):first',
       ref: 'span.reflink',
       reflink: 'span.reflink a:first',
