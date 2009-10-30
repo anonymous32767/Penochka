@@ -492,8 +492,7 @@ function setupEnv (db, env) {
       $(window).keydown(
          function (e) {
             if (e.which == 116) {
-               //window.frames['main'].location.reload()
-               return false
+               /* return false */
             }
          })
    }
@@ -516,9 +515,9 @@ function setupEnv (db, env) {
 
    env.find(iom.postform).submit(function () {
       if (db.cfg.bmAutoAdd) {
-	 var subj = $(this)
-	 var t = $(this).parents(iom.tid)
-	 var tid = t.attr('id')
+         var subj = $(this)
+         var t = $(this).parents(iom.tid)
+         var tid = t.attr('id')
          if (!toggleBookmark(tid)) {
             toggleBookmark(tid)
          }
@@ -533,7 +532,7 @@ function setupEnv (db, env) {
                   var errResult = responseText.match(/<h1.*?>(.*?)<br/)[1]
                   subj.find(iom.form.status).text(errResult)
                } else {
-		  subj.find(iom.form.status).text(i18n.okReloadingNow)
+                  subj.find(iom.form.status).text(i18n.okReloadingNow)
                   window.location.reload(true)
                }
             }})
@@ -681,28 +680,30 @@ function setupEnv (db, env) {
    $(env).click(
       function (e) {
          var subj = $(e.target)
-         if (subj.closest(iom.post.abbr).length > 0 && db.cfg.useAJAX) {
-            var tid = subj.closest(iom.tid).attr('id')
-            var pid = subj.closest(iom.pid).attr('id')
-            cacheThread(tid, function () {
-               var replacee = null
-               $('#'+tid+' #'+pid+' '+iom.post.wholemessage).each(
-                  function () {
-                     if(!replacee) {
-                        replacee = $(this)
-                     } else {
-                        $(this).remove()
-                     }
-                  })
-	       var replacer = $('<span/>').
-		  append($('#cache #'+pid+' '+iom.post.backrefsBlock).clone(true)).
-		  append($('#cache #'+pid+' '+iom.post.message).clone(true))
-               replacee.replaceWith(replacer)
-            })
-            return false
-         } else if (subj.attr('altsrc') && db.cfg.imgsUnfold) {
-            refold(subj.findc(iom.pid).attr('id'))
-	    return false
+         if (e.which == 1) {
+            if (subj.closest(iom.post.abbr).length > 0 && db.cfg.useAJAX) {
+               var tid = subj.closest(iom.tid).attr('id')
+               var pid = subj.closest(iom.pid).attr('id')
+               cacheThread(tid, function () {
+                  var replacee = null
+                  $('#'+tid+' #'+pid+' '+iom.post.wholemessage).each(
+                     function () {
+                        if(!replacee) {
+                           replacee = $(this)
+                        } else {
+                           $(this).remove()
+                        }
+                     })
+                  var replacer = $('<span/>').
+                     append($('#cache #'+pid+' '+iom.post.backrefsBlock).clone(true)).
+                     append($('#cache #'+pid+' '+iom.post.message).clone(true))
+                  replacee.replaceWith(replacer)
+               })
+               return false
+            } else if (subj.attr('altsrc') && db.cfg.imgsUnfold) {
+               refold(subj.findc(iom.pid).attr('id'))
+               return false
+            }
          }
       })
 }
