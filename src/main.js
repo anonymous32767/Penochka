@@ -177,17 +177,18 @@ function apply_isense(a) {
          )
       },
       function(evt) { // out
-         outelli(a.attr('refid'))
+	 if($(evt.target).closest('.penISense').length == 0)
+            outelli(a.attr('refid'))
       }
    )
 }
 
 var z = 0;
-var ist = {};
+var ist = null;
 
 function intelli(x, y, id, url, threadCached) {
-   clearTimeout(ist[id])
-   ist[id] = setTimeout(
+   clearTimeout(ist)
+   ist = setTimeout(
       function () {
          $('#is'+id).remove()
          var obj = {}
@@ -206,12 +207,13 @@ function intelli(x, y, id, url, threadCached) {
             obj = $.ui.preview(id, x, y)
          }
          obj.attr('id','is'+id);
+	 obj.addClass('penISense')
          obj.hover(
             function(evt) {
-               clearTimeout(ist[id])
+               clearTimeout(ist)
             },
             function(evt) {
-               outelli(id)
+	       outelli(id)
             })
          obj.css('z-index', z++);
          $('body').prepend(obj);
@@ -220,10 +222,10 @@ function intelli(x, y, id, url, threadCached) {
 }
 
 function outelli(id) {
-   clearTimeout(ist[id])
-   ist[id] = setTimeout(
+   clearTimeout(ist)
+   ist = setTimeout(
       function () {
-         $('#is'+id).remove()
+	 $('.penISense').remove()
       },
       db.cfg.iSenseDn)
 }
