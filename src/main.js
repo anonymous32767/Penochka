@@ -770,7 +770,7 @@ apply_me = function (messages, isSecondary) {
                      censf = true
                   }
                   if (db.cfg.censMail &&
-                      subj.find(iom.post.email).text().search(db.cfg.censMail) != -1) {
+                      subj.find(iom.post.email).length > 0 && subj.find(iom.post.email).attr('href').search(db.cfg.censMail) != -1) {
                      censf = true
                   }
                   if (db.cfg.censMsg &&
