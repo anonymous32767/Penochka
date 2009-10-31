@@ -145,9 +145,13 @@ var db = {
       /* TODO: Unescape this */
       for (var i = 0; i < raw.length; i+=2) {
          if (raw[i + 1]) {
-            if (raw[i + 1] == 'false') {
-               obj[raw[i]] = false
-            } else {
+	    if (typeof this.dflt[raw[i]] == 'boolean') {
+	       obj[raw[i]] = raw[i + 1] == 'false' ? false : true
+	    } else if (typeof this.dflt[raw[i]] == 'number') {
+	       obj[raw[i]] = raw[i + 1] * 1
+	       if (obj[raw[i]] == NaN) 
+		  obj[raw[i]] = this.dflt[raw[i]]
+	    } else {
                obj[raw[i]] = raw[i + 1]
             }
          }
