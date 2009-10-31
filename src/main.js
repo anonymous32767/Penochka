@@ -541,6 +541,10 @@ function setupEnv (db, env) {
          return false
       }
    })
+   
+   if(env.find(iom.form.status).length == 0) {
+      env.find(iom.form.email).after('<i></i>')
+   }
 
    var img = env.find(iom.form.turimage)
    if (img.length > 0) {
