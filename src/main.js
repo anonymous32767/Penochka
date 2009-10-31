@@ -472,6 +472,7 @@ function withSelection (subj, f) {
 
 function setupEnv (db, env) {
    var isNight = true
+   var isThread = $(iom.form.parent).length > 0 ? true : false
    var thm = db.cfg.nightTime.match(/(\d+)\D+(\d+)\D+(\d+)\D+(\d+)/)
    if(((thm[3] < db.global.time.getHours()) && (thm[1] > db.global.time.getHours())) ||
       ((thm[3] == db.global.time.getHours()) && (thm[4] < db.global.time.getMinutes())) ||
@@ -502,7 +503,7 @@ function setupEnv (db, env) {
    if (db.cfg.bmarks)
       bmenu.push([i18n.bookmarks,
                   function () { toggleBookmarks() }])
-   if (db.cfg.idxHide)
+   if (db.cfg.idxHide && !isThread)
       bmenu.push([i18n.createThread,
                   function (e) {
                      env.find(iom.postform).toggle()
@@ -518,9 +519,8 @@ function setupEnv (db, env) {
          var subj = $(this)
          var t = $(this).parents(iom.tid)
          var tid = t.attr('id')
-         if (!toggleBookmark(tid)) {
+         if (!toggleBookmark(tid)) 
             toggleBookmark(tid)
-         }
       }
       if (db.cfg.useAJAX) {
          subj.find(iom.form.status).text(i18n.sending)
@@ -540,14 +540,34 @@ function setupEnv (db, env) {
       }
    })
 
-   if (db.cfg.tripleTt) {
-      var img = env.find(iom.form.turimage)
-      img.css('padding-right', '3px').
-         after(img.clone(true)).click().
-         after(img.clone(true)).click()
+   var img = env.find(iom.form.turimage)
+   if (img.length > 0) {
+      if (db.cfg.tripleTt) {
+	 img.css('padding-left', '3px').
+            after(img.clone(true)).click().
+            after(img.clone(true)).click()
+      }
+   } else {
+      var genCaptcha = function (key, dummy) {
+	 return '<img alt="Update captcha" src="/b/captcha.pl?key=' + key + '&amp;dummy=' + dummy + '" onclick="update_captcha(this)" style="padding-left: 3px" />'
+      }
+      var tNum = $(iom.form.parent).val()
+      var key = 'mainpage'
+      if (tNum) 
+	 key = 'res' + tNum
+      if (db.cfg.tripleTt) {
+	 ttStr  = genCaptcha(key, 1) + 
+	    genCaptcha(key, 2) + 
+	    genCaptcha(key, 3)
+      } else {
+	 ttStr = genCaptcha(key, 1)
+      }
+      env.find(iom.form.turdiv).html(ttStr)
+      env.find(iom.form.turtest).removeAttr('onfocus')
    }
 
-   if($(iom.form.parent).length > 0) {
+
+   if(isThread) {
       if (db.cfg.citeInTitle) {
          $('title').append(
             ' &#8212; ' +

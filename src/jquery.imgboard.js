@@ -118,6 +118,7 @@ iom = {
       file: 'input[name=file]',
       turtest: 'input[name=captcha]',
       turimage: '#imgcaptcha',
+      turdiv: '#captchadiv',
       password: 'input[name=password]',
       parent: 'input[name=parent]',
       submit: 'input[type=submit]',
@@ -229,14 +230,9 @@ function dvach (onload, events) {
          form.find('input[name=gb2][value=thread]').attr('checked','checked') */
          form.tuneForm()
          form.prepend('<input type="hidden" name="parent" value="' + tnum + '" />')
-         var turingTest = form.find(iom.form.turimage)
-         
-	 if (turingTest.length == 0) {
-	    turingTest = $('<img alt="обновить" src="/' + db.global.board + '/captcha.pl?key=mainpage&amp;dummy=" onclick="update_captcha(this)" id="imgcaptcha" />')
-	    turingTest.focus(function () { return false; })
-            form.find(iom.form.turtest).
-               after(turingTest)
-         }
+	 var turingTest = form.find(iom.form.turimage)
+	 if (turingTest.length == 0)
+            turingTest = form.find('#captchadiv img')
 
          turingTest.attr(
             'src',
