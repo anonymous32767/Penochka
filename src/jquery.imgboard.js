@@ -374,8 +374,6 @@ function dvach (onload, events) {
    }
 
    return function (obj, f, aft) {
-      var css = '#penSetttings {padding: 8px} #penSettings .right {float: right} #penSettings span {height: 32px} #penSettings input, #penSettings select {margin-left: 8px; margin-right: 8px} .penLevel1, .penLevel2 {display: block} .penSetting {height: 24px;} .penLevel1 {font-size: 16pt; font-weight: bold;} .penLevel2 {padding-left: 2em;}  .penLevel3 {padding-left: 4em;}'
-
       onload()
 
       var threadsRaw = obj.find('#delform');
@@ -384,7 +382,6 @@ function dvach (onload, events) {
       parse(cloned);
       process(cloned);
       $('body').append('<div id="cache" style="display:none" />')
-      addStyle(css)
       f(cloned)
       threadsRaw.replaceWith(cloned);
       aft()

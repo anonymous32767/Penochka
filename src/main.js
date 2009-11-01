@@ -384,15 +384,18 @@ function toggleSettings () {
       }
    }
    var genSettings = function () {
+      var odd = true
       var slist = function (items, level) {
          var setStr = '';
          var o = 0
          for (var id in items) {
-            setStr += '<span id="pen' + items[id] + '" class="penSetting penLevel' + level + '">' +
+            setStr += '<span id="pen' + items[id] + '" class="penSetting ' + (odd && (level >= 2) ? 'penSettingOdd' : '') + ' penLevel' + level + '">' +
                db.name[items[id]] + ( level < 3 ? '<span class="right">' + genVal(items[id], db.cfg[items[id]]) + genDef(level) + '</span>' : genVal(items[id], db.cfg[items[id]])) + '</span>'
             if (db.children[items[id]]) {
                setStr += slist(db.children[items[id]], level + 1)
             }
+	    if (level == 2) 
+	       odd = !odd
             o++
          }
          return setStr
@@ -422,7 +425,30 @@ function toggleSettings () {
       )
       genControls.find('input').keypress(
          function () {
-            generated.find('.penSetting:contains("' + $(this).val() + '")').hide()
+	    var searchStr = $(this).val()
+	    if(searchStr.length > 2) {
+	       var re = new RegExp(searchStr,'i')
+	       $('.penSetting').hide()
+	       $('.penSetting').each(
+		  function () {
+		     var subj = $(this)
+		     if (subj.text().search(re) != -1) {
+			if (subj.hasClass('penLevel2')) {
+			   subj.show()
+			   subj.prevAll('.penLevel1:first').show()
+			} else if (subj.hasClass('penLevel3')) {
+			   subj.show()
+			   subj.prevAll('.penLevel2:first').show()
+			   subj.prevAll('.penLevel1:first').show()
+			}
+		     }
+		  })
+	    } else if (searchStr.length < 2) {
+	       $('.penSetting').each(
+		  function () {
+		     $(this).show()
+		  })
+	    }
          }
       )
       genControls.append(generated)
