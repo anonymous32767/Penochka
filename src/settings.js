@@ -126,6 +126,7 @@ var db = {
       this.s ('iSenseUp', 'На притяжение', 'delay', 0);
       this.s ('iSenseDn', 'На отпадание',  'delay', 200);
       this.s ('bmAutoAdd', 'Автоматически добавлять тред в закладки при ответе',  'ftune', true);
+      this.s ('bmAutoDel', 'Автоматически удалять закладку, указывающую на утеряный тред',  'ftune', false);
       this.s ('nightTime', 'Ночной интервал', 'ftune', '22:00-8:00');
       this.s ('prvwMinWidth', 'Минимальная ширина превью сообщения', 'ftune', 450);
       this.s ('prvwMinDelta', 'Дельта ширины превью сообщения', 'ftune', 200);

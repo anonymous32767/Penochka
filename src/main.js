@@ -78,7 +78,7 @@ function showReplyForm(id, cite, parent, hideHide, needHr) {
 }
 
 /* */
-function cacheThread(idurl, cb) {
+function cacheThread(idurl, cb, errHandler) {
    if (idurl.search(/\//) == -1) {
       var o = $('#'+idurl)
       var moar = o.find(iom.thread.moar)
@@ -114,7 +114,7 @@ function cacheThread(idurl, cb) {
          }
          if (cb)
             cb()
-      })
+      }, errHandler)
 }
 
 function toggleThread(id, useAjax) {
@@ -163,7 +163,7 @@ function refold(id) {
 }
 
 /* */
-function apply_isense(a) {
+function apply_isense(a, ff) {
    if(!db.cfg.iSense) {
       return
    }
@@ -177,7 +177,8 @@ function apply_isense(a) {
             x,
             evt.pageY+10,
             a.attr('refid'),
-            a.attr('refurl')
+            a.attr('refurl'),
+	    false, ff
          )
       },
       function(evt) { // out
@@ -190,7 +191,7 @@ function apply_isense(a) {
 var z = 0;
 var ist = null;
 
-function intelli(x, y, id, url, threadCached) {
+function intelli(x, y, id, url, threadCached, ff) {
    clearTimeout(ist)
    ist = setTimeout(
       function () {
@@ -198,14 +199,18 @@ function intelli(x, y, id, url, threadCached) {
          var obj = {}
          if($('#'+id).length == 0) {
             if (!threadCached && url) {
-               cacheThread(url, function () { intelli(x, y, id, null, true) })
-               obj = $.ui.preview(
+               cacheThread(url, 
+			   function () { intelli(x, y, id, null, true) }, 
+			   function () { intelli(x, y, id, null, true, ff) })
+	       obj = $.ui.preview(
                   $('<div>' + i18n.thrdLoading + '</div>'),
                   x, y)
             } else {
                obj = $.ui.preview(
                   $('<div>' + i18n.previewError + '</div>'),
                   x, y)
+	       if (ff)
+		  ff()
             }
          } else {
             obj = $.ui.preview(id, x, y)
@@ -294,6 +299,14 @@ function toggleBookmarks() {
       for (i in db.bookmarks) {
          div.append($.ui.bookmark(i, db.bookmarks[i].cite,  db.bookmarks[i].timestamp))
       }
+      div.find('a.penBmLink').each(
+	 function () {
+	    var subj = $(this)
+	    apply_isense(subj, function () {
+	       if (db.cfg.bmAutoDel)
+		  subj.closest('div').find('a:first').click()
+	    })
+	 })
       return div
    }
    if ($('#penBms').length == 0) {

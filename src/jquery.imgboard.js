@@ -244,13 +244,15 @@ function dvach (onload, events) {
          return form
       },
       ajaxThread:
-      function (url, f) {
+      function (url, f, ef) {
          var e = $('<span/>')
          e.load(
             'http://'+location.host + url + ' #delform',
             {},
             function (a,b,c) {
                if (b != 'success') {
+		  if (ef)
+		     ef()
                   return
                }
                var cloned = $(e).find('#delform')
@@ -357,7 +359,7 @@ function dvach (onload, events) {
       bookmark:
       function (url, cite, date) {
          return $('<div class="penDesc"> /' + url.replace(/.*?(\w+).*/, '$1') +
-                  '/ <a class="penBmLink" href="' + url + '">' +
+                  '/ <a class="penBmLink" refid="'+$.urltid(url).replace(/t/,'p')+'" refurl="'+url+'" href="' + url + '">>>' +
                   url.replace(/.*?(\d+).*/, '$1') + '</a> ' + cite + '</div>').
             prepend(
                $.ui.multiLink([
