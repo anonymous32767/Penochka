@@ -127,6 +127,8 @@ var db = {
       this.s ('iSenseDn', 'На отпадание',  'delay', 200);
       this.s ('bmAutoAdd', 'Автоматически добавлять тред в закладки при ответе',  'ftune', true);
       this.s ('nightTime', 'Ночной интервал', 'ftune', '22:00-8:00');
+      this.s ('prvwMinWidth', 'Минимальная ширина превью сообщения', 'ftune', 450);
+      this.s ('prvwMinDelta', 'Дельта ширины превью сообщения', 'ftune', 200);
       this.s ('overrideF5', 'Перегружать только активный фрейм по F5', 'ftune', true);
 
       this.global.domain = window.location.hostname

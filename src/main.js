@@ -169,8 +169,12 @@ function apply_isense(a) {
    }
    a.hover(
       function(evt) { // over
+	 var xBound = document.body.clientWidth
+	 var x = evt.pageX + 10
+	 if ((xBound - x) < db.cfg.prvwMinWidth)
+	    x = xBound - db.cfg.prvwMinWidth - db.cfg.prvwMinDelta
          intelli(
-            evt.pageX+10,
+            x,
             evt.pageY+10,
             a.attr('refid'),
             a.attr('refurl')
