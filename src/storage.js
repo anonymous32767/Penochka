@@ -1,17 +1,57 @@
-/**/
+/* Cookies mamangement instead of using plugin.
+   Note that we do not escape/base64 cookies 
+   values here, so take care about it's format. */
+function getCookie(cName)
+{
+   if (document.cookie.length>0)
+   {
+      cStart=document.cookie.indexOf(cName + "=");
+      if (cStart!=-1)
+      {
+         cStart=cStart + cName.length+1;
+         cEnd=document.cookie.indexOf(";",cStart);
+         if (cEnd == -1) 
+	    cEnd=document.cookie.length
+         return document.cookie.substring(cStart,cEnd);
+      }
+   }
+   return "";
+}
 
-function _cake (name, val) {
-   if (typeof val == 'undefined') {
-      return b64decode($.cookie(name))
-   } else if (val == null) {
-      $.cookie(name, '', {expires: -1})
+function setCookie(cName, value, path, expireDays)
+{
+   var expDate = new Date()
+   expDate.setDate(expDate.getDate() + expireDays);
+   document.cookie=cName+ "=" + value +
+      (path ? "; path=" + path : "") +
+      (expireDays ? "; expires="+expDate.toGMTString() : "")
+}
+
+function _cake (names, valfn) {
+   if (typeof valfn == 'function') {
+      var retVal = {}
+      for (var i in names) {
+        retVal[i] = b64decode(getCookie(i))
+      }
+      valfn(retVal)
    } else {
-      $.cookie(name, b64encode(val), {path: '/', expires: 9000})
+      var len = 0
+      var encoded = {}
+      for (var i in names) {
+	 /* Encode value */
+	 encoded[i] = b64encode(names[i][0])
+	 len += encoded[i].length
+      }
+      if (len > 4000) /* Not 4096. Let's take a small gap*/
+	 return false
+      for (var i in encoded) 
+	 setCookie(i, encoded[i], names[i][1], 365 * 10)
+      return true
    }
 }
 
 /* TO RM: This is a nasty hack so should be removed as soon
-   as opera will began support localStorage 
+   as opera will began support localStorage
 if (window.opera) {
    var neverDomain = 'http://BAAD.F00D/';
    if (location.href == neverDomain) {
@@ -25,7 +65,7 @@ if (window.opera) {
       }, true);
    } else {
       $.bind('message', function (e) {
-	 
+
       })
       document.addEventListener('message', function(evt) {
          alert('got value: '+evt.data);
@@ -45,18 +85,30 @@ if (window.opera) {
 }
  End of nasty hack */
 
-function io(name, val) {
+/* Due to imposed async nature of our cross-browser IO
+   read procedure io() should be called only once to improve
+   performance */
+function io(names, valfn) {
    try {
       var storage = (typeof localStorage === 'object') && (localStorage != null) ? localStorage : globalStorage[location.hostname]
    } catch (err) { /* Worst case: use cakes */
-      return _cake(name, val)
+      return _cake(names, valfn)
    }
-   if (typeof val == 'undefined') {
-      return storage.getItem(name)
-   } else if (val == null) {
-      storage.removeItem(name)
+   if (typeof valfn == 'function') {
+      var retVal = {}
+      for (var i in names) {
+         retVal[i] = storage.getItem(i)
+      }
+      valfn(retVal)
    } else {
-      storage.setItem(name, val)
+      for (var i in names) {
+	 if (!names[i][1])
+	    names[i][1] = ''
+         storage.setItem(i+names[i][1].replace(/\//g,''), names[i][0])
+      }
+      /* FIXME: Add length check, localStorage als 
+         has size restrictions */
+      return true
    }
 }
 

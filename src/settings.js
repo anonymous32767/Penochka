@@ -89,6 +89,9 @@ var db = {
       this.s ('constPwd', 'Постоянный пароль на удаление', 'feats', '')
       this.s ('bmarks', 'Закладки', 'feats', true)
 
+      this.s ('taResize', 'Изменять размеры поля ввода сообщения', 'form', true);
+      this.s ('taHeight', 'Высота', 'taResize', 12);
+      this.s ('taWidth', 'Ширина', 'taResize', 66);
       this.s ('fastReply', 'Быстрый ответ', 'form', true);
       this.s ('thrdMove', 'Переносить вниз, находясь в треде', 'form', true);
       this.s ('idxHide', 'Скрывать, находясь на главной', 'form', false);
@@ -131,87 +134,109 @@ var db = {
       this.s ('prvwMinWidth', 'Минимальная ширина превью сообщения', 'ftune', 450);
       this.s ('prvwMinDelta', 'Дельта ширины превью сообщения', 'ftune', 200);
       this.s ('overrideF5', 'Перегружать только активный фрейм по F5', 'ftune', true);
+      this.s ('thrdInThrdLeave', 'Не скрывать тред, когда заходишь в него', 'ftune', false);
 
       this.global.domain = window.location.hostname
       this.global.board = window.location.pathname.replace(/^\/(\w+)\/.*$/, '$1')
       this.global.time = new Date()
       this.ready = true;
    },
-   load : function (obj, name) {
+   load : function (objs, cb) {
+      io(objs, 
+	 function (data) {
+	    var retVal = {}
+	    for (i in data) {
+	       retVal[i] = {}
+	       var raw = []
+	       try {
+		  raw = data[i].split('|')
+	       } catch (err) { raw = [] }
+
+	       for (var j = 0; j < raw.length; j += 2) {
+		  if (raw[j])
+		     retVal[i][raw[j]] = raw[j + 1]
+	       }
+	    }
+
+	    cb(retVal)
+	 })
+   },
+   save : function (objs) {
+      var raw = [];
+      /* TODO: Escape this */
+      for (o in objs) {
+	 for (i in objs[o][0]) {
+            raw.push(i)
+            raw.push(objs[o][0][i])
+	 }
+	 objs[o][0] = raw ? raw.join('|') : null
+	 raw = []
+      }
+      return io(objs)
+   },
+   saveState: function () {
+      var cfgDelta = {}
+      var bookmarksRaw = {}
+
+      /* Config */
+      for (var i in this.cfg) 
+         if (this.cfg[i] != this.dflt[i]) {
+            cfgDelta[i]=this.cfg[i]
+         }
+      
+      /* Bookamrks */
+      for (var i in this.bookmarks) 
+         bookmarksRaw[i] = this.bookmarks[i].timestamp + '#' + this.bookmarks[i].cite
+      
+      return this.save({
+	 penCfg: [cfgDelta, '/'],
+	 penHidden: [this.hidden, null],
+	 penBookmarks: [bookmarksRaw, '/']
+      })
+   },
+   loadState: function (cb) {
       if (!this.ready) {
          this.init()
       }
-      var raw = []
-      try {
-         raw = io(name).split('|')
-      } catch (err) { raw = [] }
-      /* TODO: Unescape this */
-      for (var i = 0; i < raw.length; i+=2) {
-         if (raw[i + 1]) {
-	    if (typeof this.dflt[raw[i]] == 'boolean') {
-	       obj[raw[i]] = raw[i + 1] == 'false' ? false : true
-	    } else if (typeof this.dflt[raw[i]] == 'number') {
-	       obj[raw[i]] = raw[i + 1] * 1
-	       if (obj[raw[i]] == NaN) 
-		  obj[raw[i]] = this.dflt[raw[i]]
-	    } else {
-               obj[raw[i]] = raw[i + 1]
-            }
-         }
-      }
-   },
-   save : function (obj, name) {
-      var raw = [];
-      /* TODO: Escape this */
-      for (i in obj) {
-         raw.push(i)
-         raw.push(obj[i])
-      }
-      if (raw) {
-         io(name, raw.join('|'))
-      } else {
-         io(name, null)
-      }
-   },
-   loadCfg : function () {
-      this.load(this.cfg, 'penCfg')
-      for (var i in this.cfg) {
-         if (typeof this.dflt[i] == 'number') {
-            this.cfg[i] = this.cfg[i] * 1
-         }
-      }
-   },
-   saveCfg : function () {
-      var delta = {};
-      for (var i in this.cfg) {
-         if (this.cfg[i] != this.dflt[i]) {
-            delta[i]=this.cfg[i]
-         }
-      }
-      this.save(delta, 'penCfg')
-   },
-   loadHidden : function () {
-      this.load(this.hidden, 'penHidden'+this.global.board)
-   },
-   saveHidden : function (board) {
-      this.save(this.hidden, 'penHidden'+this.global.board)
-   },
-   loadBookmarks : function (board) {
-      var raw = []
-      this.load(raw, 'penBookmarks')
-      for(i in raw) {
-         var tc = raw[i].split('#')
-         this.bookmarks[i] = {
-            timestamp : tc.shift(),
-            cite : tc.join('#')
-         }
-      }
-   },
-   saveBookmarks : function (board) {
-      var raw = []
-      for (var i in this.bookmarks) {
-         raw[i] = this.bookmarks[i].timestamp + '#' + this.bookmarks[i].cite
-      }
-      this.save(raw, 'penBookmarks')
+
+      var me = this
+      
+      this.load({
+	 penCfg: '',
+	 penBookmarks: '',
+	 penHidden: ''
+      }, 
+	function (data) {
+	   me.hidden = data.penHidden
+
+	   /* Bookmarks */
+	   for(i in data.penBookmarks) {
+              var tc = data.penBookmarks[i].split('#')
+              me.bookmarks[i] = {
+		 timestamp : tc.shift(),
+		 cite : tc.join('#')
+              }
+	   }
+	   
+	   /* Config typing fix */
+	   for (i in data.penCfg) {
+	      me.cfg[i] = data.penCfg[i]
+	   }
+	   for (i in me.cfg) {
+	      if (typeof me.dflt[i] == 'boolean') {
+		 if (me.cfg[i] == 'false') {
+		    me.cfg[i] = false
+		 } else if (me.cfg[i] == 'true') {
+		    me.cfg[i] = true
+		 }
+	      } else if (typeof me.dflt[i] == 'number') {
+		 me.cfg[i] = me.cfg[i] * 1
+		 if (me.cfg[i] == NaN) 
+		    me.cfg[i] = me.dflt[i]
+	      }
+	   }
+	   
+	   cb()
+	})
    }
 }

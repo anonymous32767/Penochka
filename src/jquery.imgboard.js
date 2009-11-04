@@ -29,6 +29,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+jQuery.fn.reverse = [].reverse
+jQuery.fn.sort = [].sort
+
 /* */
 /*@ http://www.mail-archive.com/jquery-en@googlegroups.com/msg16487.html */
 function addStyle( css ) {
@@ -357,19 +360,13 @@ function dvach (onload, events) {
          return div
       },
       bookmark:
-      function (url, cite, date) {
+      function (url, cite, date, delFunc) {
          return $('<div class="penDesc"> /' + url.replace(/.*?(\w+).*/, '$1') +
                   '/ <a class="penBmLink" refid="'+$.urltid(url).replace(/t/,'p')+'" refurl="'+url+'" href="' + url + '">>>' +
                   url.replace(/.*?(\d+).*/, '$1') + '</a> ' + cite + '</div>').
             prepend(
                $.ui.multiLink([
-                  ['x',
-                   function (evt) {
-                      var subj = $(evt.target).parents('div:first')
-                      delete db.bookmarks[subj.find('a.penBmLink').attr('href')]
-                      db.saveBookmarks ()
-                      subj.remove()
-                   }]
+                  ['x', delFunc]
                ])
             )
       }

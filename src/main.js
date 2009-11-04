@@ -142,7 +142,7 @@ function toggleVisible(id) {
    } else {
       db.hidden[id] = 1;
    }
-   db.saveHidden()
+   db.saveState()
 }
 
 /* */
@@ -154,8 +154,8 @@ function swapAttr(obj, a1, a2) {
 
 function refold(id) {
    var subj = $('#' + id + ' ' + iom.post.image)
-   swapAttr(subj, 'style', 'altstyle')
    swapAttr(subj, 'src', 'altsrc')
+   swapAttr(subj, 'style', 'altstyle')   
    if (db.cfg.fitImgs) {
       subj.css('max-width', $(window).width() - 64 + 'px')
    }
@@ -182,8 +182,11 @@ function apply_isense(a, ff) {
          )
       },
       function(evt) { // out
-	 if($(evt.target).closest('.penISense').length == 0)
-            outelli(a.attr('refid'))
+	 if($(evt.target).closest('.penISense').length == 0) {
+            outelli(a.attr('refid'), true)
+	 } else {
+	    outelli(a.attr('refid'), false)
+	 }
       }
    )
 }
@@ -222,7 +225,7 @@ function intelli(x, y, id, url, threadCached, ff) {
                clearTimeout(ist)
             },
             function(evt) {
-	       outelli(id)
+	       outelli(id, true)
             })
          obj.css('z-index', z++);
          $('body').prepend(obj);
@@ -230,11 +233,15 @@ function intelli(x, y, id, url, threadCached, ff) {
       db.cfg.iSenseUp)
 }
 
-function outelli(id) {
+function outelli(id, wholeThread) {
    clearTimeout(ist)
    ist = setTimeout(
       function () {
-	 $('.penISense').remove()
+	 if(wholeThread) {
+	    $('.penISense').remove()
+	 } else {
+	    $('#is'+id).remove()
+	 }
       },
       db.cfg.iSenseDn)
 }
@@ -297,7 +304,15 @@ function toggleBookmarks() {
    var genBookmarks = function () {
       var div = $('<span id="penBmsIn">')
       for (i in db.bookmarks) {
-         div.append($.ui.bookmark(i, db.bookmarks[i].cite,  db.bookmarks[i].timestamp))
+         div.append($.ui.bookmark(
+	    i, db.bookmarks[i].cite,  
+	    db.bookmarks[i].timestamp,
+	    function (evt) {
+               var subj = $(evt.target).parents('div:first')
+               delete db.bookmarks[subj.find('a.penBmLink').attr('href')]
+               db.saveState()
+               subj.remove()
+	    }))
       }
       div.find('a.penBmLink').each(
 	 function () {
@@ -334,7 +349,9 @@ function toggleBookmark(tid) {
       var tcite =  $.ui.threadCite(tid, db.cfg.bmCiteLen - 1)
       db.bookmarks[url]= { timestamp : new Date().getTime(), cite : tcite }
    }
-   db.saveBookmarks()
+   if (!db.saveState()) {
+      alert('1')
+   }
    return db.bookmarks[url]
 }
 
@@ -434,8 +451,7 @@ function toggleSettings () {
       genControls.find('button').click(
          function () {
             generated.find('button').click()
-         }
-      )
+         })
       genControls.find('input').keypress(
          function () {
 	    var searchStr = $(this).val()
@@ -492,7 +508,9 @@ function toggleSettings () {
             [i18n.apply,
              function () {
                 saveSettings()
-                db.saveCfg()
+                if (!db.saveState()) {
+		   alert('2')
+		}
                 location.reload(true) }],
             [i18n.close,
              function () { $('#penSettings').hide() }]
@@ -517,7 +535,7 @@ function withSelection (subj, f) {
 
 function setupEnv (db, env) {
    var isNight = true
-   var isThread = $(iom.form.parent).length > 0 ? true : false
+   var isInThread = $(iom.form.parent).length > 0 ? true : false
    var thm = db.cfg.nightTime.match(/(\d+)\D+(\d+)\D+(\d+)\D+(\d+)/)
    if(((thm[3] < db.global.time.getHours()) && (thm[1] > db.global.time.getHours())) ||
       ((thm[3] == db.global.time.getHours()) && (thm[4] < db.global.time.getMinutes())) ||
@@ -531,8 +549,6 @@ function setupEnv (db, env) {
    } else if (db.cfg.btnsStyle == 'css') {
       i18n.btns = i18nButtons[isNight ? db.cfg.ntheme : db.cfg.theme]
    }
-
-   db.loadBookmarks()
 
    if (db.cfg.overrideF5) {
       $(window).keydown(
@@ -548,7 +564,7 @@ function setupEnv (db, env) {
    if (db.cfg.bmarks)
       bmenu.push([i18n.bookmarks,
                   function () { toggleBookmarks() }])
-   if (db.cfg.idxHide && !isThread)
+   if (db.cfg.idxHide && !isInThread)
       bmenu.push([i18n.createThread,
                   function (e) {
                      env.find(iom.postform).toggle()
@@ -574,7 +590,9 @@ function setupEnv (db, env) {
             success:
             function(responseText, statusText) {
                if (responseText.search(/delform/) == -1) {
-                  var errResult = responseText.match(/<h1.*?>(.*?)<br/)[1]
+		  var errResult = 'Ошибка'
+		  subj.find(iom.form.status).text(errResult)
+                  errResult = responseText.match(/<h1.*?>(.*?)<br/)[1]
                   subj.find(iom.form.status).text(errResult)
                } else {
                   subj.find(iom.form.status).text(i18n.okReloadingNow)
@@ -615,8 +633,7 @@ function setupEnv (db, env) {
       env.find(iom.form.turtest).removeAttr('onfocus')
    }
 
-
-   if(isThread) {
+   if(isInThread) {
       if (db.cfg.citeInTitle) {
          $('title').append(
             ' &#8212; ' +
@@ -660,6 +677,12 @@ function setupEnv (db, env) {
    if (db.cfg.idxHide) {
       env.find(iom.postform).hide()
       env.find('hr').slice(0,1).hide()
+   }
+
+   if (db.cfg.taResize) {
+      env.find(iom.form.message).
+	 attr('rows', db.cfg.taHeight).
+	 attr('cols', db.cfg.taWidth)
    }
 
    if (db.cfg.sageBtn) {
@@ -778,6 +801,8 @@ function setupEnv (db, env) {
 }
 
 apply_me = function (messages, isSecondary) {
+   var isInThread = $(iom.form.parent).length > 0 ? true : false
+
    messages.find(iom.tid).each(
       function () {
          var subj = $(this)
@@ -881,15 +906,17 @@ apply_me = function (messages, isSecondary) {
          function () { apply_isense($(this)) }
       )
 
-
    for(var objId in db.hidden) {
       /* It's an low level alternative of toggle method
           * TODO Rewrite toggle for suitable usage in this
           * place (may be impossible). */
       if (objId) {
          var subj = messages.find('#'+objId)
+	 var isThread = objId.search(/t/) == -1 ? false : true
+	 if (db.cfg.thrdInThrdLeave && isInThread && isThread )
+	    continue
          subj.css('display', 'none')
-         chktizer(subj, objId, objId.search(/t/) == -1 ? false : true)
+         chktizer(subj, objId, isThread)
          messages.find('#tiz'+objId).css('display','block')
       }
    }
@@ -914,7 +941,6 @@ function postSetup () {
    },0);
 }
 
-db.loadCfg()
-db.loadHidden()
-
-$(document).ok(db, setupEnv, apply_me, postSetup)
+db.loadState(function () {
+   $(document).ok(db, setupEnv, apply_me, postSetup)
+})
