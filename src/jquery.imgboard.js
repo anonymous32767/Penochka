@@ -396,12 +396,11 @@ jQuery.fn.extend({
       if($('#cache').length > 0)
 	 return
       
-      if (typeof GM_setValue != "undefined") {
-         /* we are under firefox's greasemonkey */
+      try {
          document = unsafeWindow.document
          var converge = dvach(function() { env(db, $(unsafeWindow.document)) })
          converge($(unsafeWindow.document), msg, aft)
-      } else {
+      } catch (err) {
          this.ready(
             function () {
                var subj = $(this)
