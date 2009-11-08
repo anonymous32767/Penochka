@@ -178,6 +178,8 @@ function dvach (onload, events) {
    }
 
    function process(cloned) {
+      if (!$.references)
+	 $.references = {}
       cloned.find(iom.anchors).each(
          function () {
             var subj = $(this)
@@ -192,10 +194,12 @@ function dvach (onload, events) {
             var spid = subj.findc(iom.pid).attr('id')
             subj.attr('refid', pid)
             subj.attr('refurl', refurl)
-            if(!$.references[pid]) {
-               $.references[pid] = []
-            }
-            $.references[pid][spid]=spid
+	    try {
+               $.references[pid][spid] = spid
+	    } catch (err) {
+	       $.references[pid] = {}
+	       $.references[pid][spid] = spid
+	    }
          })
       cloned.find(iom.thread.moar).each(
          function () {
@@ -276,7 +280,6 @@ function dvach (onload, events) {
    });
 
    jQuery.xlatb = xlatb;
-   jQuery.references = [];
    jQuery.bookmarks = [];
 
    jQuery.ui = {
@@ -398,13 +401,17 @@ jQuery.fn.extend({
       
       try {
          document = unsafeWindow.document
-         var converge = dvach(function() { env(db, $(unsafeWindow.document)) })
+	 scope.timer.diff('page load');
+	 scope.timer.init();
+         converge = dvach(function() { env(db, $(unsafeWindow.document)) })
          converge($(unsafeWindow.document), msg, aft)
       } catch (err) {
          this.ready(
             function () {
+	       scope.timer.diff('page load');
+	       scope.timer.init();
                var subj = $(this)
-               var converge = dvach(function() { env(db, subj) })
+               converge = dvach(function() { env(db, subj) })
                converge(subj, msg, aft)
             }
          )

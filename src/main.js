@@ -102,6 +102,10 @@ function cacheThread(idurl, cb, errHandler) {
    $.fn.ajaxThread(
       url,
       function(e) {
+	 /* Chrome extension specific javascript behaviour 
+            workaround */
+	 dvach(function () {})
+	 /* End of workaround */
          e.find(iom.thread.reflink).attr('href', url)
          apply_me(e, true)
          var ue = e.find(iom.tid)
@@ -551,10 +555,12 @@ function setupEnv (db, env) {
    }
 
    if (db.cfg.overrideF5) {
-      $(window).keydown(
+      $(window).keypress(
          function (e) {
             if (e.which == 116) {
-               /* return false */
+               e.preventDefault()
+	       e.stopPropagation()
+	       document.location.reload()
             }
          })
    }
@@ -769,7 +775,7 @@ function setupEnv (db, env) {
    /* Event-driven attempt tiny inclusion.
       Seriously, this handler needs to be much
       more more (fucking english i've forgot it). */
-   $(env).click(
+   env.click(
       function (e) {
          var subj = $(e.target)
          if (e.which == 1) {
@@ -795,9 +801,13 @@ function setupEnv (db, env) {
             } else if (subj.attr('altsrc') && db.cfg.imgsUnfold) {
                refold(subj.findc(iom.pid).attr('id'))
                return false
-            }
+            } else if (subj.parent().is(iom.post.ref) && db.cfg.fastReply) {
+	       showReplyForm(subj.closest(iom.tid).attr('id'), subj.text().replace(i18n.no,'>>'))
+               return false;
+	    }
          }
       })
+
 }
 
 apply_me = function (messages, isSecondary) {
@@ -890,12 +900,6 @@ apply_me = function (messages, isSecondary) {
                      }
                   subj.find(iom.post.message).before(refs())
                }
-               if (db.cfg.fastReply) {
-                  subj.find(iom.post.reflink).click(
-                     function () {
-                        showReplyForm(tid, '>>'+pid.replace('p',''));
-                        return false; }
-                  )}
             })
 
       }
