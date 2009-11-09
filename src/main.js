@@ -557,7 +557,8 @@ function setupEnv (db, env) {
    if (db.cfg.overrideF5) {
       $(window).keypress(
          function (e) {
-            if (e.which == 116) {
+            if (e.which == 116 && !$(e.target).is('textarea')) {
+	       
                e.preventDefault()
 	       e.stopPropagation()
 	       document.location.reload()
