@@ -558,7 +558,6 @@ function setupEnv (db, env) {
       $(window).keypress(
          function (e) {
             if (e.which == 116 && !$(e.target).is('textarea')) {
-	       
                e.preventDefault()
 	       e.stopPropagation()
 	       document.location.reload()
