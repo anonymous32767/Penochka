@@ -216,8 +216,12 @@ function dvach (onload, events) {
             subj.attr('altstyle', iom.unfoldImgCss+'min-height: '+h+'px; min-width: '+w+'px;')
             subj.removeAttr('height')
             subj.removeAttr('width')
-         }
-      )
+         })
+      /* Cannot delete posts while in thread bug (#71) workaround  */
+      cloned.submit(
+	 function () {
+	    cloned.find(iom.tid+' form').remove()
+	 })
    }
 
    jQuery.fn.extend({
