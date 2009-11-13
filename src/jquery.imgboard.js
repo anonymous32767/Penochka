@@ -205,18 +205,6 @@ function dvach (onload, events) {
          function () {
             $(this).html($(this).text().split('.')[0]+'. ')
          })
-      cloned.find(iom.post.image).each(
-         function () {
-            var subj = $(this)
-            var altsrc = subj.a().attr('href')
-            var w = subj.attr('width')
-            var h = subj.attr('height')
-            subj.attr('altsrc', altsrc)
-            subj.attr('style','height: '+h+'px; width:'+w+'px;')
-            subj.attr('altstyle', iom.unfoldImgCss+'min-height: '+h+'px; min-width: '+w+'px;')
-            subj.removeAttr('height')
-            subj.removeAttr('width')
-         })
       /* Cannot delete posts while in thread bug (#71) workaround  */
       cloned.submit(
 	 function () {

@@ -102,10 +102,10 @@ function cacheThread(idurl, cb, errHandler) {
    $.fn.ajaxThread(
       url,
       function(e) {
-	 /* Chrome extension specific javascript behaviour 
+         /* Chrome extension specific javascript behaviour
             workaround */
-	 dvach(function () {})
-	 /* End of workaround */
+         dvach(function () {})
+         /* End of workaround */
          e.find(iom.thread.reflink).attr('href', url)
          apply_me(e, true)
          var ue = e.find(iom.tid)
@@ -156,10 +156,21 @@ function swapAttr(obj, a1, a2) {
    obj.attr(a2, t)
 }
 
+function prepareRefold(subj) {
+   var altsrc = subj.closest('a').attr('href')
+   var w = subj.attr('width')
+   var h = subj.attr('height')
+   subj.attr('altsrc', altsrc)
+   subj.attr('style','height: '+h+'px; width:'+w+'px;')
+   subj.attr('altstyle', iom.unfoldImgCss+'min-height: '+h+'px; min-width: '+w+'px;')
+   subj.removeAttr('height')
+   subj.removeAttr('width')
+}
+
 function refold(id) {
    var subj = $('#' + id + ' ' + iom.post.image)
    swapAttr(subj, 'src', 'altsrc')
-   swapAttr(subj, 'style', 'altstyle')   
+   swapAttr(subj, 'style', 'altstyle')
    if (db.cfg.fitImgs) {
       subj.css('max-width', $(window).width() - 64 + 'px')
    }
@@ -173,24 +184,24 @@ function apply_isense(a, ff) {
    }
    a.hover(
       function(evt) { // over
-	 var xBound = document.body.clientWidth
-	 var x = evt.pageX + 10
-	 if ((xBound - x) < db.cfg.prvwMinWidth)
-	    x = xBound - db.cfg.prvwMinWidth - db.cfg.prvwMinDelta
+         var xBound = document.body.clientWidth
+         var x = evt.pageX + 10
+         if ((xBound - x) < db.cfg.prvwMinWidth)
+            x = xBound - db.cfg.prvwMinWidth - db.cfg.prvwMinDelta
          intelli(
             x,
             evt.pageY+10,
             a.attr('refid'),
             a.attr('refurl'),
-	    false, ff
+            false, ff
          )
       },
       function(evt) { // out
-	 if($(evt.target).closest('.penISense').length == 0) {
+         if($(evt.target).closest('.penISense').length == 0) {
             outelli(a.attr('refid'), true)
-	 } else {
-	    outelli(a.attr('refid'), false)
-	 }
+         } else {
+            outelli(a.attr('refid'), false)
+         }
       }
    )
 }
@@ -206,30 +217,30 @@ function intelli(x, y, id, url, threadCached, ff) {
          var obj = {}
          if($('#'+id).length == 0) {
             if (!threadCached && url) {
-               cacheThread(url, 
-			   function () { intelli(x, y, id, null, true) }, 
-			   function () { intelli(x, y, id, null, true, ff) })
-	       obj = $.ui.preview(
+               cacheThread(url,
+                           function () { intelli(x, y, id, null, true) },
+                           function () { intelli(x, y, id, null, true, ff) })
+               obj = $.ui.preview(
                   $('<div>' + i18n.thrdLoading + '</div>'),
                   x, y)
             } else {
                obj = $.ui.preview(
                   $('<div>' + i18n.previewError + '</div>'),
                   x, y)
-	       if (ff)
-		  ff()
+               if (ff)
+                  ff()
             }
          } else {
             obj = $.ui.preview(id, x, y)
          }
          obj.attr('id','is'+id);
-	 obj.addClass('penISense')
+         obj.addClass('penISense')
          obj.hover(
             function(evt) {
                clearTimeout(ist)
             },
             function(evt) {
-	       outelli(id, true)
+               outelli(id, true)
             })
          obj.css('z-index', z++);
          $('body').prepend(obj);
@@ -241,11 +252,11 @@ function outelli(id, wholeThread) {
    clearTimeout(ist)
    ist = setTimeout(
       function () {
-	 if(wholeThread) {
-	    $('.penISense').remove()
-	 } else {
-	    $('#is'+id).remove()
-	 }
+         if(wholeThread) {
+            $('.penISense').remove()
+         } else {
+            $('#is'+id).remove()
+         }
       },
       db.cfg.iSenseDn)
 }
@@ -309,23 +320,23 @@ function toggleBookmarks() {
       var div = $('<span id="penBmsIn">')
       for (i in db.bookmarks) {
          div.append($.ui.bookmark(
-	    i, db.bookmarks[i].cite,  
-	    db.bookmarks[i].timestamp,
-	    function (evt) {
+            i, db.bookmarks[i].cite,
+            db.bookmarks[i].timestamp,
+            function (evt) {
                var subj = $(evt.target).parents('div:first')
                delete db.bookmarks[subj.find('a.penBmLink').attr('href')]
                db.saveState()
                subj.remove()
-	    }))
+            }))
       }
       div.find('a.penBmLink').each(
-	 function () {
-	    var subj = $(this)
-	    apply_isense(subj, function () {
-	       if (db.cfg.bmAutoDel)
-		  subj.closest('div').find('a:first').click()
-	    })
-	 })
+         function () {
+            var subj = $(this)
+            apply_isense(subj, function () {
+               if (db.cfg.bmAutoDel)
+                  subj.closest('div').find('a:first').click()
+            })
+         })
       return div
    }
    if ($('#penBms').length == 0) {
@@ -428,8 +439,8 @@ function toggleSettings () {
             if (db.children[items[id]]) {
                setStr += slist(db.children[items[id]], level + 1)
             }
-	    if (level == 2) 
-	       odd = !odd
+            if (level == 2)
+               odd = !odd
             o++
          }
          return setStr
@@ -458,30 +469,30 @@ function toggleSettings () {
          })
       genControls.find('input').keypress(
          function () {
-	    var searchStr = $(this).val()
-	    if(searchStr.length > 2) {
-	       var re = new RegExp(searchStr,'i')
-	       $('.penSetting').hide()
-	       $('.penSetting').each(
-		  function () {
-		     var subj = $(this)
-		     if (subj.text().search(re) != -1) {
-			if (subj.hasClass('penLevel2')) {
-			   subj.show()
-			   subj.prevAll('.penLevel1:first').show()
-			} else if (subj.hasClass('penLevel3')) {
-			   subj.show()
-			   subj.prevAll('.penLevel2:first').show()
-			   subj.prevAll('.penLevel1:first').show()
-			}
-		     }
-		  })
-	    } else if (searchStr.length < 2) {
-	       $('.penSetting').each(
-		  function () {
-		     $(this).show()
-		  })
-	    }
+            var searchStr = $(this).val()
+            if(searchStr.length > 2) {
+               var re = new RegExp(searchStr,'i')
+               $('.penSetting').hide()
+               $('.penSetting').each(
+                  function () {
+                     var subj = $(this)
+                     if (subj.text().search(re) != -1) {
+                        if (subj.hasClass('penLevel2')) {
+                           subj.show()
+                           subj.prevAll('.penLevel1:first').show()
+                        } else if (subj.hasClass('penLevel3')) {
+                           subj.show()
+                           subj.prevAll('.penLevel2:first').show()
+                           subj.prevAll('.penLevel1:first').show()
+                        }
+                     }
+                  })
+            } else if (searchStr.length < 2) {
+               $('.penSetting').each(
+                  function () {
+                     $(this).show()
+                  })
+            }
          }
       )
       genControls.append(generated)
@@ -513,8 +524,8 @@ function toggleSettings () {
              function () {
                 saveSettings()
                 if (!db.saveState()) {
-		   alert('2')
-		}
+                   alert('2')
+                }
                 location.reload(true) }],
             [i18n.close,
              function () { $('#penSettings').hide() }]
@@ -559,8 +570,8 @@ function setupEnv (db, env) {
          function (e) {
             if (e.which == 116 && !$(e.target).is('textarea')) {
                e.preventDefault()
-	       e.stopPropagation()
-	       document.location.reload()
+               e.stopPropagation()
+               document.location.reload()
             }
          })
    }
@@ -586,7 +597,7 @@ function setupEnv (db, env) {
          var subj = $(this)
          var t = $(this).parents(iom.tid)
          var tid = t.attr('id')
-         if (!toggleBookmark(tid)) 
+         if (!toggleBookmark(tid))
             toggleBookmark(tid)
       }
       if (db.cfg.useAJAX) {
@@ -596,8 +607,8 @@ function setupEnv (db, env) {
             success:
             function(responseText, statusText) {
                if (responseText.search(/delform/) == -1) {
-		  var errResult = 'Ошибка'
-		  subj.find(iom.form.status).text(errResult)
+                  var errResult = 'Ошибка'
+                  subj.find(iom.form.status).text(errResult)
                   errResult = responseText.match(/<h1.*?>(.*?)<br/)[1]
                   subj.find(iom.form.status).text(errResult)
                } else {
@@ -608,7 +619,7 @@ function setupEnv (db, env) {
          return false
       }
    })
-   
+
    if(env.find(iom.form.status).length == 0) {
       env.find(iom.form.email).after('<i></i>')
    }
@@ -616,24 +627,24 @@ function setupEnv (db, env) {
    var img = env.find(iom.form.turimage)
    if (img.length > 0) {
       if (db.cfg.tripleTt) {
-	 img.css('padding-left', '3px').
+         img.css('padding-left', '3px').
             after(img.clone(true)).click().
             after(img.clone(true)).click()
       }
    } else {
       var genCaptcha = function (key, dummy) {
-	 return '<img alt="Update captcha" src="/b/captcha.pl?key=' + key + '&amp;dummy=' + dummy + '" onclick="update_captcha(this)" style="padding-left: 3px" />'
+         return '<img alt="Update captcha" src="/b/captcha.pl?key=' + key + '&amp;dummy=' + dummy + '" onclick="update_captcha(this)" style="padding-left: 3px" />'
       }
       var tNum = $(iom.form.parent).val()
       var key = 'mainpage'
-      if (tNum) 
-	 key = 'res' + tNum
+      if (tNum)
+         key = 'res' + tNum
       if (db.cfg.tripleTt) {
-	 ttStr  = genCaptcha(key, 1) + 
-	    genCaptcha(key, 2) + 
-	    genCaptcha(key, 3)
+         ttStr  = genCaptcha(key, 1) +
+            genCaptcha(key, 2) +
+            genCaptcha(key, 3)
       } else {
-	 ttStr = genCaptcha(key, 1)
+         ttStr = genCaptcha(key, 1)
       }
       env.find(iom.form.turdiv).html(ttStr)
       env.find(iom.form.turtest).removeAttr('onfocus')
@@ -687,8 +698,8 @@ function setupEnv (db, env) {
 
    if (db.cfg.taResize) {
       env.find(iom.form.message).
-	 attr('rows', db.cfg.taHeight).
-	 attr('cols', db.cfg.taWidth)
+         attr('rows', db.cfg.taHeight).
+         attr('cols', db.cfg.taWidth)
    }
 
    if (db.cfg.sageBtn) {
@@ -798,13 +809,21 @@ function setupEnv (db, env) {
                   replacee.replaceWith(replacer)
                })
                return false
-            } else if (subj.attr('altsrc') && db.cfg.imgsUnfold) {
-               refold(subj.findc(iom.pid).attr('id'))
-               return false
+            } else if (db.cfg.imgsUnfold && subj.is('img') ) {
+               if (subj.attr('altsrc')) {
+                  return refold(subj.closest(iom.pid).attr('id'))
+               } else {
+                  try {
+                     if (subj.attr('src').replace(/^.*?(\d+)\w+\.\w+$/,"$1") == subj.closest('a').attr('href').replace(/^.*?(\d+)\.\w+$/,"$1")) {
+                        prepareRefold(subj)
+                        return refold(subj.closest(iom.pid).attr('id'))
+                     }
+                  } catch (err) {}
+               }
             } else if (subj.parent().is(iom.post.ref) && db.cfg.fastReply) {
-	       showReplyForm(subj.closest(iom.tid).attr('id'), subj.text().replace(i18n.no,'>>'))
+               showReplyForm(subj.closest(iom.tid).attr('id'), subj.text().replace(i18n.no,'>>'))
                return false;
-	    }
+            }
          }
       })
 
@@ -916,9 +935,9 @@ apply_me = function (messages, isSecondary) {
           * place (may be impossible). */
       if (objId) {
          var subj = messages.find('#'+objId)
-	 var isThread = objId.search(/t/) == -1 ? false : true
-	 if (db.cfg.thrdInThrdLeave && isInThread && isThread )
-	    continue
+         var isThread = objId.search(/t/) == -1 ? false : true
+         if (db.cfg.thrdInThrdLeave && isInThread && isThread )
+            continue
          subj.css('display', 'none')
          chktizer(subj, objId, isThread)
          messages.find('#tiz'+objId).css('display','block')
