@@ -789,6 +789,7 @@ function setupEnv (db, env) {
    env.click(
       function (e) {
          var subj = $(e.target)
+	 var ytre = /.*?youtube.com\/watch\?v=([\w_\-]*).*/i
          if (e.which == 1) {
             if (subj.closest(iom.post.abbr).length > 0 && db.cfg.useAJAX) {
                var tid = subj.closest(iom.tid).attr('id')
@@ -823,7 +824,20 @@ function setupEnv (db, env) {
             } else if (subj.parent().is(iom.post.ref) && db.cfg.fastReply) {
                showReplyForm(subj.closest(iom.tid).attr('id'), subj.text().replace(i18n.no,'>>'))
                return false;
-            }
+            } else if (db.cfg.handleYTube && subj.is('a') && subj.attr('href').match(ytre)) {
+	       if (!subj.attr('unfolden')) {
+		  var ytSize = ({little: 'width="320" height="265"',
+				 normal: 'width="480" height="385"',
+				 big: 'width="640" height="505"'})[db.cfg.ytubeSize]
+		  var isAutoplay = db.cfg.ytubeAutorun ? '&autoplay=1' : ''
+		  subj.before($(subj.attr('href').replace(ytre,'<span id="'+"$1"+'"><object '+ytSize+'><param name="movie" value="http://www.youtube.com/v/'+"$1"+isAutoplay+'"></param><param name="wmode" value="transparent"></param><embed src="http://www.youtube.com/v/'+"$1"+isAutoplay+'" type="application/x-shockwave-flash" wmode="transparent" '+ytSize+'></embed></object><br /></span>')))
+		  subj.attr('unfolden','1')
+	       } else {
+		  subj.removeAttr('unfolden')
+		  $('#'+subj.attr('href').replace(ytre, "$1")).remove()
+	       }
+	       return false
+	    }
          }
       })
 

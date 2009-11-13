@@ -88,6 +88,9 @@ var db = {
       this.s ('thrdMenu', 'Меню треда', 'feats', true);
       this.s ('constPwd', 'Постоянный пароль на удаление', 'feats', '')
       this.s ('bmarks', 'Закладки', 'feats', true)
+      this.s ('handleYTube', 'Загружать видео с youtube прямо в сообщении', 'feats', true)
+      this.s ('ytubeAutorun', 'Автозапуск', 'handleYTube', true)
+      this.s ('ytubeSize', 'Размер окна', 'handleYTube', {normal: 'Средний', little: 'Маленький', big: 'Большой'})
 
       this.s ('taResize', 'Изменять размеры поля ввода сообщения', 'form', true);
       this.s ('taHeight', 'Высота', 'taResize', 12);
