@@ -91,8 +91,14 @@ if (window.opera) {
 function io(names, valfn) {
    var storage = {}
    try {
-      globalStorage[location.hostname].a = 'b'
+      /**/
+      
+      /* end of workaround */
       storage = (typeof localStorage === 'object') && (localStorage != null) ? localStorage : globalStorage[location.hostname]
+      if (!storage) {
+	 globalStorage[location.hostname].x = 'y'
+	 storage = globalStorage[location.hostname]
+      }
    } catch (err) { /* Worst case: use cakes */
       return _cake(names, valfn)
    }
