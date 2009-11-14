@@ -86,12 +86,12 @@ var db = {
       this.s ('imgsUnfold', 'Развертывание картинок', 'feats', true);
       this.s ('thrdUnfold', 'Развертывание тредов', 'feats', true);
       this.s ('thrdMenu', 'Меню треда', 'feats', true);
-      this.s ('thrdMenuDouble', 'Дублировать внизу треда', 'thrdMenu', true);
       this.s ('constPwd', 'Постоянный пароль на удаление', 'feats', '')
       this.s ('bmarks', 'Закладки', 'feats', true)
       this.s ('handleYTube', 'Загружать видео с youtube прямо в сообщение', 'feats', true)
       this.s ('ytubeAutorun', 'Автозапуск', 'handleYTube', true)
       this.s ('ytubeSize', 'Размер окна', 'handleYTube', {normal: 'Средний', little: 'Маленький', big: 'Большой'})
+      this.s ('overrideF5', 'Перегружать только активный фрейм по F5', 'feats', true);
 
       this.s ('taResize', 'Изменять размеры поля ввода сообщения', 'form', true);
       this.s ('taHeight', 'Высота', 'taResize', 12);
@@ -138,8 +138,8 @@ var db = {
       this.s ('nightTime', 'Ночной интервал', 'ftune', '22:00-8:00');
       this.s ('prvwMinWidth', 'Минимальная ширина превью сообщения', 'ftune', 450);
       this.s ('prvwMinDelta', 'Дельта ширины превью сообщения', 'ftune', 200);
-      this.s ('overrideF5', 'Перегружать только активный фрейм по F5', 'ftune', true);
       this.s ('thrdInThrdLeave', 'Не скрывать тред, когда заходишь в него', 'ftune', false);
+      this.s ('thrdMenuDouble', 'Дублировать меня треда внизу треда', 'ftune', true);
 
       this.global.domain = window.location.hostname
       this.global.board = window.location.pathname.replace(/^\/(\w+)\/.*$/, '$1')
