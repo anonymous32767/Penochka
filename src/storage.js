@@ -89,8 +89,10 @@ if (window.opera) {
    read procedure io() should be called only once to improve
    performance */
 function io(names, valfn) {
+   var storage = {}
    try {
-      var storage = (typeof localStorage === 'object') && (localStorage != null) ? localStorage : globalStorage[location.hostname]
+      globalStorage[location.hostname].a = 'b'
+      storage = (typeof localStorage === 'object') && (localStorage != null) ? localStorage : globalStorage[location.hostname]
    } catch (err) { /* Worst case: use cakes */
       return _cake(names, valfn)
    }
