@@ -884,7 +884,6 @@ function setupEnv (db, env) {
 
 apply_me = function (messages, isSecondary) {
    var isInThread = $(iom.form.parent).length > 0 ? true : false
-
    messages.find(iom.tid).each(
       function () {
          var subj = $(this)
@@ -912,14 +911,14 @@ apply_me = function (messages, isSecondary) {
             tmenu.push([
                i18n.reply, turl])
          trm.replaceWith($.ui.multiLink(tmenu, '', ''))
-         if($(iom.form.parent).length == 0) {
+	 if (db.cfg.thrdMenuDouble && !isInThread) {
             var moar = subj.find(iom.thread.moar).clone()
             if (moar.length == 0) {
-               moar = $('<span class="omittedposts"></span>')
+	       moar = $('<span class="omittedposts"></span>')
             }
             tmenu[tmenu.length-1] = [
-               i18n.replyThat,
-               function () { showReplyForm(tid) }]
+	       i18n.replyThat,
+	       function () { showReplyForm(tid) }]
             moar.append($.ui.multiLink(tmenu))
             subj.find(iom.thread.eotNotOp).after(moar)
          }

@@ -86,6 +86,7 @@ var db = {
       this.s ('imgsUnfold', 'Развертывание картинок', 'feats', true);
       this.s ('thrdUnfold', 'Развертывание тредов', 'feats', true);
       this.s ('thrdMenu', 'Меню треда', 'feats', true);
+      this.s ('thrdMenuDouble', 'Дублировать внизу треда', 'thrdMenu', true);
       this.s ('constPwd', 'Постоянный пароль на удаление', 'feats', '')
       this.s ('bmarks', 'Закладки', 'feats', true)
       this.s ('handleYTube', 'Загружать видео с youtube прямо в сообщение', 'feats', true)
