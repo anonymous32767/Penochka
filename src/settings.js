@@ -116,6 +116,7 @@ var db = {
       this.s ('censMail', 'E-mail (sage)', 'cens', '');
       this.s ('censMsg', 'Текст сообщения', 'cens', '');
       this.s ('censTotal', 'Любое место сообщения', 'cens', '');
+      this.s ('censHeight', 'Высота сообщения превышает', 'cens', 0);
 
       this.s ('useAJAX', 'Использовать асинхронный яваскрипт', 'sys', true);
 

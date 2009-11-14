@@ -353,17 +353,6 @@ function dvach (onload, events) {
             append('<br clear="borh" /><br />')
          $('body').prepend(div)
          return div
-      },
-      bookmark:
-      function (url, cite, date, delFunc) {
-         return $('<div class="penDesc"> /' + url.replace(/.*?(\w+).*/, '$1') +
-                  '/ <a class="penBmLink" refid="'+$.urltid(url).replace(/t/,'p')+'" refurl="'+url+'" href="' + url + '">>>' +
-                  url.replace(/.*?(\d+).*/, '$1') + '</a> ' + cite + '</div>').
-            prepend(
-               $.ui.multiLink([
-                  ['x', delFunc]
-               ])
-            )
       }
    }
 

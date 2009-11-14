@@ -43,6 +43,7 @@ jQuery.fn.swap = function(b){
 
 /* Penochka application function variable */
 var apply_me = {}
+var messagesCount = 0 /* remove this & other globals to one place */
 
 /* */
 function showReplyForm(id, cite, parent, hideHide, needHr) {
@@ -315,11 +316,61 @@ function apply_refs(a, body) {
    }
 }
 
+function applySearch (input) {
+   var t = null
+   input.keydown(
+      function () {
+	 clearTimeout(t)
+	 t = setTimeout(
+	    function () {
+	       var searchPhrase = input.val()
+	       var items = $('.penSetting')
+	       if (searchPhrase.length > 1) {
+		  items.hide()
+		  searchArray = searchPhrase.split(' ')
+		  for (var i = 0; i < searchArray.length; i++) {
+		     var re = new RegExp(searchArray[i], 'i')
+		     items.each(function () {
+			var subj = $(this)
+			if (subj.text().search(re) != -1) {
+			   if (subj.hasClass('penLevel2')) {
+                              subj.show()
+                              subj.prevAll('.penLevel1:first').show()
+			   } else if (subj.hasClass('penLevel3')) {
+                              subj.show()
+                              subj.prevAll('.penLevel2:first').show()
+                              subj.prevAll('.penLevel1:first').show()
+			   }
+			}
+		     })
+		  }
+	       } else {
+		  items.show()
+	       }
+	    }, 200)
+      })
+
+}
+
 function toggleBookmarks() {
+   var bmark = function (url, cite, date, delFunc) {
+      return $('<div class="penSetting penLevel2"> <a class="penBmLink" refid="'+$.urltid(url).replace(/t/,'p')+'" refurl="'+url+'" href="' + url + '">>>' +
+               url.replace(/.*?(\d+).*/, '$1') + '</a> ' + cite + '</div>').
+         prepend(
+            $.ui.multiLink([
+               ['x', delFunc]
+            ])
+         )
+   }
    var genBookmarks = function () {
-      var div = $('<span id="penBmsIn">')
+      var div = $('<span id="penBmsIn"><br /><input id="penSettingsSearch" size="33" style="float:right"></span>')
+      var unsorted = []
+      var B = '', N = ''
+      applySearch(div.find('input'))
       for (i in db.bookmarks) {
-         div.append($.ui.bookmark(
+         B = i.replace(/^\/(\w+)\/.*$/,"$1")
+         N = i.replace(/^.*?\/(\d+).*$/,"$1")
+         unsorted.push({b: B, n: N, e:bmark(
             i, db.bookmarks[i].cite,
             db.bookmarks[i].timestamp,
             function (evt) {
@@ -327,7 +378,22 @@ function toggleBookmarks() {
                delete db.bookmarks[subj.find('a.penBmLink').attr('href')]
                db.saveState()
                subj.remove()
-            }))
+            })})
+      }
+      var sorted = unsorted.sort(function (x,y) {
+         if (x.b == y.b) {
+            return y.n - x.n
+         } else {
+            return x.b > y.b ? 1 : -1
+         }
+      })
+      var prevB = ''
+      for (i in sorted) {
+         if (sorted[i].b != prevB) {
+            prevB = sorted[i].b
+            div.append('<span class = "penSetting penLevel1">/'+prevB+'/</span>')
+         }
+         div.append(sorted[i].e)
       }
       div.find('a.penBmLink').each(
          function () {
@@ -467,34 +533,7 @@ function toggleSettings () {
          function () {
             generated.find('button').click()
          })
-      genControls.find('input').keypress(
-         function () {
-            var searchStr = $(this).val()
-            if(searchStr.length > 2) {
-               var re = new RegExp(searchStr,'i')
-               $('.penSetting').hide()
-               $('.penSetting').each(
-                  function () {
-                     var subj = $(this)
-                     if (subj.text().search(re) != -1) {
-                        if (subj.hasClass('penLevel2')) {
-                           subj.show()
-                           subj.prevAll('.penLevel1:first').show()
-                        } else if (subj.hasClass('penLevel3')) {
-                           subj.show()
-                           subj.prevAll('.penLevel2:first').show()
-                           subj.prevAll('.penLevel1:first').show()
-                        }
-                     }
-                  })
-            } else if (searchStr.length < 2) {
-               $('.penSetting').each(
-                  function () {
-                     $(this).show()
-                  })
-            }
-         }
-      )
+      applySearch(genControls.find('input'))
       genControls.append(generated)
       return genControls
    }
@@ -688,7 +727,7 @@ function setupEnv (db, env) {
          )
       }
       if (db.cfg.thrdMove) {
-         env.find(iom.thread.header+','+iom.postform).hide()
+         env.find(iom.postform).hide()
       }
    }
    if (db.cfg.idxHide) {
@@ -789,7 +828,7 @@ function setupEnv (db, env) {
    env.click(
       function (e) {
          var subj = $(e.target)
-	 var ytre = /.*?youtube.com\/watch\?v=([\w_\-]*).*/i
+         var ytre = /.*?youtube.com\/watch\?v=([\w_\-]*).*/i
          if (e.which == 1) {
             if (subj.closest(iom.post.abbr).length > 0 && db.cfg.useAJAX) {
                var tid = subj.closest(iom.tid).attr('id')
@@ -825,19 +864,19 @@ function setupEnv (db, env) {
                showReplyForm(subj.closest(iom.tid).attr('id'), subj.text().replace(i18n.no,'>>'))
                return false;
             } else if (db.cfg.handleYTube && subj.is('a') && subj.attr('href').match(ytre)) {
-	       if (!subj.attr('unfolden')) {
-		  var ytSize = ({little: 'width="320" height="265"',
-				 normal: 'width="480" height="385"',
-				 big: 'width="640" height="505"'})[db.cfg.ytubeSize]
-		  var isAutoplay = db.cfg.ytubeAutorun ? '&autoplay=1' : ''
-		  subj.before($(subj.attr('href').replace(ytre,'<span id="'+"$1"+'"><object '+ytSize+'><param name="movie" value="http://www.youtube.com/v/'+"$1"+isAutoplay+'"></param><param name="wmode" value="transparent"></param><embed src="http://www.youtube.com/v/'+"$1"+isAutoplay+'" type="application/x-shockwave-flash" wmode="transparent" '+ytSize+'></embed></object><br /></span>')))
-		  subj.attr('unfolden','1')
-	       } else {
-		  subj.removeAttr('unfolden')
-		  $('#'+subj.attr('href').replace(ytre, "$1")).remove()
-	       }
-	       return false
-	    }
+               if (!subj.attr('unfolden')) {
+                  var ytSize = ({little: 'width="320" height="265"',
+                                 normal: 'width="480" height="385"',
+                                 big: 'width="640" height="505"'})[db.cfg.ytubeSize]
+                  var isAutoplay = db.cfg.ytubeAutorun ? '&autoplay=1' : ''
+                  subj.before($(subj.attr('href').replace(ytre,'<span id="'+"$1"+'"><object '+ytSize+'><param name="movie" value="http://www.youtube.com/v/'+"$1"+isAutoplay+'"></param><param name="wmode" value="transparent"></param><embed src="http://www.youtube.com/v/'+"$1"+isAutoplay+'" type="application/x-shockwave-flash" wmode="transparent" '+ytSize+'></embed></object><br /></span>')))
+                  subj.attr('unfolden','1')
+               } else {
+                  subj.removeAttr('unfolden')
+                  $('#'+subj.attr('href').replace(ytre, "$1")).remove()
+               }
+               return false
+            }
          }
       })
 
@@ -896,7 +935,7 @@ apply_me = function (messages, isSecondary) {
                   ], ' ', ''))
                }
                /* Censore */
-               if(db.cfg.censTitle != '' || db.cfg.censUser != '' || db.cfg.censMail != '' || db.cfg.censMsg != '' || db.cfg.censTotal != '') {
+               if(db.cfg.censTitle != '' || db.cfg.censUser != '' || db.cfg.censMail != '' || db.cfg.censMsg != '' || db.cfg.censTotal != '' || db.cfg.censHeight) {
                   var censf = false;
                   if (db.cfg.censTitle &&
                       subj.find(iom.post.title).text().search(db.cfg.censTitle) != -1) {
@@ -933,8 +972,8 @@ apply_me = function (messages, isSecondary) {
                      }
                   subj.find(iom.post.message).before(refs())
                }
+               messagesCount++
             })
-
       }
    )
 
@@ -969,6 +1008,7 @@ function postSetup () {
    if (db.cfg.thrdMove && $(iom.form.parent).length > 0) {
       showReplyForm($(iom.tid).attr('id'), null, null, true, true)
    }
+   $(iom.thread.header).text('Всего ответов: '+messagesCount)
    scope.timer.diff('penochka sync');
    scope.timer.init();
    setTimeout(function() {
