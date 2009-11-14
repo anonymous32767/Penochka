@@ -1007,7 +1007,7 @@ function postSetup () {
    if (db.cfg.thrdMove && $(iom.form.parent).length > 0) {
       showReplyForm($(iom.tid).attr('id'), null, null, true, true)
    }
-   $(iom.thread.header).text('Всего ответов: '+messagesCount)
+   $(iom.thread.header).text('Всего сообщений: '+messagesCount)
    scope.timer.diff('penochka sync');
    scope.timer.init();
    setTimeout(function() {
