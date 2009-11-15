@@ -395,14 +395,16 @@ function toggleBookmarks() {
          }
          div.append(sorted[i].e)
       }
-      div.find('a.penBmLink').each(
-         function () {
-            var subj = $(this)
-            apply_isense(subj, function () {
-               if (db.cfg.bmAutoDel)
-                  subj.closest('div').find('a:first').click()
-            })
-         })
+      if (db.cfg.bmPreview) {
+	  div.find('a.penBmLink').each(
+	     function () {
+                var subj = $(this)
+                apply_isense(subj, function () {
+                   if (db.cfg.bmAutoDel)
+                      subj.closest('div').find('a:first').click()
+                })
+             })
+      }
       return div
    }
    if ($('#penBms').length == 0) {
@@ -431,7 +433,7 @@ function toggleBookmark(tid) {
       db.bookmarks[url]= { timestamp : new Date().getTime(), cite : tcite }
    }
    if (!db.saveState()) {
-      alert('1')
+      alert('НЕ СОХРАНЕНО: Недостаточно места в куках.')
    }
    return db.bookmarks[url]
 }
@@ -563,7 +565,7 @@ function toggleSettings () {
              function () {
                 saveSettings()
                 if (!db.saveState()) {
-                   alert('2')
+                   alert('НЕ СОХРАНЕНО: Недостаточно места в куках.')
                 }
                 location.reload(true) }],
             [i18n.close,

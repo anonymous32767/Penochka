@@ -139,7 +139,8 @@ var db = {
       this.s ('prvwMinWidth', 'Минимальная ширина превью сообщения', 'ftune', 450);
       this.s ('prvwMinDelta', 'Дельта ширины превью сообщения', 'ftune', 200);
       this.s ('thrdInThrdLeave', 'Не скрывать тред, когда заходишь в него', 'ftune', false);
-      this.s ('thrdMenuDouble', 'Дублировать меня треда внизу треда', 'ftune', true);
+      this.s ('thrdMenuDouble', 'Дублировать меня треда внизу треда', 'ftune', true); 
+      this.s ('bmPreview', 'Показывать превью тредов в закладках', 'ftune', false);      
 
       this.global.domain = window.location.hostname
       this.global.board = window.location.pathname.replace(/^\/(\w+)\/.*$/, '$1')
