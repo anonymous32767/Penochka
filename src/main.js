@@ -318,7 +318,7 @@ function apply_refs(a, body) {
 
 function resetCaptcha(form, needFocus) {
    var genCaptcha = function (key, dummy) {
-      return '<img alt="Update captcha" src="/b/captcha.pl?key=' + key + '&amp;dummy=' + dummy + '" class="captchaTwin" style="padding-left: 3px" />'
+      return '<img alt="Update captcha" src="/' + db.global.board + '/captcha.pl?key=' + key + '&amp;dummy=' + dummy + '" class="captchaTwin" style="padding-left: 3px" />'
    }
    var tNum = form.find(iom.form.parent).val()
    var key = 'mainpage'
