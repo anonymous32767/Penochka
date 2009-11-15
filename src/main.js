@@ -329,7 +329,7 @@ function resetCaptcha(form, needFocus) {
          genCaptcha(key, Math.floor(Math.random() * 1000).toString()) +
          genCaptcha(key, Math.floor(Math.random() * 1000).toString())
    } else {
-      ttStr = genCaptcha(key, 1)
+      ttStr = genCaptcha(key, Math.floor(Math.random() * 1000).toString())
    }
    var generated = $(ttStr)
    if (form.find(iom.form.turimage).length > 0) {
