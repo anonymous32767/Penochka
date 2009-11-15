@@ -316,6 +316,12 @@ function apply_refs(a, body) {
    }
 }
 
+function resetCaptcha(form) {
+    form.find(iom.form.turimage).click()
+    form.find(iom.form.turtest).val('')
+    form.find(iom.form.turtest)[0].focus()
+}
+
 function applySearch (input) {
    var t = null
    input.keydown(
@@ -600,6 +606,7 @@ function setupEnv (db, env) {
    }
 
    addStyle(css[isNight ? db.cfg.ntheme : db.cfg.theme])
+
    if (db.cfg.btnsStyle == 'text') {
       i18n.btns = i18nButtons.text
    } else if (db.cfg.btnsStyle == 'css') {
@@ -652,6 +659,9 @@ function setupEnv (db, env) {
                   subj.find(iom.form.status).text(errResult)
                   errResult = responseText.match(/<h1.*?>(.*?)<br/)[1]
                   subj.find(iom.form.status).text(errResult)
+		  if (errResult.search(iom.strings.ttErr) != -1) {
+		      resetCaptcha(subj)
+		  }
                } else {
                   subj.find(iom.form.status).text(i18n.okReloadingNow)
                   window.location.reload(true)
@@ -666,6 +676,10 @@ function setupEnv (db, env) {
    }
 
    var img = env.find(iom.form.turimage)
+   img.click(function (e) { 
+      resetCaptcha($(e.target).closest('form'))
+      return false
+   })
    if (img.length > 0) {
       if (db.cfg.tripleTt) {
          img.css('padding-left', '3px').
@@ -674,7 +688,7 @@ function setupEnv (db, env) {
       }
    } else {
       var genCaptcha = function (key, dummy) {
-         return '<img alt="Update captcha" src="/b/captcha.pl?key=' + key + '&amp;dummy=' + dummy + '" onclick="update_captcha(this)" style="padding-left: 3px" />'
+         return '<img alt="Update captcha" src="/b/captcha.pl?key=' + key + '&amp;dummy=' + dummy + '" class="captchaTwin" style="padding-left: 3px" />'
       }
       var tNum = $(iom.form.parent).val()
       var key = 'mainpage'
@@ -687,7 +701,13 @@ function setupEnv (db, env) {
       } else {
          ttStr = genCaptcha(key, 1)
       }
-      env.find(iom.form.turdiv).html(ttStr)
+      var generated = $(ttStr)
+      generated.find('img').click(
+	 function (e)
+	    resetCaptcha($(e.target).closest('form'))
+            return false
+	 })
+       env.find(iom.form.turdiv).clear().append(generated)
       env.find(iom.form.turtest).removeAttr('onfocus')
    }
 
@@ -1009,7 +1029,7 @@ function postSetup () {
    if (db.cfg.thrdMove && $(iom.form.parent).length > 0) {
       showReplyForm($(iom.tid).attr('id'), null, null, true, true)
    }
-   $(iom.thread.header).text('Всего сообщений: '+messagesCount)
+   $(iom.thread.header).text(i18n.totalMsgs+messagesCount)
    scope.timer.diff('penochka sync');
    scope.timer.init();
    setTimeout(function() {

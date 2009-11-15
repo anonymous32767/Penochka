@@ -120,7 +120,7 @@ iom = {
       message: 'textarea[name=shampoo]',
       file: 'input[name=file]',
       turtest: 'input[name=captcha]',
-      turimage: '#imgcaptcha',
+      turimage: '#imgcaptcha, img.captchaTwin',
       turdiv: '#captchadiv',
       password: 'input[name=password]',
       parent: 'input[name=parent]',
@@ -135,6 +135,7 @@ iom = {
    strings: {
       bookmarks: 'Два.ч &#8212; Закладки',
       settings: 'Два.ч &#8212; Настройки',
+      ttErr: /код/i
    }
 }
 
