@@ -316,10 +316,38 @@ function apply_refs(a, body) {
    }
 }
 
-function resetCaptcha(form) {
-    form.find(iom.form.turimage).click()
-    form.find(iom.form.turtest).val('')
-    form.find(iom.form.turtest)[0].focus()
+function resetCaptcha(form, needFocus) {
+   var genCaptcha = function (key, dummy) {
+      return '<img alt="Update captcha" src="/b/captcha.pl?key=' + key + '&amp;dummy=' + dummy + '" class="captchaTwin" style="padding-left: 3px" />'
+   }
+   var tNum = form.find(iom.form.parent).val()
+   var key = 'mainpage'
+   if (tNum)
+      key = 'res' + tNum
+   if (db.cfg.tripleTt) {
+      ttStr  = genCaptcha(key, Math.floor(Math.random() * 1000).toString()) +
+         genCaptcha(key, Math.floor(Math.random() * 1000).toString()) +
+         genCaptcha(key, Math.floor(Math.random() * 1000).toString())
+   } else {
+      ttStr = genCaptcha(key, 1)
+   }
+   var generated = $(ttStr)
+   if (form.find(iom.form.turimage).length > 0) {
+      form.find(iom.form.turimage).slice(1).remove()
+      form.find(iom.form.turimage).replaceWith(generated)
+   } else {
+      form.find(iom.form.turdiv).replaceWith(generated)
+   }
+   form.find(iom.form.turimage).click(
+      function (e) {
+	 resetCaptcha($(e.target).closest('form'), true)
+         return false
+      })
+   form.find(iom.form.turtest).removeAttr('onfocus')
+   if (needFocus) { 
+      form.find(iom.form.turtest).val('')
+      form.find(iom.form.turtest)[0].focus()
+   }
 }
 
 function applySearch (input) {
@@ -328,7 +356,7 @@ function applySearch (input) {
       function () {
 	 clearTimeout(t)
 	 t = setTimeout(
-	    function () {
+    function () {
 	       var searchPhrase = input.val()
 	       var items = $('.penSetting')
 	       if (searchPhrase.length > 1) {
@@ -660,7 +688,7 @@ function setupEnv (db, env) {
                   errResult = responseText.match(/<h1.*?>(.*?)<br/)[1]
                   subj.find(iom.form.status).text(errResult)
 		  if (errResult.search(iom.strings.ttErr) != -1) {
-		      resetCaptcha(subj)
+		     resetCaptcha(subj, true)
 		  }
                } else {
                   subj.find(iom.form.status).text(i18n.okReloadingNow)
@@ -676,39 +704,13 @@ function setupEnv (db, env) {
    }
 
    var img = env.find(iom.form.turimage)
-   img.click(function (e) { 
-      resetCaptcha($(e.target).closest('form'))
-      return false
-   })
-   if (img.length > 0) {
-      if (db.cfg.tripleTt) {
-         img.css('padding-left', '3px').
-            after(img.clone(true)).click().
-            after(img.clone(true)).click()
-      }
+   if (img.length == 0 || db.cfg.tripleTt) {
+      resetCaptcha(env.find(iom.postform), true)
    } else {
-      var genCaptcha = function (key, dummy) {
-         return '<img alt="Update captcha" src="/b/captcha.pl?key=' + key + '&amp;dummy=' + dummy + '" class="captchaTwin" style="padding-left: 3px" />'
-      }
-      var tNum = $(iom.form.parent).val()
-      var key = 'mainpage'
-      if (tNum)
-         key = 'res' + tNum
-      if (db.cfg.tripleTt) {
-         ttStr  = genCaptcha(key, 1) +
-            genCaptcha(key, 2) +
-            genCaptcha(key, 3)
-      } else {
-         ttStr = genCaptcha(key, 1)
-      }
-      var generated = $(ttStr)
-      generated.find('img').click(
-	 function (e)
-	    resetCaptcha($(e.target).closest('form'))
-            return false
-	 })
-       env.find(iom.form.turdiv).clear().append(generated)
-      env.find(iom.form.turtest).removeAttr('onfocus')
+      img.click(function (e) {
+	 resetCaptcha($(e.target).closest('form'))
+	 return false
+      })
    }
 
    if(isInThread) {
@@ -883,7 +885,8 @@ function setupEnv (db, env) {
                   } catch (err) {}
                }
             } else if (subj.parent().is(iom.post.ref) && db.cfg.fastReply) {
-               showReplyForm(subj.closest(iom.tid).attr('id'), subj.text().replace(i18n.no,'>>'))
+	       var citeSelection = document.getSelection ?  document.getSelection().toString() : ''
+               showReplyForm(subj.closest(iom.tid).attr('id'), subj.text().replace(i18n.no,'>>') + (citeSelection ? '\n\n> ' + citeSelection : ''))
                return false;
             } else if (db.cfg.handleYTube && subj.is('a') && subj.attr('href').match(ytre)) {
                if (!subj.attr('unfolden')) {
