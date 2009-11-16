@@ -885,7 +885,7 @@ function setupEnv (db, env) {
                   } catch (err) {}
                }
             } else if (subj.parent().is(iom.post.ref) && db.cfg.fastReply) {
-	       var citeSelection = document.getSelection ?  document.getSelection().toString() : ''
+	       var citeSelection = window.getSelection ?  window.getSelection().toString().replace(/\n(.)/,'\n> $1') : ''
                showReplyForm(subj.closest(iom.tid).attr('id'), subj.text().replace(i18n.no,'>>') + (citeSelection ? '\n\n> ' + citeSelection : ''))
                return false;
             } else if (db.cfg.handleYTube && subj.is('a') && subj.attr('href').match(ytre)) {
