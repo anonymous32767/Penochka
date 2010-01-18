@@ -2,6 +2,7 @@ module speedtest {Тесты скорости яваскрипта} {Тесты 
 
    events
    xquery 
+	cquery
 
    doc {}
    js  {
@@ -72,6 +73,35 @@ module speedtest {Тесты скорости яваскрипта} {Тесты 
    
 	   var retval = time(test);
    	   return a == TEST_ITERATIONS ? retval : 'test failed';
-       }
+   }
+
+	window.xpath_test = function () {
+	   var DIVIDER = 1000
+		var a = null
+
+		function test () {
+         for (var i = 0; i < TEST_ITERATIONS / DIVIDER; i++) {
+	   		 a = pn(document).xpfind('//a')
+         }
+   	}
+
+		var retval = time(test);
+   	return a ? retval : 'test failed';
+	}
+
+	window.selectors_test = function () {
+	   var DIVIDER = 1000
+		var a = null
+
+		function test () {
+         for (var i = 0; i < TEST_ITERATIONS / DIVIDER; i++) {
+	   		 a = pn(document).cssfind('a')
+         }
+   	}
+
+		var retval = time(test);
+   	return a ? retval : 'test failed';
+	}
+
    }
 }
