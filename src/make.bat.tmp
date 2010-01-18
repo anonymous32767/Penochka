@@ -1,0 +1,55 @@
+@title Penochka userscript
+@echo off
+
+:main
+@cls
+@color 1F
+@echo.
+@echo               ========= Penochka (aka govno3) юзерскрипт =========
+@echo               -------------------- для 2-ch.ru -------------------
+@echo.
+@echo   Выберите действие:
+@echo    f     -   создать скрипт для Firefox, Chrome [.user.js]
+@echo    o     -   создать скрипт для Opera [.js]
+@echo    q     -   выход
+@echo.
+@echo.
+@set /p command=^>
+@if "%command%"=="q" exit
+@if "%command%"=="f" set ext=.user.js & goto make
+@if "%command%"=="o" set ext=.js & goto make
+@cls
+@echo.
+@echo   Вы ввели неправильную команду.
+@echo   Попробуйте еще раз.
+@echo.
+@echo.
+@ping -n 3 127.0.0.1 > nul
+@goto :main
+
+:make
+@if not exist src goto errmsg
+@if exist penochka%ext% del penochka%ext%
+cd src
+@ type SoUrCeCoDe >> penochka%ext%
+cd ..
+move src\penochka%ext% penochka%ext%
+@cls
+@echo.
+@echo   Файл успешно создан.
+@echo.
+@echo.
+@ping -n 3 127.0.0.1 > nul
+exit
+
+:errmsg
+@title Ошибка!
+@cls
+@color 0C
+@echo.
+@echo.
+@echo             Нужные для работы файлы не найдены,
+@echo             проверьте наличие папки src
+@echo.
+@ping -n 3 127.0.0.1 > nul
+exit
