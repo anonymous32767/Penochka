@@ -1,0 +1,42 @@
+module imagesUnfolding {Раскрытие изображений} {Раскрывает изображения-превью (thumbnails), обернутые ссылкой на оригинал} {
+   
+   events
+
+   doc {}
+   js {
+   	function tryUnfold (e) {
+	/* BUG: Now unfolds hyperlinks that points not only to images */
+		var subj = e.target
+		var imgexts = {'jpg':1, 'jpeg':1, 'bmp':1, 'png':1, 'gif':1}
+		var extRe = /^.*\.(\w+)$/
+
+		try {
+			if (subj.tagName.toLowerCase() != 'img')
+				throw false
+
+			var prevURI = subj.getAttribute('src').toLowerCase()
+			var fullURI = subj.getAttribute('altsrc') 
+
+			if (!fullURI) {
+				subj.setAttribute('altsrc', subj.parentNode.getAttribute('href'))
+				fullURI = subj.getAttribute('altsrc')
+			}
+			fullURI.toLowerCase()
+			
+				if (!imgexts[prevURI.replace(extRe, "$1")] ||
+				 !imgexts[fullURI.replace(extRe, "$1")])
+				throw false	
+
+			subj.setAttribute('height', '')
+			subj.setAttribute('width', '')
+	   } catch (err) { return true }
+		
+		subj.setAttribute('src', fullURI)
+		subj.setAttribute('altsrc', prevURI)
+		e.preventDefault()
+		e.stopPropagation()
+	}
+
+	pn.on('click', tryUnfold, true)
+   }
+}

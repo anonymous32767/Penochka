@@ -1,0 +1,77 @@
+module speedtest {Тесты скорости яваскрипта} {Тесты производительности специфических для пеночки конструкций} {
+
+   events
+   xquery 
+
+   doc {}
+   js  {
+       function time (fun) {
+          var start = new Date().getTime()
+   	  fun()
+   	  return (new Date().getTime()) - start
+       }
+
+       var TEST_ITERATIONS = 1000000;
+
+       window.namespace_create_test = function () {
+       	  var a = 0
+   	  var test = function () {
+      	  for (var i = 0; i < TEST_ITERATIONS; i++) {
+	        (function () {
+	     	   a = a + 1
+	        })()
+      	     } 
+       	  }
+
+       	  var retval = time(test);
+       	  return a == TEST_ITERATIONS ? retval : 'test failed';
+       }
+
+       window.message_pass_test = function () {
+          var events = {}
+
+   	  var AVG_EVENTS = 100;
+   	  var AVG_HANDLERS = 10;
+
+   	  var a = 0;
+
+   	  for (var i = 0; i < AVG_EVENTS; i++) {
+      	     pn.on('event'+ i, function () {})
+   	  }
+   
+	  for (var i = 0; i < AVG_HANDLERS; i++) {
+      	     pn.on('event10', function(e) { a = a + 1 })
+   	  }
+
+   	  function test () {
+      	     for (var i = 0; i < TEST_ITERATIONS / AVG_HANDLERS; i++) {
+	     	pn.to('event10', null)
+      	     }
+   	  }
+   
+	   var retval = time(test);
+   	   return a == TEST_ITERATIONS ? retval : 'test failed';
+	}
+
+	window.nativemessage_pass_test = function () { 
+  	   var AVG_HANDLERS = 10;
+
+   	   var a = 0;
+
+   	   for (var i = 0; i < AVG_HANDLERS; i++) {
+      	      document.addEventListener('event10', function(e) { a = a + 1 }, true)
+   	   }
+
+   	   function test () {
+      	      for (var i = 0; i < TEST_ITERATIONS / AVG_HANDLERS; i++) {
+	         var evObj = document.createEvent('Events');
+	 	 evObj.initEvent('event10', false, false)
+	 	 document.dispatchEvent(evObj)
+      	      }
+   	   }
+   
+	   var retval = time(test);
+   	   return a == TEST_ITERATIONS ? retval : 'test failed';
+       }
+   }
+}

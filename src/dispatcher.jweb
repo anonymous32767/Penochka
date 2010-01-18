@@ -1,0 +1,6 @@
+module dispatcher {Диспетчер событий} {Преобразует некоторые системные события во внутренние} {
+   doc {}
+	js {
+		pn.on('DOMContentLoaded', function () { pn.to('ready') }, true)
+	}
+}

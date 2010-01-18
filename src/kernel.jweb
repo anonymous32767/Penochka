@@ -1,0 +1,35 @@
+module kernel {Основные функции} \
+{Определение глобального объекта пеночки. Некоторые, удобные в
+использовании функции, аналогичные по своей сущности библиотеке
+jQuery.} {
+   doc {}
+   js {var window = this,
+       undefined,
+       pn = window.pn = function (el) {
+       	  return new pn.fn.init(el)
+       }
+
+       pn.fn = pn.prototype = {
+          init: function (el) {
+	     if (el && el.fn)
+	     	return el
+
+	     return pn.fn.merge([el ? el : document])
+	  },
+	  merge: function (arr) {
+	     this.length = 0;
+	     if (toString.call(arr) === "[object Array]") {
+	     	Array.prototype.push.apply(this, arr)
+	     } else {
+	     	Array.prototype.push.apply(this, [arr])
+	     }
+	     return this
+	  }
+       }
+       
+       pn.extend = pn.fn.extend = function (code) {
+       	  for (method_name in code) {
+	     pn.fn[method_name] = code[method_name]
+	  }
+       }}
+}
