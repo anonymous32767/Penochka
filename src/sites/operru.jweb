@@ -6,7 +6,7 @@ module goblach {Сайт называется Гоблач}\
 	doc {Ничем необчным не отличается за исключением того, что мы вырезаем некоторые излишние элементы этого сайта.}
 
 	js {$.on(
-      ['oper.ru','games.oper.ru'],
+      ['oper.ru','games.oper.ru','kino.oper.ru','travel.oper.ru','english.oper.ru','photo.oper.ru'],
       function () {
          $.on('ready', function () {  
 				$.css('.penPreview {border: 1px dashed grey;} ' + 
