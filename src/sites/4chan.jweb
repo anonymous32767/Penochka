@@ -1,0 +1,41 @@
+module yotsuba {4chan}\
+{Поддержка форчана}\
+{
+
+	kernel
+
+	doc {Ничего необычного тут нет: простая реализация api.}
+	
+	js {$.on(
+      ['boards.4chan.org'],
+      function () {
+			$.on('ready',function () { 
+				$.css('.penPreview {border: 1px dashed #EE6600;}')
+				return true
+			})
+
+         jQuery.extend({
+            extractPost: function(id, doc) {
+               var anchor = $('input[name="'+id+'"]:first', doc)
+               if (!anchor.length)
+                  return false
+               var ret = anchor.closest('td')
+               if (!ret.length)
+                  return $.makeBox('ОП-пост')
+               else
+                  return ret
+            },
+            makeBox: function (text) {
+               return $('<td class="reply">' + text + '</td>')
+            },
+				insertInFooter: function (a) {
+					$('#footer a:last').after(' + ' + a)
+				}})
+
+         jQuery.extend(jQuery.ss, {
+            refsep: '>>',
+            cache: 'form[name="delform"]'
+         })
+
+      })}
+}
