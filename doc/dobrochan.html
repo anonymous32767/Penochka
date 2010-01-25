@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+<head>
+  <title>dobrochan &#8212; Доброчан</title>
+  <link href="style.css" type="text/css" rel="stylesheet" />
+</head>
+<body>
+<h1>dobrochan &#8212; Доброчан</h1>
+<p class="abstract">Поддержка доброчана</p>
+<p>Ничем необчным не отличается.</p><p>		 TODO: Обработка изображений</p>
+
+<p><pre>$.on(
+      ['www.dobrochan.ru','dobrochan.ru'],
+      function () {
+         $.on('ready', function () {  
+				$.css('.penPreview {}')
+				return true
+			})
+
+         jQuery.extend({
+            extractPost: function(id, doc) {
+               var anchor = $('a[name="'+id+'"]:first', doc)
+               if (!anchor.length)
+                  return false
+               var ret = anchor.closest('.post')
+               if (!ret.length)
+                  return $.makeBox('Непонятно')
+               else
+                  return ret
+            },
+            makeBox: function (text) {
+               return $('<div class="reply">' + text + '</div>')
+            },
+				insertInFooter: function (a) {
+					$('p.footer a:last').after(' + ' + a )
+				}})
+
+         jQuery.extend(jQuery.ss, {
+            refsep: '>>',
+            cache: 'form[action$=delete]'
+         })
+      })</pre></p>
+</body></html>

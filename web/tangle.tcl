@@ -1,12 +1,13 @@
 #
-## tangle - генератор js-модулей на js
+## tangle - генератор js-модулей
 #
 source moduli.tcl
 
-set oc stdout
-set src [list]
+set _oc stdout
+set _src [list]
+set _raw [list]
 
-proc gen_header_comment {name title abstract} {
+proc _gen_header_comment {name title abstract} {
     if ![string compare $title ""] {
 	if ![string compare $abstract ""] {
 	    return ""
@@ -18,24 +19,36 @@ proc gen_header_comment {name title abstract} {
     }
 }
 
-proc overture {name title abstract} {
-    global oc src
-    puts $oc [gen_header_comment $name $title $abstract] nonewline
-    puts $oc ";(function () {"
-    puts $oc [join $src "\n"]
-    puts $oc "})();"
-    puts $oc ""
-    set src [list]
+proc _overture {name title abstract} {
+    global _oc _src _raw
+	 if [llength $_raw] {
+		  puts $_oc [join $_raw "\n\n"]
+		  set _raw [list]
+	 }
+	 if [llength $_src] {
+		  puts $_oc [_gen_header_comment $name $title $abstract] nonewline
+		  puts $_oc ";(function () {\n\t" nonewline
+		  puts $_oc [join $_src "\n\t"]
+		  puts $_oc "})();"
+		  puts $_oc ""
+		  set _src [list]
+	 }
 }
 
 proc js { text } {
-    global src
-    lappend src $text
+    global _src
+    lappend _src $text
 }
 
 proc js* { text } {
-    global src
-    lappend src $text
+    global _src
+    lappend _src $text
+}
+
+proc raw { text } {
+	 global _raw
+	 lappend _raw $text
 }
 
 proc doc { text } { }
+proc bib { acr text } { }

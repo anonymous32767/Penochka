@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+<head>
+  <title>onechan &#8212; 1chan.ru</title>
+  <link href="style.css" type="text/css" rel="stylesheet" />
+</head>
+<body>
+<h1>onechan &#8212; 1chan.ru</h1>
+<p class="abstract">Поддержка одночана</p>
+<p>Ничего необычного за исключением того, что на данный момент одночан   имеет две версии: старую и новую поэтому нужно писать два обработчика.</p>
+
+<p> <h3>Новый одночан</h3> </p>
+
+<p><pre>   $.on(
+      '1chan.ru',
+      function () {
+			$.on('ready', function () { 
+				$.css('.penPreview {border: 1px dashed #666;}')
+				return true
+			})
+
+         jQuery.extend({
+            extractPost: function(id, doc) {
+               var anchor = $('a[name="'+id+'"]:first', doc)
+               if (!anchor.length)
+                  return false
+               var ret = anchor.closest('div.b-comment')
+               if (!ret.length)
+                  return $.makeBox('ОП-пост')
+               else
+                  return ret
+            },
+            makeBox: function (text) {
+               return $('<div class="b-comment">' + text + '</div>')
+            },
+				insertInFooter: function (a) {
+					$('div.b-footer-copyrights').append('<p>' + a + '</p>')
+				}})
+
+         jQuery.extend(jQuery.ss, {
+            refsep: '>>',
+            cache: 'div.l-content-wrap'
+         })
+      })</pre></p>
+
+<p> <h3>Старый одночан</h3> </p>
+
+<p><pre>$.on(
+      'old.1chan.ru',
+      function () {
+			$.on('ready', function () { 
+				$.css('.penPreview {border: 1px dashed #666;}')
+				return true
+			})
+
+         jQuery.extend({
+            extractPost: function(id, doc) {
+               var anchor = $('a[name="'+id+'"]:first', doc)
+               if (!anchor.length)
+                  return false
+               var ret = anchor.closest('div.comm')
+               if (!ret.length)
+                  return $.makeBox('Странная ссылка')
+               else
+                  return ret
+            },
+            makeBox: function (text) {
+               return $('<div class="comm">' + text + '</div>')
+            },
+				insertInFooter: function (a) {
+					$('body').append('<span>' + a + '</span>')
+				}})
+
+         jQuery.extend(jQuery.ss, {
+            refsep: '>>',
+            cache: 'table'
+         })
+      })</pre></p>
+</body></html>

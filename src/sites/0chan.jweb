@@ -1,0 +1,39 @@
+module zerochan {Нульчан}\
+{Поддержка нульчана}\
+{
+	kernel
+	
+	doc {Ничем необчным не отличается.}
+
+	js {$.on(
+      ['www.0chan.ru','0chan.ru'],
+      function () {
+         $.on('ready', function () {  
+				$.css('.penPreview {border: 1px dashed grey; background: #eee;}')
+				return true
+			})
+
+         jQuery.extend({
+            extractPost: function(id, doc) {
+               var anchor = $('a[name="'+id+'"]:first', doc)
+               if (!anchor.length)
+                  return false
+               var ret = anchor.closest('div.postnode')
+               if (!ret.length)
+                  return $.makeBox('Непонятно')
+               else
+                  return ret
+            },
+            makeBox: function (text) {
+               return $('<div class="postnode">' + text + '</div>')
+            },
+				insertInFooter: function (a) {
+					$('#boardlist_footer a:last').after('] [' + a )
+				}})
+
+         jQuery.extend(jQuery.ss, {
+            refsep: '>>',
+            cache: 'table:first'
+         })
+      })}
+}

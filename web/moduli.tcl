@@ -38,6 +38,6 @@ proc module {name title abstract body} {
     }
     proc $name {} "
        $body
-       overture {$name} {$title} {$abstract}
+       _overture {$name} {$title} {$abstract}
        proc $name {} {}
 "}
