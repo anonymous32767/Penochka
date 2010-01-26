@@ -5,15 +5,21 @@
 // @include	*1chan.ru*
 // @include	*iichan.ru*
 // @include	*02ch.su*
+// @include	*dobrochan.ru*
+// @include	*0chan.ru*
+// @include	*boards.4chan.org*
+// @include	*olanet.ru*
 // @require	http://ajax.googleapis.com/ajax/libs/jquery/1.3/jquery.min.js
 // ==/UserScript==
+		
 
 /*
  * vim: ts=3 sts=3 cindent expandtab
  *
- * penochka - various extensions from imageboards.
+ * penochka - Various extensions for imageboards powered by jQuery.
  *
- * Copyright (c) 2009, anonymous
+ * Copyright (c) 2009, anonymous, released under terms of BSD license.
+ *
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,56 +44,52 @@
  * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
  * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * Greetz: anonymous, bhc, dvanon, eurekafag, userscripts.org staff, zoi.
+ * 
  */
 
-/* Extending jQuery with some staff. */
-;(function () {
-   /** Timer object. It's lacks precision a bit due to jQuery library loading */
-   jQuery.timer = {
-      time : 0,
+
+var __startup = (new Date()).getTime()
+ 
+
+/** kernel - Ядерные функции
+
+    Наиболее общеупотребительные функции пеночки */
+;(function ($) {
+	$.timer = {
+		time : __startup,
       total : 0,
       init : function() {
          this.time = (new Date()).getTime();
       }, check : function(str) {
-         var d = new Date();
-         d = (new Date()).getTime() - this.time;
-         this.total += d;
-         this.cache += str + ': ' + d + 'мсек; ';
-			this.time = (new Date()).getTime()
+         var delta = (new Date()).getTime() - this.time
+         this.total += delta;
+         this.cache += str + ': ' + delta + 'мсек; ';
+         this.time = (new Date()).getTime()
       },
       cache : ''
    }
-
-   jQuery.timer.init()
-
-   var events = {}
-
-   jQuery.on = function(evname, fun, issys, iscap) {
-      if (issys != null) {
-         var dispatcher = this[0] || document
-         dispatcher.addEventListener(evname, fun, iscap)
-      } else {
-			evname = $.makeArray(evname)
-         for (var i = 0; i < evname.length; i++) {
-				try {
-               events[evname[i]].push(fun)
-				} catch (err) {
-					events[evname[i]] = [fun]
-				}
-			}
+      
+	var events = {}
+	$.on = function(evname, fun) {
+      evname = $.makeArray(evname)
+      for (var i = 0; i < evname.length; i++) {
+         try {
+            events[evname[i]].push(fun)
+         } catch (err) {
+            events[evname[i]] = [fun]
+         }
       }
    }
-
-   jQuery.to = function (evname, cookie) {
+	$.to = function (evname, cookie) {
       try {
-         for(var i = 0; cookie && i < events[evname].length; i++)
+         for(var i = 0; cookie != null && i < events[evname].length; i++)
             cookie = events[evname][i](cookie)
          return cookie
       } catch (err) { return null }
    }
-
-   /*@ http://www.mail-archive.com/jquery-en@googlegroups.com/msg16487.html */
-   jQuery.css = function  ( css ) {
+	$.css = function  ( css ) {
       var style = document.createElement( 'style' );
       style.type = 'text/css';
       var head = document.getElementsByTagName('head')[0];
@@ -98,12 +100,7 @@
          style.appendChild( document.createTextNode(css) );
       return style;
    }
-
-   jQuery.fn.reverse = [].reverse
-
-   jQuery.fn.sort = [].sort
-
-   jQuery.extend({
+	$.extend({
       swap:function(b){
          b = $(b)[0]
          var a = this[0];
@@ -114,64 +111,33 @@
          return this;
       }
    })
+	$.ss = {}
+})(jQuery);
 
-   jQuery.ss = {}
+/** wakaba - Вакаба
 
-})();
-
-/** Cache */
-(function () {
-
-   var cache = {};
-   var bad = {};
-
-   $.on('/r/ cache', function (data) {
-      var part = $('<span/>')
-      var url = data.href.split('#')[0]
-      if (cache[url]) {
-         data.data = cache[url]
-         return $.to('cache ok', data)
-      }
-      if (bad[url]) {
-         data.wtf = 'Cache error'
-         return $.to('fail', data)
-      }
-      $.to('pending', data)
-      part.load(
-         url + ' ' + $.ss.cache,
-         function (responseText, textStatus, XMLHttpRequest) {
-            if (textStatus == 'timeout') {
-               data.wtf = textStatus
-               return $.to('cache fail', data)
-            }
-            if (({success:1,notmodified:1})[textStatus]) {
-               cache[url] = part
-            } else {
-               bad[url] = true
-            }
-            return $.to('/r/ cache', data)
-         })
-   })
-})();
-
-/** wakaba support */
-(function () {
-   $.on(
-      ['iichan.ru', '2-ch.ru', '02ch.su'],
+    Поддержка имиджбордов на базе этого движка */
+;(function ($) {
+	$.on(
+      ['iichan.ru', '2-ch.ru', '02ch.su', '2ch.olanet.ru'],
       function () {
 			$.on('ready',function () { 
 				$.css('.penPreview {border: 2px dashed #EE6600;}')
 				return true
 			})
 
-         jQuery.extend({
+			function extractOppost (anchor) {
+				return $.makeBox('Оп-пост')
+			}
+
+         $.extend({
             extractPost: function(id, doc) {
                var anchor = $('a[name="'+id+'"]:first', doc)
                if (!anchor.length)
                   return false
-               var ret = anchor.closest('table')
+               var ret = anchor.closest('td')
                if (!ret.length)
-                  return $('<div class="reply">ОП-пост</div>')
+                  return extractOppost()
                else
                   return ret
             },
@@ -182,28 +148,20 @@
 					$('p.footer a:last').after(' + ' + a)
 				}})
 
-         jQuery.extend(jQuery.ss, {
+         $.extend(jQuery.ss, {
             refsep: '>>',
             cache: '#delform'
          })
 
+			return true
       })
-})();
+})(jQuery);
 
-/* 02ch.su support 
-(function () {
-   $.on('02ch.su', function () { $.to('wakaba',1)})
-})();
+/** onechan - 1chan.ru
 
- 2-ch.ru support 
-(function () {
-   $.on('2-ch.ru', function () { $.to('wakaba',1)})
-})(); */
-
-
-/** 1chan support */
-(function () {
-   $.on(
+    Поддержка одночана */
+;(function ($) {
+	   $.on(
       '1chan.ru',
       function () {
 			$.on('ready', function () { 
@@ -211,7 +169,7 @@
 				return true
 			})
 
-         jQuery.extend({
+         $.extend({
             extractPost: function(id, doc) {
                var anchor = $('a[name="'+id+'"]:first', doc)
                if (!anchor.length)
@@ -229,16 +187,12 @@
 					$('div.b-footer-copyrights').append('<p>' + a + '</p>')
 				}})
 
-         jQuery.extend(jQuery.ss, {
+         $.extend(jQuery.ss, {
             refsep: '>>',
             cache: 'div.l-content-wrap'
          })
       })
-})();
-
-/** old.1chan support */
-(function () {
-   $.on(
+	$.on(
       'old.1chan.ru',
       function () {
 			$.on('ready', function () { 
@@ -246,7 +200,7 @@
 				return true
 			})
 
-         jQuery.extend({
+         $.extend({
             extractPost: function(id, doc) {
                var anchor = $('a[name="'+id+'"]:first', doc)
                if (!anchor.length)
@@ -264,16 +218,19 @@
 					$('body').append('<span>' + a + '</span>')
 				}})
 
-         jQuery.extend(jQuery.ss, {
+         $.extend(jQuery.ss, {
             refsep: '>>',
             cache: 'table'
          })
       })
-})();
+})(jQuery);
 
-(function () {
-   $.on(
-      ['oper.ru','games.oper.ru'],
+/** goblach - Сайт называется Гоблач
+
+    Поддержка сайта oper.ru */
+;(function ($) {
+	$.on(
+      ['oper.ru','games.oper.ru','kino.oper.ru','travel.oper.ru','english.oper.ru','photo.oper.ru'],
       function () {
          $.on('ready', function () {  
 				$.css('.penPreview {border: 1px dashed grey;} ' + 
@@ -282,7 +239,7 @@
 				return true
 			})
 
-         jQuery.extend({
+         $.extend({
             extractPost: function(id, doc) {
                var anchor = $('a[name="'+id+'"]:first', doc)
                if (!anchor.length)
@@ -305,182 +262,261 @@
             cache: '#container'
          })
       })
-})();
+})(jQuery);
 
-/* Images unfolding */
-;(function () {
-   function preparePreview (subj) {
-      return '<img src="' + subj.parent().attr('href') + '" ' +
-         'style="min-width:' + subj.attr('width') + 'px;' +
-         'min-height:' + subj.attr('height') + 'px;">'
-   }
+/** zerochan - Нульчан
 
-   function togglePreview (subj) {
-      if (!subj.attr('altimg'))
-         var t = preparePreview(subj)
-      else
-         var t = subj.attr('altimg')
+    Поддержка нульчана */
+;(function ($) {
+	$.on(
+      ['www.0chan.ru','0chan.ru'],
+      function () {
+         $.on('ready', function () {  
+				$.css('.penPreview {border: 2px dashed #EE6600;} div.penPreview {background: #eee;}')
+				return true
+			})
 
-      subj.removeAttr('altimg')
-      var alt = $(t).attr('altimg', subj.parent().html())
-      subj.replaceWith(alt)
-   }
+         $.extend({
+            extractPost: function(id, doc) {
+               var anchor = $('a[name="'+id+'"]:first', doc)
+               if (!anchor.length)
+                  return false
+               var ret = anchor.closest('td.reply, div.postnode')
+               if (!ret.length)
+                  return $.makeBox('Непонятно')
+               else
+                  return ret
+            },
+            makeBox: function (text) {
+               return $('<td class="reply">' + text + '</div>')
+            },
+				insertInFooter: function (a) {
+					$('#boardlist_footer a:last').after('] [' + a )
+				}})
 
-   function testThumb (subj) {
-      return subj.is('a[href] img')
-         && ({jpeg:1,jpg:1,png:1,gif:1,tiff:1,bmp:1})
-      [subj.parent().attr('href').
-       replace(/^.*\.(\w+)$/,'$1').toLowerCase()]
-   }
-
-   $.on(
-      'click',
-      function (e) {
-         var subj = $(e.target)
-         if (e.which == 1 && testThumb(subj)) {
-            togglePreview(subj)
-            return false
-         } else {
-            return e
-         }
+         $.extend(jQuery.ss, {
+            refsep: '>>',
+            cache: 'table:first'
+         })
       })
+})(jQuery);
 
-})();
+/** dobrochan - Доброчан
 
-;(function () {
+    Поддержка доброчана */
+;(function ($) {
+	$.on(
+      ['www.dobrochan.ru','dobrochan.ru'],
+      function () {
+		
+         $.on('ready', function () {  
+				$.css('.penPreview {}')
+				
+				/* К сожалению я пока не могу найти способ отменять стандартный
+            обработчик onclick() кроме как выдирать его с корнем. */
+				$('img.thumb').removeAttr('onclick')
+				
+				return true
+			})
 
-   var raiseDelay = 100;
-   var fallDelay = 100;
+         $.extend({
+            extractPost: function(id, doc) {
+               var anchor = $('a[name="'+id+'"]:first', doc)
+               if (!anchor.length)
+                  return false
+               var ret = anchor.closest('.reply, .post')
+               if (!ret.length)
+                  return $.makeBox('Непонятно')
+               else
+                  return ret
+            },
+            makeBox: function (text) {
+               return $('<div class="reply">' + text + '</div>')
+            },
+				insertInFooter: function (a) {
+					$('p.footer a:last').after(' + ' + a )
+				}})
 
-   $.on('/r/ post', function(data) {
-      var addr = data.href.split('#')
-      var extracted = $.extractPost(addr[1], data.ctx)
-      if (extracted) {
-         if (extracted.length) {
-            data.data = extracted
-            $.to('post ok', data)
-         } else {
-            data.wtf = 'Anchor found but post not extracted.'
-            $.to('fail', data)
-         }
-      } else {
-         return $.to('/r/ cache', data)
-      }
-   })
-
-   $.on(
-      'post ok',
-      function (data) {
-         if (data.preview) {
-				$('.penPreviewTmp').remove()
-				var cloned = data.data.clone()
-				cloned.addClass('penPreview')
-            showPreview(
-               cloned,
-               data.preview.x,
-               data.preview.y)
-         }
+         $.extend(jQuery.ss, {
+            refsep: '>>',
+            cache: 'form[action$=delete]'
+         })
       })
+})(jQuery);
 
-   $.on(
-      'cache ok',
-      function (data) {
-         if (data.preview) {
-            data.ctx = data.data
-            $.to('/r/ post', data)
-         }
+/** yotsuba - 4chan
+
+    Поддержка форчана */
+;(function ($) {
+	$.on(
+      ['boards.4chan.org'],
+      function () {
+			$.on('ready',function () { 
+				$.css('.penPreview {border: 1px dashed #EE6600;}')
+				return true
+			})
+
+         $.extend({
+            extractPost: function(id, doc) {
+               var anchor = $('input[name="'+id+'"]:first', doc)
+               if (!anchor.length)
+                  return false
+               var ret = anchor.closest('td')
+               if (!ret.length)
+                  return $.makeBox('ОП-пост')
+               else
+                  return ret
+            },
+            makeBox: function (text) {
+               return $('<td class="reply">' + text + '</td>')
+            },
+				insertInFooter: function (a) {
+					$('#footer a:last').after(' + ' + a)
+				}})
+
+         jQuery.extend(jQuery.ss, {
+            refsep: '>>',
+            cache: 'form[name="delform"]'
+         })
+			
+			var prevURL = null
+
+			$.on('post ok',
+			function (data) { 
+				prevURL = data.href.split('#')[0]
+				return data 
+			})
+
+			$.on('fail',
+				function (data) {
+					if (data.preview && !data.fixed) {
+						var addr = data.href.split('#')
+						if (addr[0] == '' && prevURL) {
+							addr[0] = prevURL
+							$.to('/r/ post', 
+										  {href:addr[0] + '#' + addr[1],
+								         preview: data.preview, 
+											ctx: document, fixed: true})
+							return null
+						}
+					}
+					return data
+				})
+
+			return true
+
       })
+})(jQuery);
 
-   $.on(
-      'fail',
-      function (data) {
-         if (data.preview) {
-            showPreview(
-               $.makeBox('Ошибка: ' + data.wtf).
-						addClass('penPreviewTmp'),
-               data.preview.x,
-               data.preview.y)
-            delete hrefxy[data.href]
-         }
+/** olanet - Оланет
+
+    Поддержка оланета */
+;(function ($) {
+	$.on(
+      ['olanet.ru'],
+      function () {
+			$.on('ready',function () { 
+				$.css('.penPreview {border: 1px dashed grey; background: white}')
+				return true
+			})
+
+			function extractOppost (anchor) {
+				return $.makeBox('Оп-пост')
+			}
+
+         $.extend({
+            extractPost: function(id, doc) {
+               var anchor = $('a[name="'+id+'"]:first', doc)
+               if (!anchor.length)
+                  return false
+               var ret = anchor.next()
+               if (!ret.length)
+                  return extractOppost()
+               else
+                  return ret
+            },
+            makeBox: function (text) {
+               return $('<div class="c">' + text + '</div>')
+            },
+				insertInFooter: function (a) {
+					$('a[name="bottom"]').after(' ' + a)
+				}})
+
+         $.extend(jQuery.ss, {
+            refsep: '>>',
+            cache: 'div.application_content'
+         })
+
       })
+	var prevURL = null
 
-   $.on(
-      'pending',
-      function (data) {
-         if (data.preview) {
-            showPreview(
-               $.makeBox('Загрузка...').
-						addClass('penPreviewTmp'),
-               data.preview.x,
-               data.preview.y)
-         }
-      })
+			$.on(
+			'2ch.olanet.ru', 
+			function () {
+				$.on('fail',
+					function (data) {
+						if (data.preview && !data.fixed) {
+							var addr = data.href.split('#')
+							if (addr[0] == '') { /* Проверка на то, что это
+                     наш случай --- отсуствует урл */
+								var href = $('a[href="'+data.href+'"]').
+									closest('blockquote').
+									prevAll('span.reflink').
+									find('a').attr('href')
+								if (href) {
+									var newaddr = href.split('#')
+									/* Если пришла какая-либо поебня вместо 
+                              ссылки заменим ее предыдущим урлом */
+									if(!newaddr[1]) {
+										if(prevURL)
+											newaddr[0] = prevURL
+										else
+											return data 
+									}
+									prevURL = newaddr[0]
+									$.to('/r/ post', 
+										  {href:newaddr[0] + '#' + addr[1], 											preview: data.preview, 
+											ctx: document, fixed: true})
+									return null
+								}
+							}
+						}
+						return data
+					})
+			})
+			 
+			$.extend(jQuery.ss, {
+            cache: 'div.application_content'
+         })
+})(jQuery);
 
-   function showPreview(what, x, y) {
-		if (document.body.clientWidth - x < 420) {
-			x = document.body.clientWidth - 500
-		}
-      what.attr(
-         'style',
-         'position:absolute; top:' + y + 
-				'px; left:' + x + 
-				'px; max-width: ' + (document.body.clientWidth - x - 10) + 'px').
-         appendTo('body')
-   }
-	
-	var t = null
+/** dispatcher - Диспетчеризация пеночки
 
-   $.on(
-      'mouseover',
-      function (e) {
-         var subj = $(e.target)
-         if (subj.is('a:contains("' + $.ss.refsep + '")')) {
-				clearTimeout(t)
-            t = setTimeout(
-               function () {
-                  $.to('/r/ post', {href: subj.attr('href'), ctx: document,
-                                    preview: {x: e.pageX, y: e.pageY}})
-               }, raiseDelay)
-            return false
-         } if (subj.closest('.penPreview').length) {
-				clearTimeout(t)
-			} else {
-            return e
-         }
-      })
-
-   $.on(
-      'mouseout',
-      function (e) {
-         var subj = $(e.target)
-         if (subj.is('a:contains("' + $.ss.refsep + '")') 
-				 || subj.closest('.penPreview')) {
-				clearTimeout(t)
-            t = setTimeout(
-               function () {
-                  $('.penPreview, .penPreviewTmp').remove()
-               }, fallDelay)
-            return false
-         } else {
-            return e
-         }
-      })
-})();
-
-
-/* The dispatcher */
-;(function () {
-
-   try { document = unsafeWindow.document } catch (err) {}
+    Запуск скрипта. Мост между браузерной системой событий и внутренними событиями пеночки */
+;(function ($) {
+	   try { document = unsafeWindow.document } catch (err) {}
 
    /* Sending event 'domain name'. E.g. for www.2-ch.ru $.to('2-ch.ru')
       will be sent */
    $.to(location.host, 1)
+
+	/* GUI messages */
+   $.on(
+	   'click',
+		function (e) {
+			var subj = $(e.target)
+			if (subj.attr('penmsg')) {
+				$.to(subj.attr('penmsg'), subj)
+				return null
+			} else {
+				return e
+			}
+		})
+
 	$.timer.check('Загрузка скрипта')
 
    /* DOM Startup */
    $.on('ready', function () {
-		$.timer.init()
 
       $(document).click(
          function (e) {
@@ -508,10 +544,230 @@
 
 	try { 
 		var dummy = unsafeWindow
+		$.timer.init()
 		$.to('ready',1)
 	} catch (e) { 
 		$(function () {
-			if (!$.timer)
-				$.noConflict(true)
-			$.to('ready',1)}) } 
-})();
+			$.timer.init()
+			$.to('ready',1)}) }
+})(jQuery);
+
+/** imagesUnfolding - Раскрытие изображений
+
+    Развертка изображений которые обернуты ссылками, ведущими на оригиналы */
+;(function ($) {
+	function testThumb (subj) {
+      return subj.is('img')
+         && ({jpeg:1,jpg:1,png:1,gif:1,tiff:1,bmp:1})
+      [subj.closest('a').attr('href').
+       replace(/^.*\.(\w+)$/,'$1').toLowerCase()]
+   }
+	   function prepareFull (subj) {
+      return '<img src="' + subj.closest('a').attr('href') + '" ' +
+         'style="min-width:' + subj.attr('width') + 'px;' +
+         'min-height:' + subj.attr('height') + 'px;" ' + 
+			'class="penImageFull" >'
+   }
+
+   function toggleFull (subj) {
+      if (!subj.attr('altimg'))
+         var t = prepareFull(subj)
+		else
+         var t = subj.attr('altimg')
+		
+      subj.removeAttr('altimg')
+      var alt = $(t).attr('altimg', subj.parent().html())
+      subj.replaceWith(alt)
+   }
+	$.on(
+      'click',
+      function (e) {
+         var subj = $(e.target)
+         if (e.which == 1 && testThumb(subj)) {
+				e.stopPropagation()
+				e.preventDefault()
+            toggleFull(subj)
+            return null
+         } else {
+            return e
+         }
+      })
+})(jQuery);
+
+/** cache - Кэш
+
+    Хранилище страничек, загруженных ajaxом. */
+;(function ($) {
+	   var cache = {}
+		var bad = {}
+
+   $.on('/r/ cache', function (data) {
+      var part = $('<span/>')
+      var url = data.href.split('#')[0]
+      if (cache[url]) {
+         data.data = cache[url]
+         return $.to('cache ok', data)
+      }
+      if (bad[url]) {
+         data.wtf = 'Cache error'
+         return $.to('fail', data)
+      }
+      $.to('pending', data)
+      part.load(
+         url + ' ' + $.ss.cache,
+			"",
+         function (responseText, textStatus, XMLHttpRequest) {
+            if (textStatus == 'timeout') {
+               data.wtf = textStatus
+               return $.to('fail', data)
+            }
+            if (({success:1,notmodified:1})[textStatus]) {
+               cache[url] = part
+            } else {
+               bad[url] = true
+            }
+            return $.to('/r/ cache', data)
+         })
+   })
+})(jQuery);
+
+/** posts - Post deliveri service
+
+    Получение сообщений по ссылке */
+;(function ($) {
+	$.on('/r/ post', function(data) {
+      var addr = data.href.split('#')
+      var extracted = $.extractPost(addr[1], data.ctx)
+      if (extracted) {
+         if (extracted.length) {
+            data.data = extracted
+            $.to('post ok', data)
+         } else {
+            data.wtf = 'Anchor found but post not extracted.'
+            $.to('fail', data)
+         }
+      } else {
+			if (data.senttocache || addr[0] == '') {
+				data.wtf = 'Post not found in pointed url'
+				return $.to('fail', data)
+			} else {
+				data.senttocache = 1
+				return $.to('/r/ cache', data)
+			}
+      }
+   })
+
+	$.on(
+		'cache ok',
+		function (data) {
+         if (data.preview) {
+            data.ctx = data.data
+            $.to('/r/ post', data)
+         }
+      })
+})(jQuery);
+
+/** postsPreview - Превью сообщений
+
+    Генерация превью сообщений при наведении на ссылку (раньше называлось intelliSense). */
+;(function ($) {
+	
+		var raiseDelay = 100;
+		var fallDelay = 100;
+
+		$.on(
+      'post ok',
+      function (data) {
+         if (data.preview) {
+				$('.penPreviewTmp').remove()
+				var cloned = data.data.clone()
+				cloned.addClass('penPreview')
+            showPreview(
+               cloned,
+               data.preview.x,
+               data.preview.y)
+         }
+      })
+
+		$.on(
+      'fail',
+      function (data) {
+         if (data.preview) {
+            showPreview(
+               $.makeBox('Ошибка: ' + data.wtf).
+						addClass('penPreviewTmp'),
+               data.preview.x,
+               data.preview.y)
+         }
+			return data
+      })
+
+   $.on(
+      'pending',
+      function (data) {
+         if (data.preview) {
+            showPreview(
+               $.makeBox('Загрузка...').
+						addClass('penPreviewTmp'),
+               data.preview.x,
+               data.preview.y)
+         }
+      })
+
+   function showPreview(what, x, y) {
+	   x+=12
+		y+=12
+		if (document.body.clientWidth - x < 420) {
+			x = document.body.clientWidth - 500
+		}
+      what.attr(
+         'style',
+         'position:absolute; top:' + y + 
+				'px; left:' + x + 
+				'px; max-width: ' + (document.body.clientWidth - x - 10) + 'px').
+         appendTo('body')
+   }
+	
+	var t = null
+
+   $.on(
+      'mouseover',
+      function (e) {
+         var subj = $(e.target)
+         if (subj[0].tagName && subj[0].tagName == 'A' && 
+				 subj.is('a:contains("' + $.ss.refsep +'")')) {
+				clearTimeout(t)
+            t = setTimeout(
+               function () {
+                  $.to('/r/ post', {href: subj.attr('href'), ctx: document,
+                                    preview: {x: e.pageX, y: e.pageY}})
+               }, raiseDelay)
+				e.stopPropagation()
+            return null
+         } if (subj.closest('.penPreview').length) {
+				clearTimeout(t)
+			} else {
+            return e
+         }
+      })
+
+   $.on(
+      'mouseout',
+      function (e) {
+         var subj = $(e.target)
+         if ((subj[0].tagName && subj[0].tagName == 'A' && 
+				  subj.is('a:contains("' + $.ss.refsep + '")')) 
+				|| subj.closest('.penPreview').length) {
+				clearTimeout(t)
+            t = setTimeout(
+               function () {
+                  $('.penPreview, .penPreviewTmp').remove()
+               }, fallDelay)
+				e.stopPropagation()
+            return false
+         } else {
+            return e
+         }
+      })
+})(jQuery);
+

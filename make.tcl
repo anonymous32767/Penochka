@@ -17,13 +17,15 @@ cd ..
 srcdir src
 
 set ie 0
-set gm 0
+set gm 1
 
 wakaba
 onechan
 goblach
 zerochan
 dobrochan
+yotsuba
+olanet
 
 imagesUnfolding
 postsPreview

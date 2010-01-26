@@ -13,6 +13,10 @@ module header {Заголовок} \
 // @include	*1chan.ru*
 // @include	*iichan.ru*
 // @include	*02ch.su*
+// @include	*dobrochan.ru*
+// @include	*0chan.ru*
+// @include	*boards.4chan.org*
+// @include	*olanet.ru*
 // ==/UserScript==
 		}}
 
@@ -53,5 +57,11 @@ module header {Заголовок} \
  * Greetz: anonymous, bhc, dvanon, eurekafag, userscripts.org staff, zoi.
  * 
  */}
+
+ doc { Некоторые глобальные переменные. }
+
+ raw {
+var __startup = (new Date()).getTime()
+ }
 
 }

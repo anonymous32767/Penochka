@@ -53,16 +53,12 @@ module dispatcher {Диспетчеризация пеночки}\
 							  $.timer.total + 'мсек">пеночка</a>')
    })
 
-   var _jq = $
-
 	try { 
 		var dummy = unsafeWindow
 		$.timer.init()
 		$.to('ready',1)
 	} catch (e) { 
 		$(function () {
-			if (!$.timer)
-				$ = _jq.noConflict(true)
 			$.timer.init()
 			$.to('ready',1)}) }}
 }

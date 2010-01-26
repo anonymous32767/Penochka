@@ -9,29 +9,29 @@ module zerochan {Нульчан}\
       ['www.0chan.ru','0chan.ru'],
       function () {
          $.on('ready', function () {  
-				$.css('.penPreview {border: 1px dashed grey; background: #eee;}')
+				$.css('.penPreview {border: 2px dashed #EE6600;} div.penPreview {background: #eee;}')
 				return true
 			})
 
-         jQuery.extend({
+         $.extend({
             extractPost: function(id, doc) {
                var anchor = $('a[name="'+id+'"]:first', doc)
                if (!anchor.length)
                   return false
-               var ret = anchor.closest('div.postnode')
+               var ret = anchor.closest('td.reply, div.postnode')
                if (!ret.length)
                   return $.makeBox('Непонятно')
                else
                   return ret
             },
             makeBox: function (text) {
-               return $('<div class="postnode">' + text + '</div>')
+               return $('<td class="reply">' + text + '</div>')
             },
 				insertInFooter: function (a) {
 					$('#boardlist_footer a:last').after('] [' + a )
 				}})
 
-         jQuery.extend(jQuery.ss, {
+         $.extend(jQuery.ss, {
             refsep: '>>',
             cache: 'table:first'
          })

@@ -27,9 +27,9 @@ proc _overture {name title abstract} {
 	 }
 	 if [llength $_src] {
 		  puts $_oc [_gen_header_comment $name $title $abstract] nonewline
-		  puts $_oc ";(function () {\n\t" nonewline
+		  puts $_oc ";(function ($) {\n\t" nonewline
 		  puts $_oc [join $_src "\n\t"]
-		  puts $_oc "})();"
+		  puts $_oc "})(jQuery);"
 		  puts $_oc ""
 		  set _src [list]
 	 }
@@ -46,6 +46,11 @@ proc js* { text } {
 }
 
 proc raw { text } {
+	 global _raw
+	 lappend _raw $text
+}
+
+proc raw* { text } {
 	 global _raw
 	 lappend _raw $text
 }

@@ -15,7 +15,7 @@ module goblach {Сайт называется Гоблач}\
 				return true
 			})
 
-         jQuery.extend({
+         $.extend({
             extractPost: function(id, doc) {
                var anchor = $('a[name="'+id+'"]:first', doc)
                if (!anchor.length)

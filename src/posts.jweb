@@ -19,7 +19,7 @@ TODO: Описать подробнее про работу с кешем.}
             $.to('fail', data)
          }
       } else {
-			if (data.senttocache) {
+			if (data.senttocache || addr[0] == '') {
 				data.wtf = 'Post not found in pointed url'
 				return $.to('fail', data)
 			} else {

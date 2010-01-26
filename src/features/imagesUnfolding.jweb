@@ -24,7 +24,7 @@ module imagesUnfolding {Раскрытие изображений}\
 Вышеописанное реализуется двумя функциями: @prepareFull(subj)@ и	  @toggleFull(subj)@ . Их работа понятна из исходного кода.}
 	
 	js {   function prepareFull (subj) {
-      return '<img src="' + subj.parent().attr('href') + '" ' +
+      return '<img src="' + subj.closest('a').attr('href') + '" ' +
          'style="min-width:' + subj.attr('width') + 'px;' +
          'min-height:' + subj.attr('height') + 'px;" ' + 
 			'class="penImageFull" >'
@@ -33,9 +33,9 @@ module imagesUnfolding {Раскрытие изображений}\
    function toggleFull (subj) {
       if (!subj.attr('altimg'))
          var t = prepareFull(subj)
-      else
+		else
          var t = subj.attr('altimg')
-
+		
       subj.removeAttr('altimg')
       var alt = $(t).attr('altimg', subj.parent().html())
       subj.replaceWith(alt)
@@ -48,8 +48,10 @@ module imagesUnfolding {Раскрытие изображений}\
       function (e) {
          var subj = $(e.target)
          if (e.which == 1 && testThumb(subj)) {
+				e.stopPropagation()
+				e.preventDefault()
             toggleFull(subj)
-            return false
+            return null
          } else {
             return e
          }

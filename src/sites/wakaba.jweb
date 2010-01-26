@@ -7,21 +7,25 @@ module wakaba {Вакаба}\
 	doc {Ничего необычного тут нет: простая реализация api. Некая особенность заключается лишь в довольно трудном процессе выковыривания 	  оп-постов (функция extractOppost()).}
 	
 	js {$.on(
-      ['iichan.ru', '2-ch.ru', '02ch.su'],
+      ['iichan.ru', '2-ch.ru', '02ch.su', '2ch.olanet.ru'],
       function () {
 			$.on('ready',function () { 
 				$.css('.penPreview {border: 2px dashed #EE6600;}')
 				return true
 			})
 
-         jQuery.extend({
+			function extractOppost (anchor) {
+				return $.makeBox('Оп-пост')
+			}
+
+         $.extend({
             extractPost: function(id, doc) {
                var anchor = $('a[name="'+id+'"]:first', doc)
                if (!anchor.length)
                   return false
-               var ret = anchor.closest('table')
+               var ret = anchor.closest('td')
                if (!ret.length)
-                  return $('<div class="reply">ОП-пост</div>')
+                  return extractOppost()
                else
                   return ret
             },
@@ -32,10 +36,11 @@ module wakaba {Вакаба}\
 					$('p.footer a:last').after(' + ' + a)
 				}})
 
-         jQuery.extend(jQuery.ss, {
+         $.extend(jQuery.ss, {
             refsep: '>>',
             cache: '#delform'
          })
 
+			return true
       })}
 }

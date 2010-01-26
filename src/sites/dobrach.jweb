@@ -10,17 +10,23 @@ module dobrochan {Доброчан}\
 	js {$.on(
       ['www.dobrochan.ru','dobrochan.ru'],
       function () {
+		
          $.on('ready', function () {  
 				$.css('.penPreview {}')
+				
+				/* К сожалению я пока не могу найти способ отменять стандартный
+            обработчик onclick() кроме как выдирать его с корнем. */
+				$('img.thumb').removeAttr('onclick')
+				
 				return true
 			})
 
-         jQuery.extend({
+         $.extend({
             extractPost: function(id, doc) {
                var anchor = $('a[name="'+id+'"]:first', doc)
                if (!anchor.length)
                   return false
-               var ret = anchor.closest('.post')
+               var ret = anchor.closest('.reply, .post')
                if (!ret.length)
                   return $.makeBox('Непонятно')
                else
@@ -33,7 +39,7 @@ module dobrochan {Доброчан}\
 					$('p.footer a:last').after(' + ' + a )
 				}})
 
-         jQuery.extend(jQuery.ss, {
+         $.extend(jQuery.ss, {
             refsep: '>>',
             cache: 'form[action$=delete]'
          })

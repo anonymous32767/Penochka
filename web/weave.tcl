@@ -80,6 +80,7 @@ proc js { text } {
 }
 
 proc js* { text } {}
+proc raw* { text } {}
 
 proc raw { text } {
 	 global _doc

@@ -26,6 +26,7 @@ module cache {Кэш}\
       $.to('pending', data)
       part.load(
          url + ' ' + $.ss.cache,
+			"",
          function (responseText, textStatus, XMLHttpRequest) {
             if (textStatus == 'timeout') {
                data.wtf = textStatus

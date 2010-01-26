@@ -15,7 +15,7 @@ module onechan {1chan.ru}\
 				return true
 			})
 
-         jQuery.extend({
+         $.extend({
             extractPost: function(id, doc) {
                var anchor = $('a[name="'+id+'"]:first', doc)
                if (!anchor.length)
@@ -33,7 +33,7 @@ module onechan {1chan.ru}\
 					$('div.b-footer-copyrights').append('<p>' + a + '</p>')
 				}})
 
-         jQuery.extend(jQuery.ss, {
+         $.extend(jQuery.ss, {
             refsep: '>>',
             cache: 'div.l-content-wrap'
          })
@@ -49,7 +49,7 @@ module onechan {1chan.ru}\
 				return true
 			})
 
-         jQuery.extend({
+         $.extend({
             extractPost: function(id, doc) {
                var anchor = $('a[name="'+id+'"]:first', doc)
                if (!anchor.length)
@@ -67,7 +67,7 @@ module onechan {1chan.ru}\
 					$('body').append('<span>' + a + '</span>')
 				}})
 
-         jQuery.extend(jQuery.ss, {
+         $.extend(jQuery.ss, {
             refsep: '>>',
             cache: 'table'
          })

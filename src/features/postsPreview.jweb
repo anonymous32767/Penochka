@@ -34,6 +34,7 @@ module postsPreview {Превью сообщений}\
                data.preview.x,
                data.preview.y)
          }
+			return data
       })
 
    $.on(
@@ -49,6 +50,8 @@ module postsPreview {Превью сообщений}\
       })
 
    function showPreview(what, x, y) {
+	   x+=12
+		y+=12
 		if (document.body.clientWidth - x < 420) {
 			x = document.body.clientWidth - 500
 		}
@@ -56,7 +59,7 @@ module postsPreview {Превью сообщений}\
          'style',
          'position:absolute; top:' + y + 
 				'px; left:' + x + 
-				'px; max-width: ' + (document.body.clientWidth - x - 10) + 				'px').
+				'px; max-width: ' + (document.body.clientWidth - x - 10) + 'px').
          appendTo('body')
    }
 	
@@ -89,7 +92,7 @@ module postsPreview {Превью сообщений}\
          var subj = $(e.target)
          if ((subj[0].tagName && subj[0].tagName == 'A' && 
 				  subj.is('a:contains("' + $.ss.refsep + '")')) 
-				|| subj.closest('.penPreview')) {
+				|| subj.closest('.penPreview').length) {
 				clearTimeout(t)
             t = setTimeout(
                function () {
