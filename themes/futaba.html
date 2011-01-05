@@ -4,30 +4,24 @@
   <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <title><? title.join(' -- ') ?></title>
-
   </head>
   <body>
     <p class="menu">
-	  [<? menu :: / ?>]
+	  <? menu :: / ?>
 	</p>
 	<h1><? title.join(' --- ') ?></h1>
 	<div class="messages">
 	  <? threads ?>
 	</div>
     <p class="menu">
-	  [<? menu :: / ?>]
+	  <? menu :: / ?>
 	</p>
-	<hr />
-	<p class="footer"><?footer?></p>
   </body>
 </html>
-
-<!--/ name title!==undefined  url -->
-<a href="<?url?>"><?name?></a>
 
 <!--/  posts -->
 <? posts ?>
 <br clear="both" /><hr />
 
-<!--/ title!==undefined message author -->
+<!--/ title message author -->
 <p><?title?> <?message?> <em><?author?></em></p>
