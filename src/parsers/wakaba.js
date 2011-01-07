@@ -86,21 +86,24 @@
                root = cch
             }
             if (cch.tagName == 'BLOCKQUOTE') {
-               var processed = to('message-text', 
-								  {message: cch.innerHTML.replace(/<div\s+class="abbrev".*?\/div>/, function () {
-									 currPost.cutted = true
-									 return ''
-								  }), 
-								   board: board,
-								   post:currPost })
+               var processed = to(
+				  'message-text', 
+				  {message: cch.innerHTML.
+				   replace(/<div\s+class="abbrev".*?\/div>/, 
+                           function () {
+                              currPost.cutted = true
+                              return ''
+                           }), 
+                   board: board,
+                   post:currPost })
                currPost['message'] = processed.message
             }
             if (cch.className == 'filesize') {
                var cch_n = cch;
                while (cch_n && !(cch_n.tagName == 'A' || (cch_n.tagName == 'SPAN' && cch_n.id)))
                   cch_n = cch_n.nextElementSibling
-			   if (!currPost['attaches']) 
-				  currPost['attaches'] = []
+               if (!currPost['attaches']) 
+                  currPost['attaches'] = []
                currPost['attaches'].push(parseThumbInfo({
                   imageInfo: cch,
                   thumbInfo: cch_n
