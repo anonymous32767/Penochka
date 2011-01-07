@@ -3,25 +3,98 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-    <title><? title.join(' -- ') ?></title>
+    <title><? title.join(' » ') ?></title>
+    <style><?css?></style>
   </head>
   <body>
     <p class="menu">
-	  <? menu :: / ?>
-	</p>
-	<h1><? title.join(' --- ') ?></h1>
-	<div class="messages">
-	  <? threads ?>
-	</div>
+      <? menu :: / ?>
+    </p>
+    <div class="logo"><? title.join(' — ') ?></div>
+    <hr />
+    <div class="messages">
+      <? threads ?>
+    </div>
     <p class="menu">
-	  <? menu :: / ?>
-	</p>
+      <? menu :: / ?>
+    </p>
+    <p class="footer">
+      - <? footer :: + ?> -
+    </p>
   </body>
 </html>
 
-<!--/  posts -->
-<? posts ?>
+<!--/ posts attaches -->
+<span class="omittedposts">Пропущено ответов: <?posts?> (из них с вложениями — <?attaches?>).</span>
+
+<!--/ posts attaches!=undefined -->
+<span class="omittedposts">Пропущено ответов: <?posts?>.</span>
+
+<!--/ posts -->
+<span class="op post">
+  <? posts.shift() ?>
+</span>
+<? _.omitted && omitted || '' ?>
+<span class="replies">
+  <? reply_wrap # posts ?>
+</span>
+<? _.omitted && omitted || '' ?>
 <br clear="both" /><hr />
 
-<!--/ title message author -->
-<p><?title?> <?message?> <em><?author?></em></p>
+<!--/ url name title!=undefined -->
+<a href="<?url?>" title="<?title?>"><?name?></a>
+
+<!--/ reply_wrap -->
+<table>
+  <tbody>
+    <tr>
+      <td class="doubledash">&gt;&gt;</td>
+      <td class="reply">
+        <? reply_wrap ?>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<!--/ title!=undefined message!=undefined author!=undefined -->
+<a name="<?id?>"></a>
+<label>
+  <input type="checkbox" name="delete" value="<?id?>" />
+  <span class="title"><?title?></span>
+  <span class="postername"><?author?></span>
+  <? _.perks && perks || '' :: ?>
+  <span class="timestamp"><?date?></span>
+</label>
+<span class="reflink">
+  <a href="<?reflink?>">№<?id?></a>&nbsp;
+</span>
+<? _.attaches && attaches || '' ?>
+<blockquote><?message?>
+<? _.cutted ? '<div class="abbrev">Сообщение слишком длинное и было обрезано.</div>' : ''?>
+<? _.pingbacks && _.pingbacks.length && {pingbacks: pingbacks} || '' ?>
+</blockquote>
+
+<!--/ perk -->
+<sup><?perk?></sup>
+
+<!--/ video -->
+<div style="float: left; margin: 5px; margin-right: 10px;"><?video?></div>
+
+<!--/ h w url size name -->
+  <br /><span class="filesize">
+  <a target="_blank" href="<?url?>"><?name?></a>
+  (<em><?size?>KiB, <?w?>×<?h?></em>)
+</span>
+<br />
+<a target="_blank" href="<?url?>">
+<? _.thumb && thumb || '<div class="nothumb">Нет картинки</div>' ?>
+</a>
+
+<!--/ h w url thumb -->
+<img src="<?url?>" width="<?w?>" height="<?h?>" alt="54" class="img" />
+
+<!--/ pingbacks -->
+<div class="pingbacks">Ответы: <? pingbacks ::, ?>.</div>
+
+<!--/ board!==undefined host!==undefined post url -->
+<a href="<?url?>">&gt;&gt;<?host?><?board?><?post?></a>
