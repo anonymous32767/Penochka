@@ -81,10 +81,16 @@
                   currPost['reflink'] = cch.children[0].href
                }
                if (cch.tagName == 'BLOCKQUOTE') {
-				  var processed = to('message-text', 
-									 {message: cch.getElementsByClassName('postmessage')[0].innerHTML, 
-									  board: board,
-									  post:currPost })
+                  var processed = to(
+                     'message-text',
+                     {message: cch.getElementsByClassName('postmessage')[0].innerHTML.
+                      replace(/<div\s+class="abbrev".*?\/div>/,
+                              function () {
+                                 currPost.cutted = true
+                                 return ''
+                              }),
+                      board: board,
+                      post:currPost })
                   currPost['message'] = processed.message
                }
             }
