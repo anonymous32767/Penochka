@@ -87,9 +87,9 @@
             }
             if (cch.tagName == 'BLOCKQUOTE') {
                var processed = to(
-				  'message-text', 
-				  {message: cch.innerHTML.
-				   replace(/<div\s+class="abbrev".*?\/div>/, 
+                  'message-text', 
+                  {message: cch.innerHTML.
+                   replace(/<div\s+class="abbrev".*?\/div>/, 
                            function () {
                               currPost.cutted = true
                               return ''
@@ -109,10 +109,10 @@
                   thumbInfo: cch_n
                }))
             }
-			if (cch.tagName == 'DIV' && cch.children[0] && cch.children[0].tagName == 'OBJECT') {
-			   if (!currPost['attaches']) 
-				  currPost['attaches'] = []
-			   currPost['attaches'].push({video: cch.innerHTML})
+            if (cch.tagName == 'DIV' && cch.children[0] && cch.children[0].tagName == 'OBJECT') {
+               if (!currPost['attaches']) 
+                  currPost['attaches'] = []
+               currPost['attaches'].push({video: cch.innerHTML})
             }
             if (cch.tagName == 'SPAN' && cch.className == 'omittedposts') {
                m = cch.innerText.split(/(\d+)/)
