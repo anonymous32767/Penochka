@@ -17,16 +17,27 @@
    }
 
    document.addEventListener('click', function (e) {
-      var signame = e.target.getAttribute('sig')
-      if (signame)
-         return to(signame, e.target) && e
+      var signame = e.target.getAttribute('msg')
+      if (signame) {
+         var result =  to('click:'+signame, e.target) && e
+		 if (!result) {
+			e.preventDefault()
+			e.stopPropagation()
+		 }
+		 return result
+	  }
       return e
    }, true)
 
    document.addEventListener('dbclick', function (e) {
-      var signame = e.target.getAttribute('sig_dbl')
+      var signame = e.target.getAttribute('msg')
       if (signame)
-         return to(signame, e.target) && e
+         var result = to('dbclick:'+signame, e.target) && e
+		 if (!result) {
+			e.preventDefault()
+			e.stopPropagation()
+		 }
+		 return result
       return e
    }, true)
 

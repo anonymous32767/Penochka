@@ -19,9 +19,7 @@
    }
 
    on('init', function (data) {
-
       var render = eval(pnck.nannou2(to('futaba.html')))
-      var board = null
 	  var binfo = boardInfo[location.host]
 	  while (binfo.sameas) {
 		 var origin = binfo.sameas
@@ -34,13 +32,19 @@
 		 console.log('Unknown location '+location.host+'. Exit.')
 		 return 
 	  }
-      board = to(binfo.engine, document)
-      board.css = to('futaba.css')
-	  board.footer.unshift({
+      document.documentElement.innerHTML = render(
+		 to('bomready', 
+			{board: to(binfo.engine, document)}).board
+	  )
+   })
+
+   on('bomready', function (data) {
+	  data.board.footer.unshift({
          'name': 'penochka',
          'url': 'http://google.com/',
          'title': 'UnStAbLe'
       })
-      document.documentElement.innerHTML = render(board)
+	  return data
    })
+
 })(penochka);

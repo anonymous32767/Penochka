@@ -61,9 +61,9 @@
                            nextElementSibling
                   });
                }
-               currPost['title'] = ''
-               currPost['author'] = ''
                if (cch.tagName == 'LABEL') {
+				  currPost['title'] = ''
+				  currPost['author'] = ''
                   currPost['date'] = cch.children[cch.children.length-1].
                         nextSibling.textContent;
                   for (k = 0; k < cch.children.length; k++) {
@@ -145,8 +145,6 @@
       board.menu = parseMenu(document.getElementById('boardlist_header'))
       parseMessages(document.getElementById('delform'), board)
       board.footer = parseFooter(document.getElementsByClassName('footer')[0])
-      console.log(board.pingbacks)
-      console.log(board.threads)
       return board
    })
 

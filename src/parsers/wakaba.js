@@ -153,7 +153,7 @@
       var menuLinks = []
       var menuLinksRaw = root.getElementsByTagName('A'), i
       for (i = 0; i < menuLinksRaw.length; i++) {
-         if (menuLinksRaw[i].getAttribute('href').match(/^\//)) {
+         if (menuLinksRaw[i].href.match(/\/\w+\//)) {
             menuLinks.push({
                'name': menuLinksRaw[i].textContent,
                'url': menuLinksRaw[i].href,

@@ -1,3 +1,24 @@
+/*** From wakaba inline */
+
+body { margin: 0; padding: 8px; margin-bottom: auto; }blockquote blockquote { margin-left: 0em }
+
+form { margin-bottom: 0px }
+form .trap { display:none }
+.postarea { text-align: center }
+.postarea table { margin: 0px auto; text-align: left }
+.img { border: none; float: left; margin: 2px 20px; }
+.nothumb { float: left; background: #eee; border: 2px dashed #aaa; text-align: center; margin: 2px 20px; padding: 1em 0.5em 1em 0.5em; }
+.reply blockquote, blockquote :last-child { margin-bottom: 0em }
+.reflink a { color: inherit; text-decoration: none }
+.filesize { margin-left: 20px; }
+.userdelete { float: right; text-align: center; white-space: nowrap }
+.replypage .replylink { display: none }
+.o { text-decoration: overline; }
+.u { text-decoration: underline; }
+.s {text-decoration: line-through;}
+
+/* Futaba.css */
+
 html, body {
          background:#FFFFEE;
          color:#800000;
@@ -139,26 +160,7 @@ a:hover {
 	border: 2px dashed #EEAA88;
 }
 
-
-/*** From wakaba inline */
-
-body { margin: 0; padding: 8px; margin-bottom: auto; }blockquote blockquote { margin-left: 0em }
-form { margin-bottom: 0px }
-form .trap { display:none }
-.postarea { text-align: center }
-.postarea table { margin: 0px auto; text-align: left }
-.img { border: none; float: left; margin: 2px 20px }
-.nothumb { float: left; background: #eee; border: 2px dashed #aaa; text-align: center; margin: 2px 20px; padding: 1em 0.5em 1em 0.5em; }
-.reply blockquote, blockquote :last-child { margin-bottom: 0em }
-.reflink a { color: inherit; text-decoration: none }
-.reply .filesize { margin-left: 20px }
-.userdelete { float: right; text-align: center; white-space: nowrap }
-.replypage .replylink { display: none }
-.o { text-decoration: overline; }
-.u { text-decoration: underline; }
-.s {text-decoration: line-through;}
-
-/* Tunes */
+/* Specific tunes */
 
 .forced {color: blue; font-weight: bold;}
 

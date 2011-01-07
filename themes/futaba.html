@@ -31,15 +31,17 @@
 <span class="omittedposts">Пропущено ответов: <?posts?>.</span>
 
 <!--/ posts -->
-<span class="op post">
-  <? posts.shift() ?>
+<span class="thread">
+  <span class="op post">
+    <? posts.shift() ?>
+  </span>
+  <? _.omitted && omitted || '' ?>
+  <span class="replies">
+    <? reply_wrap # posts ?>
+  </span>
+  <? _.omitted && omitted || '' ?>
+  <br clear="both" /><hr />
 </span>
-<? _.omitted && omitted || '' ?>
-<span class="replies">
-  <? reply_wrap # posts ?>
-</span>
-<? _.omitted && omitted || '' ?>
-<br clear="both" /><hr />
 
 <!--/ url name title!=undefined -->
 <a href="<?url?>" title="<?title?>"><?name?></a>
@@ -81,9 +83,9 @@
 <div style="float: left; margin: 5px; margin-right: 10px;"><?video?></div>
 
 <!--/ h w url size name -->
-  <br /><span class="filesize">
-  <a target="_blank" href="<?url?>"><?name?></a>
-  (<em><?size?>KiB, <?w?>×<?h?></em>)
+<br /><span class="filesize">
+<a target="_blank" href="<?url?>"><?name?></a>
+(<em><?size?>KiB, <?w?>×<?h?>px</em>)
 </span>
 <br />
 <a target="_blank" href="<?url?>">
@@ -91,7 +93,7 @@
 </a>
 
 <!--/ h w url thumb -->
-<img src="<?url?>" width="<?w?>" height="<?h?>" alt="54" class="img" />
+<img src="<?url?>" width="<?w?>" height="<?h?>" alt="" class="img" msg="toggle-image" />
 
 <!--/ pingbacks -->
 <div class="pingbacks">Ответы: <? pingbacks ::, ?>.</div>
