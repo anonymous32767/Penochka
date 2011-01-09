@@ -8,11 +8,20 @@
       signals[sig].push(handler)
    }
 
-   window.to = function (sig, data) {
-      var handlers = signals[sig] || [], i = -1
-      while (handlers[++i]) {
-         data = handlers[i](data)
-      }
+   window.to = function () {
+	  if (arguments.length == 1) {
+		 arguments.length = 2
+		 arguments[1] = this
+	  }
+	  var a = arguments.length - 1, data = arguments[a], sig
+	  while (sig = arguments[--a]) {
+		 if (sig[0] == '.')
+			sig = data[sig.slice(1)]
+		 var handlers = signals[sig] || [], i = -1
+		 while (handlers[++i]) {
+			data = handlers[i](data)
+		 }
+	  }
       return data
    }
 
