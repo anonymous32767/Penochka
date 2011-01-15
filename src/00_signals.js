@@ -1,4 +1,11 @@
-(function (window) {
+;(function () {
+
+   function timer(f, params, message, logger) {
+	  var s = (new Date).getTime()
+	  var result = f.apply(this, params)
+	  logger(message, ((new Date).getTime() - s))
+	  return result
+   }
 
    var signals = {}
 
@@ -19,35 +26,12 @@
 			sig = data[sig.slice(1)]
 		 var handlers = signals[sig] || [], i = -1
 		 while (handlers[++i]) {
-			data = handlers[i](data)
+			data = window.profiling 
+				  ? timer(handlers[i], [data], 'Message '+ sig, function(){console.log(arguments)}) 
+				  : handlers[i](data)
 		 }
 	  }
       return data
    }
 
-   document.addEventListener('click', function (e) {
-      var signame = e.target.getAttribute('msg')
-      if (signame) {
-         var result =  to('click:'+signame, e.target) && e
-		 if (!result) {
-			e.preventDefault()
-			e.stopPropagation()
-		 }
-		 return result
-	  }
-      return e
-   }, true)
-
-   document.addEventListener('dbclick', function (e) {
-      var signame = e.target.getAttribute('msg')
-      if (signame)
-         var result = to('dbclick:'+signame, e.target) && e
-		 if (!result) {
-			e.preventDefault()
-			e.stopPropagation()
-		 }
-		 return result
-      return e
-   }, true)
-
-})(window);
+})();
