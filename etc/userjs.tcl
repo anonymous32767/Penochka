@@ -9,7 +9,7 @@ proc make {js version includes excludes output} {
  *
  * version: $version
  */"
-    append js "\ndocument.addEventListener('DOMContentLoaded', function () { to('init', 1) }, false)\n"
+    append js "\ndocument.addEventListener('DOMContentLoaded', function () { to('init') }, false)\n"
     puts $fp $js
     close $fp
 }

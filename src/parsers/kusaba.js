@@ -1,4 +1,4 @@
-;(function (pnck) {
+;(function (ρ) {
 
    function parseThumbInfo(info) {
       var image = {}, link = info.imageInfo.getElementsByTagName('A')[0], m
@@ -6,12 +6,16 @@
          image['url'] = link.href
          image['name'] = link.textContent
       }
-      if (m = info.imageInfo.children[info.imageInfo.children.length-1].
-          nextSibling.textContent.split(/(\d+)/)) {
-         image['size'] = m[1]
-         image['w'] = m[3]
-         image['h'] = m[5]
-      }
+	  m = info.imageInfo.textContent.split(/(\d+)/)
+      if (m && m.length > 3) {
+         image['size'] = m[3]
+         image['w'] = m[7]
+         image['h'] = m[9]
+      } else {
+		 image['size'] = '?'
+         image['w'] = '?'
+         image['h'] = '?'
+	  }
       if (thumb = info.thumbInfo.getElementsByTagName('IMG')[0]) {
          image['thumb'] = {
             'thumb': true,
@@ -25,7 +29,7 @@
 
    function parseMessages (root, board) {
       var stack  = [], i, j, k
-      var currPost = {}, thumbInfo = {}, currThread = {posts:[]}, cch, threads = board.threads
+      var currPost = {}, thumbInfo = {}, currThread = {posts:[], omitted:{}}, cch, threads = board.threads
 
       var raw = document.querySelectorAll('div.postnode, td.reply, span.omittedposts, hr', root)
 
@@ -36,11 +40,18 @@
                board.pingbacks[currPost.id] = []
             }
             currPost.pingbacks = board.pingbacks[currPost.id]
+			currPost.parent = currThread.posts[0].id
+			ρ.storage('messages').save(currPost)
             currPost = {}
          }
          if (!postOnly && currThread.posts.length > 0) {
+			currThread.menu = {
+			   url: currThread.posts[0].reflink.replace(/#.*?$/,''), 
+			   title: '',
+			   name:'Посетить тред'
+			}
             threads.push(currThread)
-            currThread = {posts:[]}
+            currThread = {posts:[], omitted:{}}
          }
       }
 
@@ -64,8 +75,17 @@
                if (cch.tagName == 'LABEL') {
 				  currPost['title'] = ''
 				  currPost['author'] = ''
-                  currPost['date'] = cch.children[cch.children.length-1].
-                        nextSibling.textContent;
+				  currPost['date'] = ''
+				  cch.children[cch.children.length-1].
+                        nextSibling.textContent.replace(
+								 /(\d{4})\s(\S{3})\s(\d{2})\s(\d{2}):(\d{2}):(\d{2})/, 
+						   function (_, year, mstr, day, h, m, s) {
+                           var md = {'янв':0, 'фев':1, 'мар':2, 'апр':3, 'май':4, 'июн':5,
+                                     'июл':5, 'авг':7, 'сен':8, 'окт':9, 'ноя':10, 'дек':11,
+									 'января':0, 'февраля':1, 'марта':2, 'апреля':3, 'мая':4, 'июня':5, 
+									 'июля':6, 'августа':7, 'сентября':8, 'октября':9, 'ноября':10, 'декабря':11 }
+							  currPost['date'] = new Date(year, md[mstr.toLowerCase()], day, h, m, s)
+						   })
                   for (k = 0; k < cch.children.length; k++) {
                      if (cch.children[k].className == 'filetitle'
                          || cch.children[k].className == 'replytitle') {
@@ -73,6 +93,7 @@
                      }
                      if (cch.children[k].className == 'postername'
                          || cch.children[k].className == 'commentpostername') {
+						currPost['email'] = cch.children[k].children[0] ? cch.children[k].children[0].href : ''
                         currPost['author'] = cch.children[k].textContent
                      }
                   }
@@ -109,7 +130,7 @@
       var menuLinks = []
       var menuLinksRaw = root.getElementsByTagName('A'), i
       for (i = 0; i < menuLinksRaw.length; i++) {
-         if (menuLinksRaw[i].getAttribute('href').match(/^\//)) {
+         if (menuLinksRaw[i].getAttribute('href').match(/\/\w+\//)) {
             menuLinks.push({
                'name': menuLinksRaw[i].href.replace(/^.*\/(\w+).*?$/, '$1'),
                'url': menuLinksRaw[i].href,
@@ -137,15 +158,19 @@
       return out
    }
 
-   on('kusaba', function (document) {
-      var board = {}
+   async_on('kusaba', function (board, ret) {
+	  var document = board.source, m
       board.threads = []
       board.pingbacks = {}
+	  if (m = location.pathname.match(/(\d+)\.\w+$/)) {
+		 board.parent = m[1]
+		 board.form.messageData = '.. ' + m[1] + ' :parent \n'
+	  }
       board.title = document.title.split(/\s+\W\s+/)
       board.menu = parseMenu(document.getElementById('boardlist_header'))
       parseMessages(document.getElementById('delform'), board)
       board.footer = parseFooter(document.getElementsByClassName('footer')[0])
-      return board
+      ret(board)
    })
 
 })(penochka);

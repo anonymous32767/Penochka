@@ -26,7 +26,7 @@ set src [lsort [rglob src *.js]]
 
 set res [glob themes/*]
 
-set includes {"http://iichan.ru/*" "http://*.iichan.ru/*" "http://02ch.su/*" "http://*.02ch.su/*" "http://2-ch.ru/*" "http://*.2-ch.ru/*" "http://*.0chan.ru/*"}
+set includes {"http://iichan.ru/*" "http://*.iichan.ru/*" "http://02ch.su/*" "http://*.02ch.su/*" "http://2-ch.ru/*" "http://*.2-ch.ru/*" "http://*.0chan.ru/*" "http://dobrochan.ru/*"}
 
 set excludes {"*/src/*"}
 
@@ -40,7 +40,7 @@ proc firefox {} {
 
 proc opera   {} {
     global version build;
-    return [list "penochka~" "[join $version {.}].$build" "userjs.tcl"]}
+    return [list "penochka~" "[join $version {.}].$build" "opera.tcl"]}
 
 if { $argc != 1 } {
     puts {Usage: ./buildTool [opera|firefox|chrome]}

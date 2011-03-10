@@ -1,4 +1,4 @@
-on('bomready', function (data) {
-   data.board.css = to('futaba.css')
-   return data
+async_on('phase1', function (board, ret) {
+   board.css = to('futaba.css')
+   ret(board)
 })

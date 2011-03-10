@@ -1,5 +1,4 @@
-(function (pnck) {
-
+(function (ρ) {
 
    function parseThumbInfo(info) {
       var image = {}, link = info.imageInfo.getElementsByTagName('A')[0], m
@@ -7,12 +6,16 @@
          image['url'] = link.href
          image['name'] = link.textContent
       }
-      if (m = info.imageInfo.getElementsByTagName('EM')[0].
-          textContent.split(/(\d+)/)) {
-         image['size'] = m[1]
-         image['w'] = m[3]
-         image['h'] = m[5]
-      }
+	  m = info.imageInfo.textContent.split(/(\d+)/)
+      if (m && m.length > 3) {
+         image['size'] = m[3]
+         image['w'] = m[5]
+         image['h'] = m[7]
+      } else {
+		 image['size'] = '?'
+         image['w'] = '?'
+         image['h'] = '?'
+	  }
       if (info.thumbInfo && (thumb = info.thumbInfo.getElementsByTagName('IMG')[0])) {
          image['thumb'] = {
             'thumb': true,
@@ -26,7 +29,7 @@
 
    function parseMessages(root, board) {
       var stack  = [], i
-      var currPost = {}, thumbInfo = {}, currThread = {posts:[]}, cch, threads = board.threads
+      var currPost = {}, thumbInfo = {}, currThread = {posts:[], omitted:{}}, cch, threads = board.threads
 
       function finState(postOnly) {
          if (currPost.id) {
@@ -38,8 +41,13 @@
             currPost = {}
          }
          if (!postOnly && currThread.posts.length > 0) {
+			currThread.menu = {
+			   url: currThread.posts[0].reflink.replace(/#.*?$/,''), 
+			   title: '',
+			   name:'Посетить тред'
+			}
             threads.push(currThread)
-            currThread = {posts:[]}
+            currThread = {posts:[], omitted:{}}
          }
       }
 
@@ -59,6 +67,7 @@
             }
             if (cch.className == 'postername'
                 || cch.className == 'commentpostername') {
+			   currPost['email'] = cch.children[0] ? cch.children[0].href : ''
                currPost['author'] = cch.innerText
             }
             if (cch.tagName == 'SPAN' && (cch.className == 'reflink')) {
@@ -79,21 +88,30 @@
                currPost['perks'].push({perk:cch.textContent})
             }
             if (cch.tagName == 'LABEL') {
-               currPost['date'] = cch.children[cch.children.length-1].
-                     nextSibling.textContent
+               currPost['date'] = ''
+			   cch.children[cch.children.length-1].
+                     nextSibling.textContent.replace(
+                              /(\d{2})\s(\S+)\s(\d{4})\s(\d{2}):(\d{2}):(\d{2})/,
+                        function (_, day, mstr, year, h, m, s) {
+                           var md = {'янв':0, 'фев':1, 'мар':2, 'апр':3, 'май':4, 'июн':5,
+                                     'июл':5, 'авг':7, 'сен':8, 'окт':9, 'ноя':10, 'дек':11,
+									 'января':0, 'февраля':1, 'марта':2, 'апреля':3, 'мая':4, 'июня':5, 
+									 'июля':6, 'августа':7, 'сентября':8, 'октября':9, 'ноября':10, 'декабря':11 }
+                           currPost['date'] = new Date(year, md[mstr.toLowerCase()], day, h, m, s)
+                        })
                stack.push([root, i, function () {}])
                i = 0
                root = cch
             }
             if (cch.tagName == 'BLOCKQUOTE') {
                var processed = to(
-                  'message-text', 
+                  'message-text',
                   {message: cch.innerHTML.
-                   replace(/<div\s+class="abbrev".*?\/div>/, 
+                   replace(/<div\s+class="abbrev".*?\/div>/,
                            function () {
                               currPost.cutted = true
                               return ''
-                           }), 
+                           }),
                    board: board,
                    post:currPost })
                currPost['message'] = processed.message
@@ -102,7 +120,7 @@
                var cch_n = cch;
                while (cch_n && !(cch_n.tagName == 'A' || (cch_n.tagName == 'SPAN' && cch_n.id)))
                   cch_n = cch_n.nextElementSibling
-               if (!currPost['attaches']) 
+               if (!currPost['attaches'])
                   currPost['attaches'] = []
                currPost['attaches'].push(parseThumbInfo({
                   imageInfo: cch,
@@ -110,7 +128,7 @@
                }))
             }
             if (cch.tagName == 'DIV' && cch.children[0] && cch.children[0].tagName == 'OBJECT') {
-               if (!currPost['attaches']) 
+               if (!currPost['attaches'])
                   currPost['attaches'] = []
                currPost['attaches'].push({video: cch.innerHTML})
             }
@@ -182,15 +200,15 @@
       return out
    }
 
-   on('wakaba', function (document) {
-      var board = {}
+   async_on('wakaba', function (board, ret) {
+	  var document = board.source
       board.threads = []
       board.pingbacks = {}
       board.title = document.title.split(/\s+\W\s+/)
       board.menu = parseMenu(document.getElementsByClassName('adminbar')[0])
       parseMessages(document.getElementById('delform'), board)
       board.footer = parseFooter(document.getElementsByClassName('footer')[0])
-      return board
+      ret(board)
    })
 
 })(penochka);

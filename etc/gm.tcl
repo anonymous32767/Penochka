@@ -15,8 +15,9 @@ $includes
 $excludes
 // @run-at         document-start
 // ==/UserScript=="
+
     regsub -all {innerText} $js {textContent} js
-    append js "\nto('init', 1)\n"
+    append js "\nto('init')\n"	
     puts $fp $js
     close $fp
 }

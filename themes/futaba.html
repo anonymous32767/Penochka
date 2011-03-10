@@ -6,48 +6,53 @@
     <title><? title.join(' » ') ?></title>
     <style><?css?></style>
   </head>
-  <body>
-    <p class="menu">
-      <? menu :: / ?>
-    </p>
-    <div class="logo"><? title.join(' — ') ?></div>
-    <hr />
-    <div class="messages">
-      <? threads ?>
-    </div>
-    <p class="menu">
-      <? menu :: / ?>
-    </p>
-    <p class="footer">
-      - <? footer :: + ?> -
-    </p>
-  </body>
+  <body <?_.parent ? 'thread_id="' + parent + '"' : '' ?>>
+  <? {stdmenu:menu} ?>
+  <div class="logo"><? title.join(' — ') ?></div>
+  <?{topformwrapper: form}?>
+  <hr />
+  <div class="messages">
+    <? threads ?>
+  </div>
+  <? {stdmenu:menu} ?>
+  <p class="footer">
+    - <? footer :: + ?> -
+  </p>
+</body>
 </html>
 
 <!--/ posts attaches -->
-<span class="omittedposts">Пропущено ответов: <?posts?> (из них с вложениями — <?attaches?>).</span>
+<span class="omittedposts">
+  <?rtl._n(posts, {nom:'Пропущен',gen:'Пропущено',plu:'Пропущено'})?>
+  <?posts?> <?rtl._n(posts, {nom:'ответ',gen:'ответа',plu:'ответов'})?>
+  и
+  <?attaches?> <?rtl._n(attaches, {nom:'изображение',gen:'изображения',plu:'изображений'})?>.
+</span>
 
-<!--/ posts attaches!=undefined -->
-<span class="omittedposts">Пропущено ответов: <?posts?>.</span>
+<!--/ posts attaches!==undefined -->
+<span class="omittedposts">
+  <?rtl._n(posts, {nom:'Пропущен',gen:'Пропущено',plu:'Пропущено'})?>
+  <?posts?> <?rtl._n(posts, {nom:'ответ',gen:'ответа',plu:'ответов'})?>.
+</span>
 
-<!--/ posts -->
-<span class="thread">
-  <span class="op post">
-    <? posts.shift() ?>
-  </span>
-  <? _.omitted && omitted || '' ?>
-  <span class="replies">
-    <? reply_wrap # posts ?>
-  </span>
-  <? _.omitted && omitted || '' ?>
-  <br clear="both" /><hr />
+<!--/ posts omitted!==undefined -->
+<span class="thread" thread_id="<?posts[0].id?>">
+<span class="postwrap">
+  <? (oppost = posts.shift(), oppost.menu = menu, oppost) ?>
+</span>
+<?omitted?>
+<span class="replies">
+  <? reply_wrap # posts ?>
+</span>
+<?omitted?>
+<br clear="both" /><hr />
 </span>
 
 <!--/ url name title!=undefined -->
 <a href="<?url?>" title="<?title?>"><?name?></a>
 
 <!--/ reply_wrap -->
-<table>
+<table class="postwrap">
   <tbody>
     <tr>
       <td class="doubledash">&gt;&gt;</td>
@@ -58,23 +63,35 @@
   </tbody>
 </table>
 
-<!--/ title!=undefined message!=undefined author!=undefined -->
+<!--/ title!=undefined message!=undefined author!=undefined email!=undefined -->
 <a name="<?id?>"></a>
-<label>
+<span class="info">
   <input type="checkbox" name="delete" value="<?id?>" />
   <span class="title"><?title?></span>
-  <span class="postername"><?author?></span>
+  <span class="postername"><?{author:author, email:email}?></span>
   <? _.perks && perks || '' :: ?>
-  <span class="timestamp"><?date?></span>
-</label>
-<span class="reflink">
-  <a href="<?reflink?>">№<?id?></a>&nbsp;
-</span>
-<? _.attaches && attaches || '' ?>
-<blockquote><?message?>
+  <span class="timestamp"><?rtl._d(date)?></span>
+  <span class="reflink">
+	№<a href="<?reflink?>" msg="postnum"><?id?></a>&nbsp;
+  </span>
+  <? _.menu && {stdmenu: menu} || '' ?>
+  <br clear="left">
+</span> 
+<? _.attaches ||  '' ?>
+<? _.attaches && _.attaches.length > 2 ? '<br clear="both"/>' : '' ?>
+<blockquote class="message"><?message?>
 <? _.cutted ? '<div class="abbrev">Сообщение слишком длинное и было обрезано.</div>' : ''?>
 <? _.pingbacks && _.pingbacks.length && {pingbacks: pingbacks} || '' ?>
 </blockquote>
+
+<!--/ author email -->
+<a href="<?email?>"><?author?></a>
+
+<!--/ author email=='' -->
+<?author?>
+
+<!--/ stdmenu -->
+<span class="stdmenu">[<?stdmenu :: / ?>]</span>
 
 <!--/ perk -->
 <sup><?perk?></sup>
@@ -82,8 +99,9 @@
 <!--/ video -->
 <div style="float: left; margin: 5px; margin-right: 10px;"><?video?></div>
 
-<!--/ h w url size name -->
-<br /><span class="filesize">
+<!--/ h!==undefined w!==undefined url size name -->
+<span class="attach">
+<span class="filesize">
 <a target="_blank" href="<?url?>"><?name?></a>
 (<em><?size?>KiB, <?w?>×<?h?>px</em>)
 </span>
@@ -91,6 +109,7 @@
 <a target="_blank" href="<?url?>">
 <? _.thumb && thumb || '<div class="nothumb">Нет картинки</div>' ?>
 </a>
+</span>
 
 <!--/ h w url thumb -->
 <img src="<?url?>" width="<?w?>" height="<?h?>" alt="" class="img" msg="toggle-image" />
@@ -100,3 +119,43 @@
 
 <!--/ board!==undefined host!==undefined post url -->
 <a href="<?url?>">&gt;&gt;<?host?><?board?><?post?></a>
+
+<!--/ topformwrapper -->
+<div id="postform-placeholder">
+  <a href="javascript:" id="thread-starter" class="postwrap" msg="postnum" <?topformwrapper.hidden ? '' : 'style="display:none"' ?>>Новый тред</a>
+  <span <?topformwrapper.hidden ? 'style="display:none"' : '' ?>><?topformwrapper?></span>
+</div>
+
+<!--/ botformwrapper -->
+<div id="postform-placeholder">
+  <a href="javascript:" id="thread-starter" class="postwrap" msg="postnum" style="display:none">Ответить в тред</a>
+  <?botformwrapper?>
+</div>
+
+<!--/ action attach messageData!=undefined -->
+<div id="postform" class="postarea">
+  <form id="postform" action="<?action?>" method="post" enctype="multipart/form-data">
+  <table>
+    <tr>
+      <td rowspan="2" class="doubledash">&gt;&gt;</td>
+      <td rowspan="2" valign="top" id="preview-placeholder"></td>
+      <td>
+        <textarea id="postmsg" cols="75" rows="6"><?messageData?></textarea>
+      </td>
+    </tr>
+    <tr>
+      <td valign="middle">
+        <span>
+          <input type="file" name="<?attach?>" msg="attach" size="35" />
+        </span>
+        <span id="captcha">
+	  <img <? _.noCaptcha ? 'style="display:none"' : ''?> src="<?captchaImage()?>">
+	</span>
+        <span style="float:right">
+          <input  type="submit" msg="post" value="Отправить" />
+        </span>
+      </td>
+    </tr>
+  </table>
+</form>
+</div>

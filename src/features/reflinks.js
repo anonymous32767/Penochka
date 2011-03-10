@@ -3,8 +3,8 @@
  */
 on('message-text', function (data) {
    var  board = data.board, currPost = data.post
-   data.message = data.message.replace(/<a\s+href="([^"]*?)(\/\w+\/)res\/(\d+)\.html(#(\d+))?".*?\/a>/g, function (_, h, b, thread, __, post) {
-      var dispBoard = b, dispHost = h, url = h+b+'res/'+thread+'.html' + (post && ('#' + post) || '')
+   data.message = data.message.replace(/<a\s+href="(([^"]*?)(\/\w+\/)res\/(\d+)\.\w+(#(\d+))?)".*?\/a>/g, function (_, url, h, b, thread, __, post) {
+      var dispBoard = b, dispHost = h 
       post = post || thread
       if (!h || h.match(location.host)) {
          dispHost = ''
@@ -16,7 +16,11 @@ on('message-text', function (data) {
       }
       if (!board.pingbacks[post])
          board.pingbacks[post] = []
-      board.pingbacks[post].push({host:dispHost, board: dispBoard, post:currPost.id, url: url})
+      board.pingbacks[post].push({
+		 host: dispHost, 
+		 board: dispBoard, 
+		 post: currPost.id, 
+		 url: url.replace(/#\d+$/, '') + '#' + currPost.id})
       return '<a href="'+url+'">&gt;&gt;'+dispHost+dispBoard+post+'</a>'
    })
    return data

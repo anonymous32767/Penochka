@@ -1,10 +1,9 @@
 /*** From wakaba inline */
 
-body { margin: 0; padding: 8px; margin-bottom: auto; }blockquote blockquote { margin-left: 0em }
-
+body { margin: 0; padding: 8px; margin-bottom: auto; } 
+blockquote blockquote { margin-left: 0em }
 form { margin-bottom: 0px }
 form .trap { display:none }
-.postarea { text-align: center }
 .postarea table { margin: 0px auto; text-align: left }
 .img { border: none; float: left; margin: 2px 20px; }
 .nothumb { float: left; background: #eee; border: 2px dashed #aaa; text-align: center; margin: 2px 20px; padding: 1em 0.5em 1em 0.5em; }
@@ -47,8 +46,6 @@ a:hover {
         padding:2px;
         color:#FFFFFF;
         width:100%;
-}
-.postarea {
 }
 .rules {
         font-size:0.7em;
@@ -132,10 +129,8 @@ a:hover {
 	display: none;
 }
 .replies .doubledash {
-	display: block;
+	display: table-cell;
  	vertical-align:top;
-	clear:both;
-	float:left;
 }
 .replytitle {
 	font-size: 1.2em;
@@ -165,3 +160,52 @@ a:hover {
 .forced {color: blue; font-weight: bold;}
 
 .pingbacks { font-size: 80%; margin-top: 1em; }
+
+.image-preview a { 
+	font-family: Arial, Sans Serif; 
+	font-weight: bold;
+	color:#804040;
+	text-decoration: none;
+}
+
+.postarea textarea { 
+	font-family: Times New Roman, Serif; 
+	font-size: 12pt;
+	margin: 0px;
+	padding: 0px;
+}
+
+#postform-placeholder {
+	text-align: center;
+	margin-top: 1em;
+}
+
+#thread-starter {
+	font-size: 16pt;
+	display: block;
+	margin-bottom: 1em;
+}
+
+.messages #postform table {
+	float: left;
+	margin-left: 40pt;
+}
+
+#preview-placeholder img {
+    max-height: 160px;
+	max-width: 220px;
+}
+
+#preview-placeholder .no-preview {
+    height: 160px;
+	width: 160px;
+	border: dashed 2px #800000;
+	text-align: center;
+	padding-top: 1em;
+}
+
+.attach {
+	display: block;
+	float: left;
+	margin: 0;
+}
