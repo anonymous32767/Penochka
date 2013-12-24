@@ -26,7 +26,7 @@ set src [lsort [rglob src *.js]]
 
 set res [glob themes/*]
 
-set includes {"http://iichan.ru/*" "http://*.iichan.ru/*" "http://02ch.su/*" "http://*.02ch.su/*" "http://2-ch.ru/*" "http://*.2-ch.ru/*" "http://*.0chan.ru/*" "http://dobrochan.ru/*"}
+set includes {"http://iichan.hk/*" "http://*.iichan.hk/*" "http://2ch.hk/*" "http://*.2ch.hk/*" "http://dobrochan.com/*"}
 
 set excludes {"*/src/*"}
 

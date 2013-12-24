@@ -37,8 +37,9 @@
    
    async_on('render', function (data, ret) {
 	  if (!renderer)
-		 renderer = nannou2(to('futaba.html'), to('rtl'))
-	  ret(to('frontend', renderer(data)))
+		  renderer = nannou2(to('futaba.html'), to('rtl'))
+    data.rendered = renderer(data);
+	  ret(to('frontend', data))
    })
 
 })(penochka);

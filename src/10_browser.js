@@ -1,4 +1,4 @@
-;(function () {
+;(function (ρ) {
 
    function setupProxy(browserEvent, triggerAttribute, rawEventPass, prefixName, asigname) {
 
@@ -31,7 +31,9 @@
    setupProxy('mouseout', 'msg', true);
 
    on('frontend', function (data) {
-	  document.documentElement.innerHTML = data
+   	  ρ.locked = true;
+   	  data.source.documentElement.innerHTML = data.rendered;
+   	  data.source.onload(function () { ρ.locked = false; });
 	  return 'ok'
    })
 
@@ -65,4 +67,4 @@
 	  })
    })
 
-})();
+})(penochka);

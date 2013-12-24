@@ -21,7 +21,7 @@ on('message-text', function (data) {
 		 board: dispBoard, 
 		 post: currPost.id, 
 		 url: url.replace(/#\d+$/, '') + '#' + currPost.id})
-      return '<a href="'+url+'">&gt;&gt;'+dispHost+dispBoard+post+'</a>'
+      return '<a href="'+url+'" msg="reflink">&gt;&gt;'+dispHost+dispBoard+post+'</a>'
    })
    return data
 })

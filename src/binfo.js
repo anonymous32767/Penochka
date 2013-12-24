@@ -45,6 +45,10 @@
         },
         'iichan.ru': {
             engine: 'wakaba',
+            wakaba: {
+                adminbar: '.adminbar',
+                delform:  '#delform'
+            },
             form: {
                 action:  '/cgi-bin/wakaba.pl/' + location.pathname.split('/')[1] + '/',
                 messageData: '',
@@ -88,7 +92,14 @@
                 })
             }
         },
-        '2-ch.ru': {
+        'iichan.hk': {
+            sameas: 'iichan.ru'
+        },
+        '2ch.hk': {
+            wakaba: {
+                adminbar: '#adminbar',
+                delform:  '#posts_form'
+            },
             sameas: 'iichan.ru',
             postProcess: formPostProcess({
                 'name':'akane',

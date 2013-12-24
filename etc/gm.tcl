@@ -13,7 +13,7 @@ proc make {js version includes excludes output} {
 // @description    Penochka imgboard script.
 $includes
 $excludes
-// @run-at         document-start
+// @run-at         document-idle
 // ==/UserScript=="
 
     regsub -all {innerText} $js {textContent} js

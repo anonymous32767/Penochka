@@ -201,12 +201,12 @@
    }
 
    async_on('wakaba', function (board, ret) {
-	  var document = board.source
+	   var document = board.source
       board.threads = []
       board.pingbacks = {}
       board.title = document.title.split(/\s+\W\s+/)
-      board.menu = parseMenu(document.getElementsByClassName('adminbar')[0])
-      parseMessages(document.getElementById('delform'), board)
+      board.menu = parseMenu(document.querySelector(board.wakaba.adminbar))
+      parseMessages(document.querySelector(board.wakaba.delform), board)
       board.footer = parseFooter(document.getElementsByClassName('footer')[0])
       ret(board)
    })

@@ -49,7 +49,7 @@
 </span>
 
 <!--/ url name title!=undefined -->
-<a href="<?url?>" title="<?title?>"><?name?></a>
+<a href="<?url?>" title="<?title?>" ><?name?></a>
 
 <!--/ reply_wrap -->
 <table class="postwrap">
@@ -103,7 +103,7 @@
 <span class="attach">
 <span class="filesize">
 <a target="_blank" href="<?url?>"><?name?></a>
-(<em><?size?>KiB, <?w?>×<?h?>px</em>)
+(<em><?size?>КиБ, <?w?>×<?h?>пикс.</em>)
 </span>
 <br />
 <a target="_blank" href="<?url?>">
@@ -118,7 +118,7 @@
 <div class="pingbacks">Ответы: <? pingbacks ::, ?>.</div>
 
 <!--/ board!==undefined host!==undefined post url -->
-<a href="<?url?>">&gt;&gt;<?host?><?board?><?post?></a>
+<a href="<?url?>" msg="reflink">&gt;&gt;<?host?><?board?><?post?></a>
 
 <!--/ topformwrapper -->
 <div id="postform-placeholder">

@@ -2,6 +2,9 @@
 
    on('init', function (data) {
 
+   	  if(ρ.locked)
+   	  	return;
+
 	  ρ.storage('messages').index('post', function (obj) { return obj.id })
 	  ρ.storage('messages').index('thread', function (obj) { return obj.id })
 
