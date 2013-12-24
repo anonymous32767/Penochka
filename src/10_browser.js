@@ -33,6 +33,7 @@
    on('frontend', function (data) {
    	  ρ.locked = true;
    	  data.source.documentElement.innerHTML = data.rendered;
+   	  // FUKING MAZAFAKING BUGG!!!!
    	  data.source.onload(function () { ρ.locked = false; });
 	  return 'ok'
    })
