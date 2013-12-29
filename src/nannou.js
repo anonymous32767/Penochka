@@ -6,7 +6,7 @@
  * system. 
  */
 
-;(function (pnck) {
+;(function (ρ) {
 
    function trim (x) { return x.replace(/^\s+|\s+$/g, '') }
 

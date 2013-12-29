@@ -80,6 +80,11 @@
                      currPost['perks'] = []
                   currPost['perks'].push({perk:'<span class="forced">frcd</span>'})
                }
+               if (sticky && sticky.src.match('locked')) {
+                  if (!currPost['perks'])
+                     currPost['perks'] = []
+                  currPost['perks'].push({perk:'<span class="forced">lckd</span>'})
+               }
             }
             if ((cch.tagName == 'SPAN' && (cch.className == 'adm' || cch.className == 'mod'))
                 || (cch.tagName == 'FONT' && cch.parentNode && cch.parentNode.tagName == 'LABEL')) {
@@ -87,9 +92,13 @@
                   currPost['perks'] = []
                currPost['perks'].push({perk:cch.textContent})
             }
+            var dt;
+            if (dt = cch.querySelector('.dateTime')) {
+               currPost['date'] = new Date(parseInt(dt.getAttribute('data-utc')) * 1000);
+            }
             if (cch.tagName == 'LABEL') {
                currPost['date'] = ''
-			   cch.children[cch.children.length-1].
+			      cch.children[cch.children.length-1].
                      nextSibling.textContent.replace(
                               /(\d{2})\s(\S+)\s(\d{4})\s(\d{2}):(\d{2}):(\d{2})/,
                         function (_, day, mstr, year, h, m, s) {
@@ -142,13 +151,21 @@
                if (answ) {
                   stack.push([root, i, function () {  finState(true) }])
                   i = 0
-                  root = cch.getElementsByClassName('reply')[0]
+                  root = answ
                }
             }
             if (cch.tagName == 'DIV' && cch.id && cch.id.match(/^t/)) {
                stack.push([root, i, function () { }])
                i = 0
                root = cch
+
+               var opp;
+               if (opp = root.querySelector('.oppost')) {
+                  finState(true)
+                  stack.push([root, i, function () {  finState(true) }])
+                  i = 0
+                  root = opp;
+               }
             }
             if (cch.tagName == 'HR') {
                finState(false)

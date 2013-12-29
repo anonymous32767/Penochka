@@ -121,7 +121,7 @@ a:hover {
 .omittedposts {
         color:#707070;
 }
-.replies .reply {
+.replies .reply, .preview {
 	background:#F0E0D6;
 	color:#800000;
 }

@@ -3,7 +3,7 @@
  */
 on('message-text', function (data) {
    var  board = data.board, currPost = data.post
-   data.message = data.message.replace(/<a\s+href="(([^"]*?)(\/\w+\/)res\/(\d+)\.\w+(#(\d+))?)".*?\/a>/g, function (_, url, h, b, thread, __, post) {
+   data.message = data.message.replace(/<a[^>]+?href="(([^"]*?)(\/\w+\/)res\/(\d+)\.\w+(#(\d+))?)".*?\/a>/g, function (_, url, h, b, thread, __, post) {
       var dispBoard = b, dispHost = h 
       post = post || thread
       if (!h || h.match(location.host)) {

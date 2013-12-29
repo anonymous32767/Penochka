@@ -97,7 +97,7 @@
         },
         '2ch.hk': {
             wakaba: {
-                adminbar: '#adminbar',
+                adminbar: '#boardNav',
                 delform:  '#posts_form'
             },
             sameas: 'iichan.ru',

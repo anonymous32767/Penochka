@@ -2,14 +2,14 @@
 
    on('init', function (data) {
 
-   	  if(ρ.locked)
-   	  	return;
+     if(ρ.locked)
+        return;
 
 	  ρ.storage('messages').index('post', function (obj) { return obj.id })
 	  ρ.storage('messages').index('thread', function (obj) { return obj.id })
 
 	  async_to('render', 'phase1', '.host', '.engine', 'detect-board', {
-		 source: document,
+		 source: (data && data.document) || document,
 		 host: location.host.replace(/^www\./, '')
 	  }, null)
    })
@@ -22,6 +22,10 @@
          'title': 'UnStAbLe'
       })
 	  ret(board)
+   })
+
+   on('fail', function (failInfo) {
+      console.log('FAIL', failInfo)
    })
 
 })(penochka);
